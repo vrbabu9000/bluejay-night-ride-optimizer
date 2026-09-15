@@ -1,0 +1,136 @@
+%%%%%%%% FINAL PROJECT PROPOSAL : EN.553.602 %%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage[accepted]{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+\icmltitlerunning{Optimizing the Night Ride}
+
+\begin{document}
+
+\icmltitle{Optimizing the Night Ride:\\ Dispatch and Routing Models for Johns Hopkins' Blue Jay Night Ride}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Irfan Setiadi}{jhu}
+    \icmlauthor{Miles Zhou}{jhu}
+    \icmlauthor{Youzhi Zhang}{jhu}
+    \icmlauthor{Vignesh Rajesh Babu}{jhu}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{jhu}{Department of Applied Mathematics and Statistics, Johns Hopkins University (Team FourSight)}
+  \icmlcorrespondingauthor{Vignesh Rajesh Babu}{vrajesh1@jh.edu}
+
+\vskip 0.05in
+\begin{center}\small
+EN.553.402\,/\,553.602 Research and Design in Mathematics: Data Mining \quad$\cdot$\quad Instructor: Prof.\ Anthony J.\ Kearsley \quad$\cdot$\quad Fall 2026 \quad$\cdot$\quad Project Proposal
+\end{center}
+
+\vskip -0.25in
+\section{Proposed Research}
+\vskip -0.1in
+
+Team FourSight will study how Johns Hopkins' Homewood Blue Jay Night Ride assigns riders to vans and plans routes. The service is an on-demand, shared, curb-to-curb shuttle booked through the TransLoc app. We treat it as a dynamic Dial-a-Ride Problem with time windows and compare three methods on the same requests: fast assignment rules, an exact rolling-horizon optimization model as our main method, and a hybrid of the two. Our question is whether optimization can cut long waits and reduce trips that overflow to Lyft, while still respecting van capacity, pickup before drop-off, the published wait- and ride-time limits, and van moves already underway. We measure each method against simple baselines and report where optimization helps.
+
+\vskip -0.1in
+\section{Data Explanation}
+\vskip -0.1in
+
+JHU Transportation has shared operational reports from the TransLoc-supported Blue Jay Night Ride service. Right now we have April 2026 summary dashboards. They show where rides start and end, completed rides by hour, rides by status, average vans in service by hour, wait-time and ride-time percentiles, and combined van and Lyft ridership (44,374 riders that month). These summaries tell us the shape of demand, how many vans are available, and where service breaks down. In particular, the slowest riders wait close to or beyond the 20-minute pickup target, and about one in four trips overflows to a paid Lyft. We have asked JHU Transportation for de-identified trip-level records: timestamps for request, assignment, arrival, pickup, and drop-off; pickup and destination zones or protected coordinates; party size; and anonymous vehicle IDs and capacities. When road travel times are missing, we will build a travel-time table between locations using an approved routing service (OSRM) and check a sample by hand. Trip-level records will let us replay real service nights. If they do not arrive, we will generate synthetic requests calibrated to the summary data, run several random seeds, and clearly label every simulated input. We will drop rider names, university IDs, contact details, driver identities, and exact addresses. All results will be aggregate statistics and de-identified maps, following any rules JHU Transportation sets.
+
+\vskip -0.1in
+\section{Technical Plan}
+\vskip -0.1in
+
+We model Blue Jay Night Ride as a dynamic Dial-a-Ride Problem and solve it with a mixed-integer linear program (MILP). Yes/no variables choose which van serves each request, whether a van travels between two stops, and whether a request goes to Lyft instead; continuous variables track arrival times, van load, rider wait, and extra ride time. Constraints keep each route connected, make one van handle a rider's pickup and drop-off, force pickup before drop-off, respect van capacity and service time windows, cap the ride length, and lock in moves already in progress. The objective is service-first: first cut Lyft overflow, then rider wait, then extra ride time, and only then van distance. We test the model on small cases with known answers, then run it in a rolling-horizon loop that re-solves as new requests arrive, keeps committed moves fixed, warm-starts from the previous plan, and commits only the next action.
+
+We compare all methods on identical inputs (requests, available vans, travel times, and starting state): a reconstruction of actual operations once trip-level data allow, a nearest-available-van rule, a greedy insertion rule, the rolling-horizon MILP, and a hybrid that pairs the MILP with local search for the peak (about 28 vans). We report median and 90th-percentile wait, the share of pickups within 20 minutes, ride time and the share within 25 minutes, the overflow rate, total and empty miles, van use, and solver time. If the MILP is too slow, we will drop impossible routes, warm-start it, shorten the planning window, or use it only as an offline benchmark. We plan to use Gurobi, a commercial optimization solver with free academic licenses, and keep an open-source solver (HiGHS or SCIP) as a backup.
+
+\vskip -0.1in
+\section{Objectives and Deliverables}
+\vskip -0.1in
+
+\textbf{Objectives.}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Build a reproducible environment that replays Blue Jay Night Ride nights and scores any dispatch policy on the same inputs.
+\item Formulate, validate, and tune the rolling-horizon MILP and the baseline methods.
+\item Measure whether optimization lowers tail waits and Lyft overflow relative to the baselines, and identify where it helps.
+\end{itemize}
+\textbf{Deliverables.}
+\begin{itemize}\setlength\itemsep{1pt}
+\item A validated MILP model with rolling-horizon control.
+\item The replay and simulation environment with an OSRM travel-time matrix.
+\item Baseline dispatchers (nearest-feasible and greedy insertion).
+\item Comparative results and figures (waits, overflow, utilization, solver time) with de-identified maps.
+\item A mid-semester progress report, a final report and presentation, and a short summary for JHU Transportation.
+\end{itemize}
+
+\vskip -0.1in
+\section{Challenges and Limitations}
+\vskip -0.1in
+
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Data availability.} We currently have only aggregate dashboards. If trip-level records are delayed or restricted, early evaluation will use synthetic requests calibrated to the aggregates and clearly labeled.
+\item \textbf{Historical reconstruction.} Without vehicle-level history we cannot perfectly reproduce past dispatch, so we compare against transparent baselines rather than claim a historical improvement.
+\item \textbf{Computation.} The exact MILP may be too slow at the roughly 28-van peak; we mitigate with arc pruning, warm starts, a shorter horizon, or the hybrid, and we report solver time and optimality gap.
+\item \textbf{Scope and assumptions.} This is retrospective decision support, not a live deployment, and results depend on estimated travel times and modeling choices.
+\item \textbf{Privacy.} All outputs stay aggregate and de-identified.
+\end{itemize}
+
+\vskip -0.1in
+\section{Timeline}
+\vskip -0.1in
+
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{September.} Finalize scope; audit the data as it arrives; build and validate the OSRM travel-time matrix.
+\item \textbf{Late September to October.} Build the replay simulator; implement the nearest-feasible and greedy-insertion baselines.
+\item \textbf{October.} Implement and validate the static MILP, then add rolling-horizon control; present the mid-semester update.
+\item \textbf{November.} Run the main experiments and sensitivity analysis (waits, overflow, utilization, solver time).
+\item \textbf{December.} Final report and presentation; deliver the stakeholder summary.
+\end{itemize}
+
+\vskip -0.1in
+\section{Potential Impact}
+\vskip -0.1in
+
+This project gives JHU Transportation a clear, repeatable way to see how dispatch decisions affect rider wait time, ride length, van use, and Lyft overflow. Even if optimization does not beat the simple rules, the study will show which times of night and which constraints cause the worst delays and overflow. The model, the replay tool, and the sensitivity analysis can then support future decisions about fleet size, service targets, and dispatch policy. Because Blue Jay Night Ride is a safety-focused service, our recommendations put timely, reliable rides ahead of distance savings, and stay in the realm of decision support rather than a live deployment.
+
+\vskip -0.1in
+\section{References}
+\vskip -0.1in
+
+{\small
+\begin{enumerate}\itemsep 2pt \parskip 0pt
+\item Cordeau, J.-F. (2006). A Branch-and-Cut Algorithm for the Dial-a-Ride Problem. \emph{Operations Research}, 54(3), 573--586.
+\item Cordeau, J.-F., \& Laporte, G. (2007). The Dial-a-Ride Problem: Models and Algorithms. \emph{Annals of Operations Research}, 153, 29--46.
+\item Ho, S. C., Szeto, W. Y., Kuo, Y.-H., Leung, J. M. Y., Petering, M., \& Tou, T. W. H. (2018). A Survey of Dial-a-Ride Problems: Literature Review and Recent Developments. \emph{Transportation Research Part B: Methodological}, 111, 395--421.
+\item Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E., \& Rus, D. (2017). On-Demand High-Capacity Ride-Sharing via Dynamic Trip-Vehicle Assignment. \emph{Proceedings of the National Academy of Sciences}, 114(3), 462--467.
+\item Bertsimas, D., Jaillet, P., \& Martin, S. (2019). Online Vehicle Routing: The Edge of Optimization in Large-Scale Applications. \emph{Operations Research}, 67(1), 143--162.
+\item Gaul, D., Klamroth, K., \& Stiglmayr, M. (2021). Solving the Dynamic Dial-a-Ride Problem Using a Rolling-Horizon Event-Based Graph. \emph{OASIcs ATMOS 2021}, 96, 8:1--8:16.
+\item Amiri, A., Legrain, A., \& El Hallaoui, I. (2024). Online Optimization of a Dial-a-Ride Problem with the Integral Primal Simplex. Springer. \url{https://link.springer.com/chapter/10.1007/978-3-031-60597-0_1}
+\item Johns Hopkins University Facilities \& Real Estate. Shuttle Services. \url{https://jhfre.jhu.edu/ts/transportation/shuttle-services/}
+\item Babu, V. R. VehiPathOptimizer (GitHub repository). \url{https://github.com/vrbabu9000/VehiPathOptimizer}
+\end{enumerate}
+}
+
+\vskip -0.1in
+\section{AI-Use Disclosure}
+\vskip -0.1in
+
+\textbf{Tools used.} OpenAI Codex and Anthropic Claude (Claude Code).
+
+\textbf{Purpose.} We used these tools to help organize and draft this proposal, review our own prior public routing repository, search recent optimization literature, outline the mixed-integer model, and build the presentation figures from the April 2026 dashboards.
+
+\textbf{How the output was used.} AI-assisted text and figures were reviewed and revised by the team, then integrated into the submitted proposal and slides. No material was submitted without team review.
+
+\textbf{Verification.} The team checked every definition, citation, and reported figure against original sources and the files supplied by JHU Transportation, and will independently implement and test all code and results. We remain responsible for the accuracy, originality, integrity, and scholarly quality of the submitted work.
+
+\end{document}
