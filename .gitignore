@@ -224,3 +224,6 @@ outputs/
 # Restricted / source data (JHU) — keep out of the repo per data governance
 HW Night Ride Data April 2026.pdf
 *.pdf.data
+
+# misc
+.tokensave/
