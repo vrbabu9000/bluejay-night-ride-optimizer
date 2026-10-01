@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "status": "TEMPLATE_NOT_RUNNABLE",
+    "version": "1.0",
+    "timezone": "America/New_York",
+    "decision_log_path": null
+  },
+  "service": {
+    "start_local": null,
+    "end_local": null,
+    "after_midnight_date_rule": null,
+    "wait_limit_s": null,
+    "ride_limit_s": null,
+    "rules_source": null
+  },
+  "fleet": {
+    "schedule_path": null,
+    "shift_end_rule": null
+  },
+  "demand": {
+    "daily_totals_path": null,
+    "hourly_request_weights": null,
+    "party_size_probs": null,
+    "patience_spec": null,
+    "arrival_model": null,
+    "map_population_interpretation": null
+  },
+  "spatial": {
+    "zones_path": null,
+    "zone_counts_path": null,
+    "beta_per_min": null,
+    "scenario_path": null,
+    "balance_tolerance": null,
+    "unknown_mass_rule": null
+  },
+  "travel": {
+    "matrix_path": null,
+    "multiplier": null,
+    "stochastic_spec": null
+  },
+  "simulation": {
+    "pickup_dwell_s": null,
+    "dropoff_dwell_s": null,
+    "simultaneous_event_order": null,
+    "commitment_rule": null,
+    "reassignment_rule": null,
+    "overflow_rule": null,
+    "end_of_night_rule": null
+  },
+  "dispatch": {
+    "policies": [
+      "immediate_greedy",
+      "periodic_greedy",
+      "periodic_joint"
+    ],
+    "windows_s": [
+      30,
+      60,
+      120
+    ],
+    "windows_status": "ILLUSTRATIVE_PILOT_CHOICES",
+    "urgent_margin_s": null,
+    "fallback": "shared_immediate_greedy",
+    "objective": "service_first_then_added_wait_then_travel"
+  },
+  "solver": {
+    "time_limit_s": null,
+    "max_new_per_route": null,
+    "delay_accounting_rule": null
+  },
+  "evaluation": {
+    "replicates": null,
+    "seed_base": null,
+    "random_stream_scheme": null,
+    "primary_comparison": null,
+    "minimum_meaningful_gain": null,
+    "maximum_acceptable_harm": null,
+    "calibration_targets": null,
+    "held_out_checks": null,
+    "scenario_weights": null
+  }
+}

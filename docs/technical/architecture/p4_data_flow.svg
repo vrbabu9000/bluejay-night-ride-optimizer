@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="753" viewBox="0 0 1000 753" style="max-width:100%;height:auto" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Data flow and files</title>
+  <desc id="desc">Four swimlanes, left to right: Evidence, World, Simulation, Communication. The April PDF is digitized into observations and map clusters, which feed the insight figures and, via zones and OSRM travel times, the scenario generator. Scenario files feed the runner, whose outputs feed the replay viewer and the experiment figures.</desc>
+  <rect x="0" y="0" width="1000" height="753" fill="#FFFFFF"/>
+  <!-- swimlanes -->
+  <g id="p4-lane-evidence">
+    <rect x="8" y="10" width="234" height="733" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="125" y="27.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Evidence</text>
+  </g>
+  <g id="p4-lane-world">
+    <rect x="258" y="10" width="234" height="733" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="375" y="27.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">World</text>
+  </g>
+  <g id="p4-lane-simulation">
+    <rect x="508" y="10" width="234" height="733" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="625" y="27.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Simulation</text>
+  </g>
+  <g id="p4-lane-communication">
+    <rect x="758" y="10" width="234" height="733" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="875" y="27.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Communication</text>
+  </g>
+  <!-- nodes -->
+  <g id="p4-april-pdf">
+    <rect x="20" y="58" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="80.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">April PDF</text>
+    <text x="125" y="95.345" font-size="11" fill="#444441" text-anchor="middle">12 charts on 11 pages</text>
+  </g>
+  <g id="p4-page-images">
+    <rect x="20" y="136" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="158.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Page images</text>
+    <text x="125" y="173.345" font-size="11" fill="#444441" text-anchor="middle">data/raw/april/pNN.png</text>
+  </g>
+  <g id="p4-digitizers">
+    <rect x="20" y="214" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="236.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Digitizers</text>
+    <text x="125" y="251.345" font-size="11" fill="#444441" text-anchor="middle">src/evidence</text>
+  </g>
+  <g id="p4-digitized">
+    <rect x="20" y="292" width="210" height="82" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="314.605" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Digitized data</text>
+    <text x="125" y="329.135" font-size="11" fill="#444441" text-anchor="middle">data/processed/observations.csv</text>
+    <text x="125" y="344.345" font-size="11" fill="#444441" text-anchor="middle">data/processed/map_clusters.csv</text>
+    <text x="125" y="359.555" font-size="11" fill="#444441" text-anchor="middle">+ briefs in docs/evidence</text>
+  </g>
+  <g id="p4-insights">
+    <rect x="20" y="401" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="423.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Insights T1–T10</text>
+    <text x="125" y="438.345" font-size="11" fill="#444441" text-anchor="middle">src/insights</text>
+  </g>
+  <g id="p4-insight-figs">
+    <rect x="20" y="495" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="125" y="517.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Insight figures</text>
+    <text x="125" y="532.345" font-size="11" fill="#444441" text-anchor="middle">outputs/insights</text>
+  </g>
+  <g id="p4-zones">
+    <rect x="270" y="299" width="210" height="68" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="375" y="322.21" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Zones + OSRM travel times</text>
+    <text x="375" y="336.74" font-size="11" fill="#444441" text-anchor="middle">src/scenario</text>
+    <text x="375" y="351.95" font-size="11" fill="#444441" text-anchor="middle">Travel-time matrix, cached routes</text>
+  </g>
+  <g id="p4-generator">
+    <rect x="270" y="393" width="210" height="68" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="375" y="416.21" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Scenario generator</text>
+    <text x="375" y="430.74" font-size="11" fill="#444441" text-anchor="middle">src/scenario</text>
+    <text x="375" y="445.95" font-size="11" fill="#444441" text-anchor="middle">Gravity + IPF, then sampling</text>
+  </g>
+  <g id="p4-scenario-files">
+    <rect x="270" y="495" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="375" y="517.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Scenario files</text>
+    <text x="375" y="532.345" font-size="11" fill="#444441" text-anchor="middle">requests_*.csv, fleet_*.csv</text>
+  </g>
+  <g id="p4-dispatchers">
+    <rect x="520" y="393" width="210" height="68" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="625" y="416.21" font-size="13" font-weight="bold" fill="#3C3489" text-anchor="middle">Dispatchers</text>
+    <text x="625" y="430.74" font-size="11" fill="#3C3489" text-anchor="middle">src/sim/dispatchers</text>
+    <text x="625" y="445.95" font-size="11" fill="#3C3489" text-anchor="middle">N, A, B, C, H</text>
+  </g>
+  <g id="p4-runner">
+    <rect x="520" y="487" width="210" height="68" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="625" y="510.21" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Runner + engine</text>
+    <text x="625" y="524.74" font-size="11" fill="#085041" text-anchor="middle">src/sim</text>
+    <text x="625" y="539.95" font-size="11" fill="#085041" text-anchor="middle">Scenarios × players × seeds</text>
+  </g>
+  <g id="p4-outputs">
+    <rect x="520" y="581" width="210" height="68" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="625" y="604.21" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Run outputs</text>
+    <text x="625" y="618.74" font-size="11" fill="#444441" text-anchor="middle">replay.json, request_results,</text>
+    <text x="625" y="633.95" font-size="11" fill="#444441" text-anchor="middle">run_manifest.json</text>
+  </g>
+  <g id="p4-viewer">
+    <rect x="770" y="589" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="875" y="611.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Replay viewer</text>
+    <text x="875" y="626.345" font-size="11" fill="#444441" text-anchor="middle">src/viewer</text>
+  </g>
+  <g id="p4-exp-figs">
+    <rect x="770" y="667" width="210" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="875" y="689.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Experiment figures</text>
+    <text x="875" y="704.345" font-size="11" fill="#444441" text-anchor="middle">Value ladder, heat map</text>
+  </g>
+  <!-- arrows -->
+  <g id="p4-e-pdf-images">
+    <polyline points="125,110 125,128.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="125,136 121.5,128.5 128.5,128.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-images-digitizers">
+    <polyline points="125,188 125,206.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="125,214 121.5,206.5 128.5,206.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-digitizers-data">
+    <polyline points="125,266 125,284.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="125,292 121.5,284.5 128.5,284.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-data-insights">
+    <polyline points="125,374 125,393.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="125,401 121.5,393.5 128.5,393.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-insights-figs">
+    <polyline points="125,453 125,487.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="125,495 121.5,487.5 128.5,487.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-data-zones">
+    <polyline points="230,333 262.5,333" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="270,333 262.5,336.5 262.5,329.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-zones-generator">
+    <polyline points="375,367 375,385.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="375,393 371.5,385.5 378.5,385.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-generator-files">
+    <polyline points="375,461 375,487.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="375,495 371.5,487.5 378.5,487.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-files-runner">
+    <polyline points="480,521 512.5,521" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="520,521 512.5,524.5 512.5,517.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-dispatchers-runner">
+    <polyline points="625,461 625,479.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="625,487 621.5,479.5 628.5,479.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-runner-outputs">
+    <polyline points="625,555 625,573.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="625,581 621.5,573.5 628.5,573.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-outputs-viewer">
+    <polyline points="730,615 762.5,615" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="770,615 762.5,618.5 762.5,611.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p4-e-outputs-figs">
+    <polyline points="625,649 625,693 762.5,693" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="770,693 762.5,696.5 762.5,689.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+</svg>

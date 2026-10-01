@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="434" viewBox="0 0 1000 434" style="max-width:100%;height:auto" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Players (dispatchers)</title>
+  <desc id="desc">A two-by-two grid of dispatchers: when they decide (on each request or every W seconds) against how they decide (greedy one at a time or a joint MILP over all pending requests). A immediate greedy, B batched greedy, C batched MILP; the immediate-MILP cell is not planned. Below a dashed line sit the benchmarks N (floor) and H (ceiling). A side note names the gap between each pair.</desc>
+  <rect x="0" y="0" width="1000" height="434" fill="#FFFFFF"/>
+  <!-- nodes -->
+  <g id="p2-h-col1">
+    <text x="340" y="55.08" font-size="12" font-weight="bold" fill="#444441" text-anchor="middle">Decides on each request</text>
+  </g>
+  <g id="p2-h-col2">
+    <text x="624" y="55.08" font-size="12" font-weight="bold" fill="#444441" text-anchor="middle">Decides every W seconds</text>
+  </g>
+  <g id="p2-h-row1">
+    <text x="110" y="118.08" font-size="12" font-weight="bold" fill="#444441" text-anchor="middle">Greedy, one at a time</text>
+  </g>
+  <g id="p2-h-row2">
+    <text x="110" y="218.08" font-size="12" font-weight="bold" fill="#444441" text-anchor="middle">Joint MILP, all pending</text>
+  </g>
+  <g id="p2-h-row3">
+    <text x="110" y="360.08" font-size="12" font-weight="bold" fill="#444441" text-anchor="middle">Benchmarks</text>
+  </g>
+  <g id="p2-A">
+    <rect x="210" y="76" width="260" height="76" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="340" y="110.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">A: immediate greedy</text>
+    <text x="340" y="125.93" font-size="11" fill="#3C3489" text-anchor="middle">Inserts each request</text>
+  </g>
+  <g id="p2-B">
+    <rect x="494" y="76" width="260" height="76" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="624" y="110.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">B: batched greedy</text>
+    <text x="624" y="125.93" font-size="11" fill="#3C3489" text-anchor="middle">A, but waits W seconds</text>
+  </g>
+  <g id="p2-notplanned">
+    <rect x="210" y="176" width="260" height="76" rx="8" ry="8" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="340" y="210.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Not planned</text>
+    <text x="340" y="225.93" font-size="11" fill="#444441" text-anchor="middle">Little to coordinate</text>
+  </g>
+  <g id="p2-C">
+    <rect x="494" y="176" width="260" height="76" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="624" y="210.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">C: batched MILP</text>
+    <text x="624" y="225.93" font-size="11" fill="#3C3489" text-anchor="middle">B, but decides jointly</text>
+  </g>
+  <g id="p2-separator">
+    <line x1="30" y1="285" x2="754" y2="285" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="6 4"/>
+  </g>
+  <g id="p2-N">
+    <rect x="210" y="318" width="260" height="76" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="340" y="352.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">N: floor</text>
+    <text x="340" y="367.93" font-size="11" fill="#3C3489" text-anchor="middle">Nearest van, no pooling</text>
+  </g>
+  <g id="p2-H">
+    <rect x="494" y="318" width="260" height="76" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="624" y="352.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">H: ceiling</text>
+    <text x="624" y="367.93" font-size="11" fill="#3C3489" text-anchor="middle">Decides once, sees all</text>
+  </g>
+  <g id="p2-gaps">
+    <rect x="790" y="76" width="184" height="126" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="804" y="102.025" font-size="13" font-weight="bold" fill="#444441" text-anchor="start">Gaps between players</text>
+    <text x="804" y="132.105" font-size="12" fill="#444441" text-anchor="start"><tspan font-weight="bold">A − N</tspan><tspan> = pooling</tspan></text>
+    <text x="804" y="147.315" font-size="12" fill="#444441" text-anchor="start"><tspan font-weight="bold">B − A</tspan><tspan> = waiting</tspan></text>
+    <text x="804" y="162.525" font-size="12" fill="#444441" text-anchor="start"><tspan font-weight="bold">C − B</tspan><tspan> = coordination</tspan></text>
+    <text x="804" y="177.735" font-size="12" fill="#444441" text-anchor="start"><tspan font-weight="bold">H − C</tspan><tspan> = headroom</tspan></text>
+  </g>
+</svg>

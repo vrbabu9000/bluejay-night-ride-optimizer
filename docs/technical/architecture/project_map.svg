@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1564" height="1012" viewBox="0 0 1564 1012" style="max-width:100%;height:auto" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Blue Jay Night Ride project map</title>
+  <desc id="desc">One-page project map for Team FourSight. Top to bottom: the abandoned 15 Sep proposal, the 28-30 Sep pivot, then five stages left to right: Digitize and Analyze (done), Build the world (next), Simulate and compare, Recommend and report (planned). A footer lists the documents and governance in place. Color is status and every box also states its status in words.</desc>
+  <rect x="0" y="0" width="1564" height="1012" fill="#FFFFFF"/>
+  <!-- swimlanes -->
+  <g id="pm-lane-then">
+    <rect x="16" y="66" width="1532" height="132" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="782" y="83.18" font-size="13" font-weight="bold" fill="#7A7A7A" text-anchor="middle">THEN · Proposal, 15 Sep  ·  ABANDONED 28 Sep: the trip-level data never came; only the aggregate April report did</text>
+  </g>
+  <g id="pm-lane-1">
+    <rect x="16" y="298" width="422" height="598" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="227" y="315.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">1 · Digitize</text>
+  </g>
+  <g id="pm-lane-2">
+    <rect x="468" y="298" width="244" height="598" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="590" y="315.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">2 · Analyze and mine</text>
+  </g>
+  <g id="pm-lane-3">
+    <rect x="782" y="298" width="230" height="598" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="897" y="315.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">3 · Build the world</text>
+  </g>
+  <g id="pm-lane-4">
+    <rect x="1036" y="298" width="237" height="686" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="1154.5" y="315.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">4 · Simulate and compare</text>
+  </g>
+  <g id="pm-lane-5">
+    <rect x="1297" y="298" width="251" height="686" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="1422.5" y="315.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">5 · Recommend and report</text>
+  </g>
+  <g id="pm-lane-docs">
+    <rect x="16" y="912" width="996" height="72" rx="8" ry="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="1"/>
+    <text x="514" y="929.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Documents and governance · DONE</text>
+  </g>
+  <!-- nodes -->
+  <g id="pm-title">
+    <text x="16" y="30.8" font-size="20" font-weight="bold" fill="#444441" text-anchor="start">Blue Jay Night Ride · Team FourSight · Project map</text>
+  </g>
+  <g id="pm-subtitle">
+    <text x="16" y="51.42" font-size="13" fill="#444441" text-anchor="start">Where we started, where we are (1 Oct 2026), and where the data flows next</text>
+  </g>
+  <g id="pm-legend-label">
+    <text x="1031" y="29.74" font-size="11" fill="#444441" text-anchor="start">Color = status</text>
+  </g>
+  <g id="pm-legend-done">
+    <rect x="1131" y="14" width="53" height="24" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="1157.5" y="29.74" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE</text>
+  </g>
+  <g id="pm-legend-next">
+    <rect x="1192" y="14" width="50" height="24" rx="8" ry="8" fill="#FFF3D6" stroke="#B7791F" stroke-width="2"/>
+    <text x="1217" y="29.74" font-size="11" font-weight="bold" fill="#7A4B00" text-anchor="middle">NEXT</text>
+  </g>
+  <g id="pm-legend-planned">
+    <rect x="1250" y="14" width="78" height="24" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1289" y="29.74" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED</text>
+  </g>
+  <g id="pm-legend-abandoned">
+    <rect x="1336" y="14" width="99" height="24" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="1385.5" y="29.74" font-size="11" font-weight="bold" fill="#7A7A7A" text-anchor="middle">ABANDONED</text>
+  </g>
+  <g id="pm-legend-side">
+    <rect x="1443" y="14" width="105" height="24" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="1495.5" y="29.74" font-size="11" font-weight="bold" fill="#3C3489" text-anchor="middle">SIDE-BRANCH</text>
+  </g>
+  <g id="pm-then-1">
+    <rect x="32" y="96" width="330" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="197" y="118.55" font-size="13" font-weight="bold" fill="#7A7A7A" text-anchor="middle">Trip-level TransLoc extracts</text>
+    <text x="197" y="131.91" font-size="11" fill="#7A7A7A" text-anchor="middle">expected; never arrived</text>
+    <text x="197" y="144.78" font-size="11" font-weight="bold" fill="#7A7A7A" text-anchor="middle">ABANDONED 28 Sep</text>
+  </g>
+  <g id="pm-then-2">
+    <rect x="422" y="96" width="330" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="587" y="118.55" font-size="13" font-weight="bold" fill="#7A7A7A" text-anchor="middle">Replay April nights</text>
+    <text x="587" y="131.91" font-size="11" fill="#7A7A7A" text-anchor="middle">reconstruct each night, trip by trip</text>
+    <text x="587" y="144.78" font-size="11" font-weight="bold" fill="#7A7A7A" text-anchor="middle">ABANDONED 28 Sep</text>
+  </g>
+  <g id="pm-then-3">
+    <rect x="812" y="96" width="330" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="977" y="118.55" font-size="13" font-weight="bold" fill="#7A7A7A" text-anchor="middle">Node-arc MILP</text>
+    <text x="977" y="131.91" font-size="11" fill="#7A7A7A" text-anchor="middle">one offline model, rolling horizon</text>
+    <text x="977" y="144.78" font-size="11" font-weight="bold" fill="#7A7A7A" text-anchor="middle">ABANDONED 28 Sep</text>
+  </g>
+  <g id="pm-then-4">
+    <rect x="1202" y="96" width="330" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#9A9A9A" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="1367" y="118.55" font-size="13" font-weight="bold" fill="#7A7A7A" text-anchor="middle">Compare with actual April</text>
+    <text x="1367" y="131.91" font-size="11" fill="#7A7A7A" text-anchor="middle">the historical baseline</text>
+    <text x="1367" y="144.78" font-size="11" font-weight="bold" fill="#7A7A7A" text-anchor="middle">ABANDONED 28 Sep</text>
+  </g>
+  <g id="pm-then-note-1">
+    <rect x="422" y="166" width="330" height="24" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="587" y="181.74" font-size="11" fill="#444441" text-anchor="middle">-&gt; survives as the replay viewer (simulated nights)</text>
+  </g>
+  <g id="pm-then-note-2">
+    <rect x="812" y="166" width="330" height="24" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="977" y="181.74" font-size="11" fill="#444441" text-anchor="middle">-&gt; survives as H, the offline ceiling</text>
+  </g>
+  <g id="pm-ms-1">
+    <rect x="16" y="208" width="309" height="44" rx="8" ry="8" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="170.5" y="227.985" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">28 Sep</text>
+    <text x="170.5" y="241.345" font-size="11" fill="#444441" text-anchor="middle">aggregate-only April report (12 charts)</text>
+  </g>
+  <g id="pm-ms-2">
+    <rect x="381" y="208" width="381" height="44" rx="8" ry="8" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="571.5" y="227.985" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">29 Sep</text>
+    <text x="571.5" y="241.345" font-size="11" fill="#444441" text-anchor="middle">plan v2: an April-shaped arena, five dispatchers</text>
+  </g>
+  <g id="pm-ms-3">
+    <rect x="818" y="208" width="431" height="44" rx="8" ry="8" fill="#FFFFFF" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1033.5" y="227.985" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">29 Sep</text>
+    <text x="1033.5" y="241.345" font-size="11" fill="#444441" text-anchor="middle">Prof. Kearsley: "gradient pointing in the right direction"</text>
+  </g>
+  <g id="pm-ms-4">
+    <rect x="1305" y="208" width="243" height="44" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="1426.5" y="227.985" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">30 Sep</text>
+    <text x="1426.5" y="241.345" font-size="11" fill="#085041" text-anchor="middle">Phases 0-2 done, G1 passed</text>
+  </g>
+  <g id="pm-lane-sub-1">
+    <text x="227" y="331.24" font-size="11" fill="#085041" text-anchor="middle">Phase 1 · DONE · G1 passed</text>
+  </g>
+  <g id="pm-lane-sub-2">
+    <text x="590" y="331.24" font-size="11" fill="#085041" text-anchor="middle">Phase 2 · DONE</text>
+  </g>
+  <g id="pm-lane-sub-3">
+    <text x="897" y="331.24" font-size="11" fill="#7A4B00" text-anchor="middle">Phase 3 · NEXT</text>
+  </g>
+  <g id="pm-lane-sub-4">
+    <text x="1154.5" y="331.24" font-size="11" fill="#444441" text-anchor="middle">Phases 4-7 · PLANNED</text>
+  </g>
+  <g id="pm-lane-sub-5">
+    <text x="1422.5" y="331.24" font-size="11" fill="#444441" text-anchor="middle">Phase 8 · PLANNED</text>
+  </g>
+  <g id="pm-doc-1">
+    <rect x="34" y="948" width="341" height="26" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="204.5" y="964.74" font-size="11" fill="#085041" text-anchor="middle">Team guide v1.0 (22 Sep) -&gt; v2.0 (29 Sep) -&gt; v2.2 (1 Oct)</text>
+  </g>
+  <g id="pm-doc-2">
+    <rect x="389" y="948" width="161" height="26" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="469.5" y="964.74" font-size="11" fill="#085041" text-anchor="middle">Decision log D-01 to D-15</text>
+  </g>
+  <g id="pm-doc-3">
+    <rect x="564" y="948" width="220" height="26" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="674" y="964.74" font-size="11" fill="#085041" text-anchor="middle">AI-use log (every tool use disclosed)</text>
+  </g>
+  <g id="pm-doc-4">
+    <rect x="798" y="948" width="196" height="26" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="896" y="964.74" font-size="11" fill="#085041" text-anchor="middle">Derived April data kept out of git</text>
+  </g>
+  <g id="pm-here">
+    <rect x="657" y="260" width="180" height="24" rx="8" ry="8" fill="#FFF3D6" stroke="#B7791F" stroke-width="2"/>
+    <text x="747" y="276.42" font-size="13" font-weight="bold" fill="#7A4B00" text-anchor="middle">YOU ARE HERE · 1 Oct</text>
+  </g>
+  <g id="pm-here-ptr">
+    <polygon points="739,286 755,286 747,295" fill="#FFF3D6" stroke="#B7791F" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-pdf">
+    <rect x="40" y="360" width="179" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="129.5" y="382.115" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">April PDF</text>
+    <text x="129.5" y="395.475" font-size="11" fill="#085041" text-anchor="middle">12 charts on 11</text>
+    <text x="129.5" y="408.345" font-size="11" fill="#085041" text-anchor="middle">pages, aggregate only</text>
+    <text x="129.5" y="421.215" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-images">
+    <rect x="245" y="360" width="179" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="334.5" y="388.55" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Page images</text>
+    <text x="334.5" y="401.91" font-size="11" fill="#085041" text-anchor="middle">original pixels (pdfimages)</text>
+    <text x="334.5" y="414.78" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-bubbles">
+    <rect x="40" y="458" width="179" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="129.5" y="480.115" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Map bubbles</text>
+    <text x="129.5" y="493.475" font-size="11" fill="#085041" text-anchor="middle">215 read; two blind</text>
+    <text x="129.5" y="506.345" font-size="11" fill="#085041" text-anchor="middle">readers agree on 214</text>
+    <text x="129.5" y="519.215" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-digitizers">
+    <rect x="245" y="458" width="179" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="334.5" y="480.115" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Chart digitizers</text>
+    <text x="334.5" y="493.475" font-size="11" fill="#085041" text-anchor="middle">color masks, axis fits,</text>
+    <text x="334.5" y="506.345" font-size="11" fill="#085041" text-anchor="middle">tooltip un-blending</text>
+    <text x="334.5" y="519.215" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-georef">
+    <rect x="40" y="556" width="179" height="87" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="129.5" y="578.18" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Georeference</text>
+    <text x="129.5" y="591.54" font-size="11" fill="#085041" text-anchor="middle">Web Mercator from</text>
+    <text x="129.5" y="604.41" font-size="11" fill="#085041" text-anchor="middle">POI pins; ±17 m</text>
+    <text x="129.5" y="617.28" font-size="11" fill="#085041" text-anchor="middle">campus, ±57 m city</text>
+    <text x="129.5" y="630.15" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-obs">
+    <rect x="245" y="556" width="179" height="87" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="334.5" y="584.615" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">observations.csv</text>
+    <text x="334.5" y="597.975" font-size="11" fill="#085041" text-anchor="middle">482 reads, each</text>
+    <text x="334.5" y="610.845" font-size="11" fill="#085041" text-anchor="middle">with an interval</text>
+    <text x="334.5" y="623.715" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-ledger">
+    <rect x="40" y="667" width="384" height="61" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="232" y="689.05" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Reconciliation ledger</text>
+    <text x="232" y="702.41" font-size="11" fill="#085041" text-anchor="middle">totals close within 0.4% · G1 PASSED</text>
+    <text x="232" y="715.28" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 1</text>
+  </g>
+  <g id="pm-insights">
+    <rect x="482" y="360" width="216" height="87" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="590" y="382.18" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Insights T1-T10</text>
+    <text x="590" y="395.54" font-size="11" fill="#085041" text-anchor="middle">supply, cancellation, congestion,</text>
+    <text x="590" y="408.41" font-size="11" fill="#085041" text-anchor="middle">party size, occupancy, detour,</text>
+    <text x="590" y="421.28" font-size="11" fill="#085041" text-anchor="middle">Lyft, O-D structure, shift</text>
+    <text x="590" y="434.15" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 2</text>
+  </g>
+  <g id="pm-regimes">
+    <rect x="482" y="467" width="216" height="100" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="590" y="489.245" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Operating regimes</text>
+    <text x="590" y="502.605" font-size="11" fill="#085041" text-anchor="middle">supply-limited; ~7 pts of</text>
+    <text x="590" y="515.475" font-size="11" fill="#085041" text-anchor="middle">cancellations per min of wait;</text>
+    <text x="590" y="528.345" font-size="11" fill="#085041" text-anchor="middle">Apr 17 (Alumni Weekend):</text>
+    <text x="590" y="541.215" font-size="11" fill="#085041" text-anchor="middle">the system slowed</text>
+    <text x="590" y="554.085" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 2</text>
+  </g>
+  <g id="pm-scorecard">
+    <rect x="482" y="587" width="216" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="590" y="609.115" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Data-quality scorecard</text>
+    <text x="590" y="622.475" font-size="11" fill="#085041" text-anchor="middle">6 dimensions × 12 charts:</text>
+    <text x="590" y="635.345" font-size="11" fill="#085041" text-anchor="middle">numbers sound, definitions weak</text>
+    <text x="590" y="648.215" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · Phase 2</text>
+  </g>
+  <g id="pm-line2">
+    <rect x="482" y="681" width="216" height="102" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1" stroke-dasharray="6 4"/>
+    <text x="590" y="703.075" font-size="13" font-weight="bold" fill="#3C3489" text-anchor="middle">Approach 2 · Events, zones</text>
+    <text x="590" y="718.285" font-size="13" font-weight="bold" fill="#3C3489" text-anchor="middle">and traffic</text>
+    <text x="590" y="731.645" font-size="11" fill="#3C3489" text-anchor="middle">when, where and</text>
+    <text x="590" y="744.515" font-size="11" fill="#3C3489" text-anchor="middle">how a night strains;</text>
+    <text x="590" y="757.385" font-size="11" fill="#3C3489" text-anchor="middle">scored on each new monthly report</text>
+    <text x="590" y="770.255" font-size="11" font-weight="bold" fill="#3C3489" text-anchor="middle">SIDE-BRANCH · time-boxed</text>
+  </g>
+  <g id="pm-zones">
+    <rect x="794" y="360" width="206" height="74" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="897" y="382.115" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Zones + travel times</text>
+    <text x="897" y="395.475" font-size="11" fill="#085041" text-anchor="middle">16 zones; OSRM,</text>
+    <text x="897" y="408.345" font-size="11" fill="#085041" text-anchor="middle">8,800 directed pairs</text>
+    <text x="897" y="421.215" font-size="11" font-weight="bold" fill="#085041" text-anchor="middle">DONE · v0</text>
+  </g>
+  <g id="pm-generator">
+    <rect x="794" y="463.5" width="206" height="87" rx="8" ry="8" fill="#FFF3D6" stroke="#B7791F" stroke-width="2"/>
+    <text x="897" y="485.68" font-size="13" font-weight="bold" fill="#7A4B00" text-anchor="middle">Scenario generator</text>
+    <text x="897" y="499.04" font-size="11" fill="#7A4B00" text-anchor="middle">gravity + IPF + sampling:</text>
+    <text x="897" y="511.91" font-size="11" fill="#7A4B00" text-anchor="middle">synthetic nights consistent</text>
+    <text x="897" y="524.78" font-size="11" fill="#7A4B00" text-anchor="middle">with the aggregates</text>
+    <text x="897" y="537.65" font-size="11" font-weight="bold" fill="#7A4B00" text-anchor="middle">NEXT · Phase 3</text>
+  </g>
+  <g id="pm-base">
+    <rect x="794" y="570.5" width="206" height="74" rx="8" ry="8" fill="#FFF3D6" stroke="#B7791F" stroke-width="2"/>
+    <text x="897" y="592.615" font-size="13" font-weight="bold" fill="#7A4B00" text-anchor="middle">Base scenario M</text>
+    <text x="897" y="605.975" font-size="11" fill="#7A4B00" text-anchor="middle">18:00-19:00, 5 vans,</text>
+    <text x="897" y="618.845" font-size="11" fill="#7A4B00" text-anchor="middle">30 or 60 requests</text>
+    <text x="897" y="631.715" font-size="11" font-weight="bold" fill="#7A4B00" text-anchor="middle">NEXT · Phase 3</text>
+  </g>
+  <g id="pm-scale">
+    <rect x="794" y="664.5" width="206" height="74" rx="8" ry="8" fill="#FFF3D6" stroke="#B7791F" stroke-width="2"/>
+    <text x="897" y="686.615" font-size="13" font-weight="bold" fill="#7A4B00" text-anchor="middle">Scale ladder + grid</text>
+    <text x="897" y="699.975" font-size="11" fill="#7A4B00" text-anchor="middle">S0 -&gt; S1 -&gt; S2 -&gt; M -&gt; L;</text>
+    <text x="897" y="712.845" font-size="11" fill="#7A4B00" text-anchor="middle">grid pre-registered</text>
+    <text x="897" y="725.715" font-size="11" font-weight="bold" fill="#7A4B00" text-anchor="middle">NEXT · Phase 3</text>
+  </g>
+  <g id="pm-dispatchers">
+    <rect x="1048" y="416" width="213" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1154.5" y="438.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Dispatchers (players)</text>
+    <text x="1154.5" y="451.475" font-size="11" fill="#444441" text-anchor="middle">N floor · A greedy · B batched ·</text>
+    <text x="1154.5" y="464.345" font-size="11" fill="#444441" text-anchor="middle">C joint MILP · H ceiling</text>
+    <text x="1154.5" y="477.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 5 · G3</text>
+  </g>
+  <g id="pm-engine">
+    <rect x="1048" y="510" width="213" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1154.5" y="532.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Game engine (referee)</text>
+    <text x="1154.5" y="545.475" font-size="11" fill="#444441" text-anchor="middle">event-driven; validates every</text>
+    <text x="1154.5" y="558.345" font-size="11" fill="#444441" text-anchor="middle">command; accounting identity</text>
+    <text x="1154.5" y="571.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 4 · G2</text>
+  </g>
+  <g id="pm-replaylog">
+    <rect x="1048" y="604" width="213" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1154.5" y="626.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Replay log</text>
+    <text x="1154.5" y="639.475" font-size="11" fill="#444441" text-anchor="middle">replay.json, request</text>
+    <text x="1154.5" y="652.345" font-size="11" fill="#444441" text-anchor="middle">results, run manifest</text>
+    <text x="1154.5" y="665.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 4</text>
+  </g>
+  <g id="pm-experiments">
+    <rect x="1048" y="704.5" width="213" height="61" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1154.5" y="726.55" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Experiments</text>
+    <text x="1154.5" y="739.91" font-size="11" fill="#444441" text-anchor="middle">scenarios × players × paired seeds</text>
+    <text x="1154.5" y="752.78" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 7 · G5</text>
+  </g>
+  <g id="pm-calibration">
+    <rect x="1048" y="793.5" width="213" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1154.5" y="815.615" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Calibration-lite</text>
+    <text x="1154.5" y="828.975" font-size="11" fill="#444441" text-anchor="middle">ride P10 sets road</text>
+    <text x="1154.5" y="841.845" font-size="11" fill="#444441" text-anchor="middle">physics; rest held out</text>
+    <text x="1154.5" y="854.715" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 6 · G4</text>
+  </g>
+  <g id="pm-midsem">
+    <rect x="1309" y="516.5" width="227" height="61" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1422.5" y="538.55" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Mid-semester update</text>
+    <text x="1422.5" y="551.91" font-size="11" fill="#444441" text-anchor="middle">after Phase 4 · date TBD</text>
+    <text x="1422.5" y="564.78" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED</text>
+  </g>
+  <g id="pm-viewer">
+    <rect x="1309" y="604" width="227" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1422.5" y="626.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Replay viewer</text>
+    <text x="1422.5" y="639.475" font-size="11" fill="#444441" text-anchor="middle">preview, play, fast-forward;</text>
+    <text x="1422.5" y="652.345" font-size="11" fill="#444441" text-anchor="middle">players side by side</text>
+    <text x="1422.5" y="665.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 8</text>
+  </g>
+  <g id="pm-ladder">
+    <rect x="1309" y="698" width="227" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1422.5" y="720.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Value ladder</text>
+    <text x="1422.5" y="733.475" font-size="11" fill="#444441" text-anchor="middle">the gaps: pooling, waiting,</text>
+    <text x="1422.5" y="746.345" font-size="11" fill="#444441" text-anchor="middle">coordination, information</text>
+    <text x="1422.5" y="759.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 8</text>
+  </g>
+  <g id="pm-final">
+    <rect x="1309" y="792" width="227" height="74" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1422.5" y="814.115" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Final report + deck</text>
+    <text x="1422.5" y="827.475" font-size="11" fill="#444441" text-anchor="middle">conditional recommendation,</text>
+    <text x="1422.5" y="840.345" font-size="11" fill="#444441" text-anchor="middle">limits stated</text>
+    <text x="1422.5" y="853.215" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 8 · G6</text>
+  </g>
+  <g id="pm-value">
+    <rect x="1309" y="886" width="227" height="87" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="1422.5" y="908.18" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Value to Hopkins + TransLoc</text>
+    <text x="1422.5" y="921.54" font-size="11" fill="#444441" text-anchor="middle">benchmark, headroom, fleet</text>
+    <text x="1422.5" y="934.41" font-size="11" fill="#444441" text-anchor="middle">curves, cancellation diagnosis,</text>
+    <text x="1422.5" y="947.28" font-size="11" fill="#444441" text-anchor="middle">value of the next extract</text>
+    <text x="1422.5" y="960.15" font-size="11" font-weight="bold" fill="#444441" text-anchor="middle">PLANNED · Phase 8</text>
+  </g>
+  <!-- arrows -->
+  <g id="pm-e-then-1">
+    <polyline points="362,127 414.5,127" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="2 3"/>
+    <polygon points="422,127 414.5,130.5 414.5,123.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-then-2">
+    <polyline points="752,127 804.5,127" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="2 3"/>
+    <polygon points="812,127 804.5,130.5 804.5,123.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-then-3">
+    <polyline points="1142,127 1194.5,127" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="2 3"/>
+    <polygon points="1202,127 1194.5,130.5 1194.5,123.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-ms-1">
+    <polyline points="325,230 373.5,230" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="381,230 373.5,233.5 373.5,226.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-ms-2">
+    <polyline points="762,230 810.5,230" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="818,230 810.5,233.5 810.5,226.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-ms-3">
+    <polyline points="1249,230 1297.5,230" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1305,230 1297.5,233.5 1297.5,226.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-pdf-images">
+    <polyline points="219,397 237.5,397" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="245,397 237.5,400.5 237.5,393.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-images-digitizers">
+    <polyline points="334.5,434 334.5,450.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="334.5,458 331,450.5 338,450.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-images-bubbles">
+    <polyline points="266.48,434 266.48,444 129.5,444 129.5,450.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="129.5,458 126,450.5 133,450.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-bubbles-georef">
+    <polyline points="129.5,532 129.5,548.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="129.5,556 126,548.5 133,548.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-digitizers-obs">
+    <polyline points="334.5,532 334.5,548.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="334.5,556 331,548.5 338,548.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-georef-ledger">
+    <polyline points="129.5,643 129.5,659.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="129.5,667 126,659.5 133,659.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-obs-ledger">
+    <polyline points="334.5,643 334.5,659.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="334.5,667 331,659.5 338,659.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-obs-insights">
+    <polyline points="424,599.5 446,599.5 446,386.1 474.5,386.1" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="482,386.1 474.5,389.6 474.5,382.6" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-georef-zones">
+    <polyline points="40,599.5 28,599.5 28,344 747,344 747,397 786.5,397" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="794,397 786.5,400.5 786.5,393.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-insights-regimes">
+    <polyline points="590,447 590,459.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="590,467 586.5,459.5 593.5,459.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-insights-scorecard">
+    <polyline points="482,433.95 458,433.95 458,624 474.5,624" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="482,624 474.5,627.5 474.5,620.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-regimes-line2">
+    <polyline points="698,549 724,549 724,732 705.5,732" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="2 3"/>
+    <polygon points="698,732 705.5,728.5 705.5,735.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-regimes-generator">
+    <polyline points="698,507 786.5,507" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="794,507 786.5,510.5 786.5,503.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="746" y="499.74" font-size="11" fill="#444441" text-anchor="middle">fences + regimes</text>
+  </g>
+  <g id="pm-e-zones-generator">
+    <polyline points="897,434 897,456" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="897,463.5 893.5,456 900.5,456" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-generator-base">
+    <polyline points="897,550.5 897,563" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="897,570.5 893.5,563 900.5,563" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-base-scale">
+    <polyline points="897,644.5 897,657" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="897,664.5 893.5,657 900.5,657" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-scale-engine">
+    <polyline points="1000,701.5 1024,701.5 1024,547 1040.5,547" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1048,547 1040.5,550.5 1040.5,543.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-dispatchers-engine">
+    <polyline points="1154.5,490 1154.5,502.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1154.5,510 1151,502.5 1158,502.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-engine-replaylog">
+    <polyline points="1154.5,584 1154.5,596.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1154.5,604 1151,596.5 1158,596.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-replaylog-experiments">
+    <polyline points="1154.5,678 1154.5,697" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1154.5,704.5 1151,697 1158,697" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-calibration-experiments">
+    <polyline points="1154.5,793.5 1154.5,773" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1154.5,765.5 1158,773 1151,773" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="1210.1281" y="783.24" font-size="11" fill="#444441" text-anchor="middle">frozen parameters</text>
+  </g>
+  <g id="pm-e-replaylog-viewer">
+    <polyline points="1261,641 1301.5,641" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1309,641 1301.5,644.5 1301.5,637.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-experiments-ladder">
+    <polyline points="1261,735 1301.5,735" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1309,735 1301.5,738.5 1301.5,731.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-ladder-final">
+    <polyline points="1422.5,772 1422.5,784.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1422.5,792 1419,784.5 1426,784.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="pm-e-ladder-value">
+    <polyline points="1309,760.9 1288,760.9 1288,929.5 1301.5,929.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="1309,929.5 1301.5,933 1301.5,926" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -224,3 +224,7 @@ outputs/
 # Restricted / source data (JHU) — keep out of the repo per data governance
 HW Night Ride Data April 2026.pdf
 *.pdf.data
+
+# Digitized / derived April data (from the restricted PDF) — untracked until data-sharing is confirmed
+data/
+docs/evidence/

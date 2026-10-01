@@ -1,0 +1,327 @@
+<mxfile host="app.diagrams.net" modified="2026-10-01T18:45:23.000Z" agent="Claude Code (generated; edit freely in draw.io)" version="24.7.0" type="device">
+  <diagram id="pm" name="Project map">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1564" pageHeight="1012" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="pm-root" />
+        <mxCell id="pm-layer" parent="pm-root" />
+        <mxCell id="pm-lane-then" value="THEN · Proposal, 15 Sep  ·  ABANDONED 28 Sep: the trip-level data never came; only the aggregate April report did" style="rounded=1;arcSize=6.06;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="66" width="1532" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-1" value="1 · Digitize" style="rounded=1;arcSize=1.9;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="298" width="422" height="598" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-2" value="2 · Analyze and mine" style="rounded=1;arcSize=3.28;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="468" y="298" width="244" height="598" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-3" value="3 · Build the world" style="rounded=1;arcSize=3.48;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="782" y="298" width="230" height="598" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-4" value="4 · Simulate and compare" style="rounded=1;arcSize=3.38;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1036" y="298" width="237" height="686" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-5" value="5 · Recommend and report" style="rounded=1;arcSize=3.19;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1297" y="298" width="251" height="686" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-docs" value="Documents and governance · DONE" style="rounded=1;arcSize=11.11;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="912" width="996" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-title" value="&lt;b&gt;Blue Jay Night Ride · Team FourSight · Project map&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#444441;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="10" width="572" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-subtitle" value="Where we started, where we are (1 Oct 2026), and where the data flows next" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#444441;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="38" width="530" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-label" value="Color = status" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#444441;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1031" y="14" width="92" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-done" value="&lt;font style=&quot;font-size:11px&quot;&gt;&lt;b&gt;DONE&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1131" y="14" width="53" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-next" value="&lt;font style=&quot;font-size:11px&quot;&gt;&lt;b&gt;NEXT&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1192" y="14" width="50" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-planned" value="&lt;font style=&quot;font-size:11px&quot;&gt;&lt;b&gt;PLANNED&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1250" y="14" width="78" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-abandoned" value="&lt;font style=&quot;font-size:11px&quot;&gt;&lt;b&gt;ABANDONED&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1336" y="14" width="99" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-legend-side" value="&lt;font style=&quot;font-size:11px&quot;&gt;&lt;b&gt;SIDE-BRANCH&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1443" y="14" width="105" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-1" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Trip-level TransLoc extracts&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;expected; never arrived&lt;br&gt;&lt;b&gt;ABANDONED 28 Sep&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=12.9;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="16" y="30" width="330" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-2" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Replay April nights&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;reconstruct each night, trip by trip&lt;br&gt;&lt;b&gt;ABANDONED 28 Sep&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=12.9;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="406" y="30" width="330" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-3" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Node-arc MILP&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;one offline model, rolling horizon&lt;br&gt;&lt;b&gt;ABANDONED 28 Sep&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=12.9;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="796" y="30" width="330" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-4" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Compare with actual April&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;the historical baseline&lt;br&gt;&lt;b&gt;ABANDONED 28 Sep&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=12.9;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9A9A9A;fontColor=#7A7A7A;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="1186" y="30" width="330" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-note-1" value="&lt;font style=&quot;font-size:11px&quot;&gt;-&amp;gt; survives as the replay viewer (simulated nights)&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="406" y="100" width="330" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-then-note-2" value="&lt;font style=&quot;font-size:11px&quot;&gt;-&amp;gt; survives as H, the offline ceiling&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-then">
+          <mxGeometry x="796" y="100" width="330" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ms-1" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;28 Sep&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;aggregate-only April report (12 charts)&lt;/font&gt;" style="rounded=1;arcSize=18.18;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="16" y="208" width="309" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ms-2" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;29 Sep&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;plan v2: an April-shaped arena, five dispatchers&lt;/font&gt;" style="rounded=1;arcSize=18.18;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="381" y="208" width="381" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ms-3" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;29 Sep&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Prof. Kearsley: &quot;gradient pointing in the right direction&quot;&lt;/font&gt;" style="rounded=1;arcSize=18.18;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="818" y="208" width="431" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ms-4" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;30 Sep&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Phases 0-2 done, G1 passed&lt;/font&gt;" style="rounded=1;arcSize=18.18;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="1305" y="208" width="243" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-sub-1" value="Phase 1 · DONE · G1 passed" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#085041;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="8" y="22" width="406" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-sub-2" value="Phase 2 · DONE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#085041;" vertex="1" parent="pm-lane-2">
+          <mxGeometry x="8" y="22" width="228" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-sub-3" value="Phase 3 · NEXT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#7A4B00;" vertex="1" parent="pm-lane-3">
+          <mxGeometry x="8" y="22" width="214" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-sub-4" value="Phases 4-7 · PLANNED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#444441;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="8" y="22" width="221" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-lane-sub-5" value="Phase 8 · PLANNED" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=1;fontColor=#444441;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="8" y="22" width="235" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-doc-1" value="&lt;font style=&quot;font-size:11px&quot;&gt;Team guide v1.0 (22 Sep) -&amp;gt; v2.0 (29 Sep) -&amp;gt; v2.2 (1 Oct)&lt;/font&gt;" style="rounded=1;arcSize=30.77;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-docs">
+          <mxGeometry x="18" y="36" width="341" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-doc-2" value="&lt;font style=&quot;font-size:11px&quot;&gt;Decision log D-01 to D-15&lt;/font&gt;" style="rounded=1;arcSize=30.77;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-docs">
+          <mxGeometry x="373" y="36" width="161" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-doc-3" value="&lt;font style=&quot;font-size:11px&quot;&gt;AI-use log (every tool use disclosed)&lt;/font&gt;" style="rounded=1;arcSize=30.77;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-docs">
+          <mxGeometry x="548" y="36" width="220" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-doc-4" value="&lt;font style=&quot;font-size:11px&quot;&gt;Derived April data kept out of git&lt;/font&gt;" style="rounded=1;arcSize=30.77;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-docs">
+          <mxGeometry x="782" y="36" width="196" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-here" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;YOU ARE HERE · 1 Oct&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=33.33;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="657" y="260" width="180" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-here-ptr" value="" style="triangle;direction=south;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-layer">
+          <mxGeometry x="739" y="286" width="16" height="9" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-pdf" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;April PDF&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;12 charts on 11&lt;br&gt;pages, aggregate only&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="24" y="62" width="179" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-images" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Page images&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;original pixels (pdfimages)&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="229" y="62" width="179" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-bubbles" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Map bubbles&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;215 read; two blind&lt;br&gt;readers agree on 214&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="24" y="160" width="179" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-digitizers" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Chart digitizers&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;color masks, axis fits,&lt;br&gt;tooltip un-blending&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="229" y="160" width="179" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-georef" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Georeference&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Web Mercator from&lt;br&gt;POI pins; ±17 m&lt;br&gt;campus, ±57 m city&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=9.2;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="24" y="258" width="179" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-obs" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;observations.csv&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;482 reads, each&lt;br&gt;with an interval&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=9.2;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="229" y="258" width="179" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ledger" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Reconciliation ledger&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;totals close within 0.4% · G1 PASSED&lt;br&gt;&lt;b&gt;DONE · Phase 1&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=13.11;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-1">
+          <mxGeometry x="24" y="369" width="384" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-insights" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Insights T1-T10&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;supply, cancellation, congestion,&lt;br&gt;party size, occupancy, detour,&lt;br&gt;Lyft, O-D structure, shift&lt;br&gt;&lt;b&gt;DONE · Phase 2&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=9.2;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-2">
+          <mxGeometry x="14" y="62" width="216" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-regimes" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Operating regimes&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;supply-limited; ~7 pts of&lt;br&gt;cancellations per min of wait;&lt;br&gt;Apr 17 (Alumni Weekend):&lt;br&gt;the system slowed&lt;br&gt;&lt;b&gt;DONE · Phase 2&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-2">
+          <mxGeometry x="14" y="169" width="216" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-scorecard" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Data-quality scorecard&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;6 dimensions × 12 charts:&lt;br&gt;numbers sound, definitions weak&lt;br&gt;&lt;b&gt;DONE · Phase 2&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-2">
+          <mxGeometry x="14" y="289" width="216" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-line2" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Approach 2 · Events, zones&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;and traffic&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;when, where and&lt;br&gt;how a night strains;&lt;br&gt;scored on each new monthly report&lt;br&gt;&lt;b&gt;SIDE-BRANCH · time-boxed&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=7.84;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="pm-lane-2">
+          <mxGeometry x="14" y="383" width="216" height="102" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-zones" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Zones + travel times&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;16 zones; OSRM,&lt;br&gt;8,800 directed pairs&lt;br&gt;&lt;b&gt;DONE · v0&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-3">
+          <mxGeometry x="12" y="62" width="206" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-generator" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Scenario generator&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;gravity + IPF + sampling:&lt;br&gt;synthetic nights consistent&lt;br&gt;with the aggregates&lt;br&gt;&lt;b&gt;NEXT · Phase 3&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=9.2;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-3">
+          <mxGeometry x="12" y="165.5" width="206" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-base" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Base scenario M&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;18:00-19:00, 5 vans,&lt;br&gt;30 or 60 requests&lt;br&gt;&lt;b&gt;NEXT · Phase 3&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-3">
+          <mxGeometry x="12" y="272.5" width="206" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-scale" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Scale ladder + grid&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;S0 -&amp;gt; S1 -&amp;gt; S2 -&amp;gt; M -&amp;gt; L;&lt;br&gt;grid pre-registered&lt;br&gt;&lt;b&gt;NEXT · Phase 3&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#FFF3D6;strokeColor=#B7791F;fontColor=#7A4B00;strokeWidth=2;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-3">
+          <mxGeometry x="12" y="366.5" width="206" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-dispatchers" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Dispatchers (players)&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;N floor · A greedy · B batched ·&lt;br&gt;C joint MILP · H ceiling&lt;br&gt;&lt;b&gt;PLANNED · Phase 5 · G3&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="12" y="118" width="213" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-engine" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Game engine (referee)&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;event-driven; validates every&lt;br&gt;command; accounting identity&lt;br&gt;&lt;b&gt;PLANNED · Phase 4 · G2&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="12" y="212" width="213" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-replaylog" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Replay log&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;replay.json, request&lt;br&gt;results, run manifest&lt;br&gt;&lt;b&gt;PLANNED · Phase 4&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="12" y="306" width="213" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-experiments" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Experiments&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;scenarios × players × paired seeds&lt;br&gt;&lt;b&gt;PLANNED · Phase 7 · G5&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=13.11;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="12" y="406.5" width="213" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-calibration" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Calibration-lite&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;ride P10 sets road&lt;br&gt;physics; rest held out&lt;br&gt;&lt;b&gt;PLANNED · Phase 6 · G4&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-4">
+          <mxGeometry x="12" y="495.5" width="213" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-midsem" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Mid-semester update&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;after Phase 4 · date TBD&lt;br&gt;&lt;b&gt;PLANNED&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=13.11;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="12" y="218.5" width="227" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-viewer" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Replay viewer&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;preview, play, fast-forward;&lt;br&gt;players side by side&lt;br&gt;&lt;b&gt;PLANNED · Phase 8&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="12" y="306" width="227" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-ladder" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Value ladder&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;the gaps: pooling, waiting,&lt;br&gt;coordination, information&lt;br&gt;&lt;b&gt;PLANNED · Phase 8&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="12" y="400" width="227" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-final" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Final report + deck&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;conditional recommendation,&lt;br&gt;limits stated&lt;br&gt;&lt;b&gt;PLANNED · Phase 8 · G6&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=10.81;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="12" y="494" width="227" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-value" value="&lt;font style=&quot;font-size:13px&quot;&gt;&lt;b&gt;Value to Hopkins + TransLoc&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;benchmark, headroom, fleet&lt;br&gt;curves, cancellation diagnosis,&lt;br&gt;value of the next extract&lt;br&gt;&lt;b&gt;PLANNED · Phase 8&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=9.2;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=11;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="pm-lane-5">
+          <mxGeometry x="12" y="588" width="227" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-then-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=2 3;" edge="1" parent="pm-layer" source="pm-then-1" target="pm-then-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-then-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=2 3;" edge="1" parent="pm-layer" source="pm-then-2" target="pm-then-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-then-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=2 3;" edge="1" parent="pm-layer" source="pm-then-3" target="pm-then-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-ms-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-ms-1" target="pm-ms-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-ms-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-ms-2" target="pm-ms-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-ms-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-ms-3" target="pm-ms-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-pdf-images" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-pdf" target="pm-images">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-images-digitizers" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-images" target="pm-digitizers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-images-bubbles" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.12;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-images" target="pm-bubbles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="266.48" y="444" />
+              <mxPoint x="129.5" y="444" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-bubbles-georef" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-bubbles" target="pm-georef">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-digitizers-obs" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-digitizers" target="pm-obs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-georef-ledger" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2331;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-georef" target="pm-ledger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-obs-ledger" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7669;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-obs" target="pm-ledger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-obs-insights" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-obs" target="pm-insights">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="446" y="599.5" />
+              <mxPoint x="446" y="386.1" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-georef-zones" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-georef" target="pm-zones">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="28" y="599.5" />
+              <mxPoint x="28" y="344" />
+              <mxPoint x="747" y="344" />
+              <mxPoint x="747" y="397" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-insights-regimes" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-insights" target="pm-regimes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-insights-scorecard" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-insights" target="pm-scorecard">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="458" y="433.95" />
+              <mxPoint x="458" y="624" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-regimes-line2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.82;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=2 3;" edge="1" parent="pm-layer" source="pm-regimes" target="pm-line2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="724" y="549" />
+              <mxPoint x="724" y="732" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-regimes-generator" value="fences + regimes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-regimes" target="pm-generator">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-zones-generator" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-zones" target="pm-generator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-generator-base" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-generator" target="pm-base">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-base-scale" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-base" target="pm-scale">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-scale-engine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-scale" target="pm-engine">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1024" y="701.5" />
+              <mxPoint x="1024" y="547" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-dispatchers-engine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-dispatchers" target="pm-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-engine-replaylog" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-engine" target="pm-replaylog">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-replaylog-experiments" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-replaylog" target="pm-experiments">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-calibration-experiments" value="frozen parameters" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-calibration" target="pm-experiments">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="55.6281" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pm-e-replaylog-viewer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-replaylog" target="pm-viewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-experiments-ladder" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-experiments" target="pm-ladder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-ladder-final" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-ladder" target="pm-final">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pm-e-ladder-value" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="pm-layer" source="pm-ladder" target="pm-value">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1288" y="760.9" />
+              <mxPoint x="1288" y="929.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
