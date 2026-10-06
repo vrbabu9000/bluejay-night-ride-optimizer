@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="880" viewBox="0 0 1000 880" style="max-width:100%;height:auto" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Engine loop (one turn)</title>
+  <desc id="desc">Flowchart of one engine turn: pop the next event, update the world, and if a trigger fired build an observation, call Dispatcher.decide(), have the referee validate the commands and either commit them or log the reason; then append to the replay log and loop. A patience expiry cancels the request and applies the Lyft overflow rule. When the queue is empty the accounting identity is checked.</desc>
+  <rect x="0" y="0" width="1000" height="880" fill="#FFFFFF"/>
+  <!-- nodes -->
+  <g id="p3-pop">
+    <rect x="155" y="30" width="290" height="76" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="300" y="57.21" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Pop next event from the queue</text>
+    <text x="300" y="71.74" font-size="11" fill="#085041" text-anchor="middle">Tie order: drop-offs, pickups, new requests,</text>
+    <text x="300" y="86.95" font-size="11" fill="#085041" text-anchor="middle">patience checks, dispatch ticks</text>
+  </g>
+  <g id="p3-update">
+    <rect x="155" y="146" width="290" height="56" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="300" y="170.815" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Update world state</text>
+    <text x="300" y="185.345" font-size="11" fill="#085041" text-anchor="middle">Van positions, loads, request states</text>
+  </g>
+  <g id="p3-trigger">
+    <polygon points="300,242 410,288 300,334 190,288" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1" stroke-linejoin="round"/>
+    <text x="300" y="292.42" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Trigger fired?</text>
+  </g>
+  <g id="p3-observe">
+    <rect x="155" y="374" width="290" height="68" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="300" y="397.21" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Build observation</text>
+    <text x="300" y="411.74" font-size="11" fill="#085041" text-anchor="middle">Current state + revealed requests only</text>
+    <text x="300" y="426.95" font-size="11" fill="#085041" text-anchor="middle">(no future information)</text>
+  </g>
+  <g id="p3-decide">
+    <rect x="155" y="478" width="290" height="56" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="300" y="502.815" font-size="13" font-weight="bold" fill="#3C3489" text-anchor="middle">Dispatcher.decide()</text>
+    <text x="300" y="517.345" font-size="11" fill="#3C3489" text-anchor="middle">Observation in, commands out</text>
+  </g>
+  <g id="p3-validate">
+    <rect x="155" y="570" width="290" height="88" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="300" y="595.605" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Referee validates commands</text>
+    <text x="300" y="610.135" font-size="11" fill="#085041" text-anchor="middle">Capacity, pickup before drop-off, same van,</text>
+    <text x="300" y="625.345" font-size="11" fill="#085041" text-anchor="middle">wait/ride limits, frozen commitments,</text>
+    <text x="300" y="640.555" font-size="11" fill="#085041" text-anchor="middle">shift end</text>
+  </g>
+  <g id="p3-commit">
+    <rect x="155" y="698" width="290" height="60" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="300" y="724.815" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Commit + schedule arrivals</text>
+    <text x="300" y="739.345" font-size="11" fill="#085041" text-anchor="middle">Van arrival events go into the queue</text>
+  </g>
+  <g id="p3-reject">
+    <rect x="565" y="586" width="220" height="56" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="675" y="610.815" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Log reason</text>
+    <text x="675" y="625.345" font-size="11" fill="#085041" text-anchor="middle">Rejected, state unchanged</text>
+  </g>
+  <g id="p3-append">
+    <rect x="70" y="798" width="860" height="52" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="500" y="820.815" font-size="13" font-weight="bold" fill="#444441" text-anchor="middle">Append to replay log</text>
+    <text x="500" y="835.345" font-size="11" fill="#444441" text-anchor="middle">Every event, time-stamped</text>
+  </g>
+  <g id="p3-cancel">
+    <rect x="545" y="140" width="160" height="68" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="625" y="170.815" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Cancel request</text>
+    <text x="625" y="185.345" font-size="11" fill="#085041" text-anchor="middle">Patience clock ran out</text>
+  </g>
+  <g id="p3-overflow">
+    <rect x="745" y="140" width="170" height="68" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="830" y="163.21" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Overflow (Lyft) rule</text>
+    <text x="830" y="177.74" font-size="11" fill="#085041" text-anchor="middle">Counts as Lyft overflow</text>
+    <text x="830" y="192.95" font-size="11" fill="#085041" text-anchor="middle">or abandoned</text>
+  </g>
+  <g id="p3-end">
+    <rect x="690" y="34" width="270" height="68" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="825" y="57.21" font-size="13" font-weight="bold" fill="#085041" text-anchor="middle">Accounting check</text>
+    <text x="825" y="71.74" font-size="11" fill="#085041" text-anchor="middle">generated = completed + abandoned +</text>
+    <text x="825" y="86.95" font-size="11" fill="#085041" text-anchor="middle">overflow + unserved at close</text>
+  </g>
+  <g id="p3-triggers">
+    <rect x="490" y="246" width="230" height="84" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="504" y="269.605" font-size="13" font-weight="bold" fill="#444441" text-anchor="start">Triggers</text>
+    <text x="504" y="284.135" font-size="11" fill="#444441" text-anchor="start">New request (on-request players)</text>
+    <text x="504" y="299.345" font-size="11" fill="#444441" text-anchor="start">Tick every W (batched players)</text>
+    <text x="504" y="314.555" font-size="11" fill="#444441" text-anchor="start">Urgent request (any player)</text>
+  </g>
+  <!-- arrows -->
+  <g id="p3-e-pop-update">
+    <polyline points="300,106 300,138.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,146 296.5,138.5 303.5,138.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-update-trigger">
+    <polyline points="300,202 300,234.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,242 296.5,234.5 303.5,234.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-trigger-observe">
+    <polyline points="300,334 300,366.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,374 296.5,366.5 303.5,366.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="320" y="357.74" font-size="11" fill="#444441" text-anchor="middle">yes</text>
+  </g>
+  <g id="p3-e-observe-decide">
+    <polyline points="300,442 300,470.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,478 296.5,470.5 303.5,470.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-decide-validate">
+    <polyline points="300,534 300,562.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,570 296.5,562.5 303.5,562.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-validate-commit">
+    <polyline points="300,658 300,690.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,698 296.5,690.5 303.5,690.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="338" y="681.74" font-size="11" fill="#444441" text-anchor="middle">accepted</text>
+  </g>
+  <g id="p3-e-validate-reject">
+    <polyline points="445,614 557.5,614" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="565,614 557.5,617.5 557.5,610.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="505" y="606.74" font-size="11" fill="#444441" text-anchor="middle">rejected</text>
+  </g>
+  <g id="p3-e-commit-append">
+    <polyline points="300,758 300,790.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="300,798 296.5,790.5 303.5,790.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-reject-append">
+    <polyline points="675,642 675,790.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="675,798 671.5,790.5 678.5,790.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-trigger-append">
+    <polyline points="190,288 118,288 118,790.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="118,798 114.5,790.5 121.5,790.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="154" y="280.74" font-size="11" fill="#444441" text-anchor="middle">no</text>
+  </g>
+  <g id="p3-e-append-pop">
+    <polyline points="70,824 48,824 48,68 147.5,68" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="155,68 147.5,71.5 147.5,64.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <rect x="19.6" y="441.625" width="56.8" height="16.75" fill="#FFFFFF"/>
+    <text x="48" y="453.74" font-size="11" fill="#444441" text-anchor="middle">next event</text>
+  </g>
+  <g id="p3-e-update-cancel">
+    <polyline points="445,174 537.5,174" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="545,174 537.5,177.5 537.5,170.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="495" y="166.74" font-size="11" fill="#444441" text-anchor="middle">patience expiry</text>
+  </g>
+  <g id="p3-e-cancel-overflow">
+    <polyline points="705,174 737.5,174" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="745,174 737.5,177.5 737.5,170.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-overflow-append">
+    <polyline points="830,208 830,790.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="830,798 826.5,790.5 833.5,790.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p3-e-pop-end">
+    <polyline points="445,68 682.5,68" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="690,68 682.5,71.5 682.5,64.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="567.5" y="60.74" font-size="11" fill="#444441" text-anchor="middle">queue empty after the last arrival</text>
+  </g>
+  <g id="p3-e-trigger-note">
+    <polyline points="410,288 490,288" fill="none" stroke="#5F5E5A" stroke-width="1" stroke-dasharray="2 3"/>
+  </g>
+</svg>

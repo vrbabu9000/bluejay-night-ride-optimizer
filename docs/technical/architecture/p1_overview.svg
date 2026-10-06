@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="534" viewBox="0 0 1000 534" style="max-width:100%;height:auto" font-family="Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Simulator overview (game framing)</title>
+  <desc id="desc">The level builder turns April hotspots into a scenario and the experiment runner plays scenarios, players and seeds. The game engine (referee) and a dispatcher (player) trade observations and commands. The engine writes a replay log that feeds the replay viewer and the scoreboard.</desc>
+  <rect x="0" y="0" width="1000" height="534" fill="#FFFFFF"/>
+  <!-- nodes -->
+  <g id="p1-builder">
+    <rect x="70" y="40" width="290" height="64" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="215" y="68.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Level builder</text>
+    <text x="215" y="83.93" font-size="11" fill="#444441" text-anchor="middle">April hotspots to a scenario</text>
+  </g>
+  <g id="p1-runner">
+    <rect x="640" y="40" width="290" height="64" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="785" y="68.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Experiment runner</text>
+    <text x="785" y="83.93" font-size="11" fill="#444441" text-anchor="middle">Scenarios × players × seeds</text>
+  </g>
+  <g id="p1-engine">
+    <rect x="70" y="170" width="290" height="64" rx="8" ry="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+    <text x="215" y="198.57" font-size="14" font-weight="bold" fill="#085041" text-anchor="middle">Game engine (referee)</text>
+    <text x="215" y="213.93" font-size="11" fill="#085041" text-anchor="middle">Clock, rules, rider behavior</text>
+  </g>
+  <g id="p1-dispatcher">
+    <rect x="640" y="170" width="290" height="64" rx="8" ry="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+    <text x="785" y="198.57" font-size="14" font-weight="bold" fill="#3C3489" text-anchor="middle">Dispatcher (player)</text>
+    <text x="785" y="213.93" font-size="11" fill="#3C3489" text-anchor="middle">Reads state, sends commands</text>
+  </g>
+  <g id="p1-log">
+    <rect x="70" y="300" width="290" height="64" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="215" y="328.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Replay log</text>
+    <text x="215" y="343.93" font-size="11" fill="#444441" text-anchor="middle">Every event, time-stamped</text>
+  </g>
+  <g id="p1-viewer">
+    <rect x="70" y="430" width="290" height="64" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="215" y="458.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Replay viewer</text>
+    <text x="215" y="473.93" font-size="11" fill="#444441" text-anchor="middle">Preview, play, fast-forward</text>
+  </g>
+  <g id="p1-scoreboard">
+    <rect x="640" y="430" width="290" height="64" rx="8" ry="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+    <text x="785" y="458.57" font-size="14" font-weight="bold" fill="#444441" text-anchor="middle">Scoreboard</text>
+    <text x="785" y="473.93" font-size="11" fill="#444441" text-anchor="middle">Served, waits, Lyft overflow</text>
+  </g>
+  <!-- arrows -->
+  <g id="p1-e-runner-builder">
+    <polyline points="640,72 367.5,72" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="360,72 367.5,68.5 367.5,75.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p1-e-runner-dispatcher">
+    <polyline points="785,104 785,162.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="785,170 781.5,162.5 788.5,162.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p1-e-builder-engine">
+    <polyline points="215,104 215,162.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="215,170 211.5,162.5 218.5,162.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p1-e-engine-dispatcher">
+    <polyline points="360,190 632.5,190" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="640,190 632.5,193.5 632.5,186.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="500" y="182.74" font-size="11" fill="#444441" text-anchor="middle">state / observation</text>
+  </g>
+  <g id="p1-e-dispatcher-engine">
+    <polyline points="640,214 367.5,214" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="360,214 367.5,210.5 367.5,217.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+    <text x="500" y="228.74" font-size="11" fill="#444441" text-anchor="middle">commands</text>
+  </g>
+  <g id="p1-e-engine-log">
+    <polyline points="215,234 215,292.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="215,300 211.5,292.5 218.5,292.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p1-e-log-viewer">
+    <polyline points="215,364 215,422.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="215,430 211.5,422.5 218.5,422.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+  <g id="p1-e-log-scoreboard">
+    <polyline points="360,332 785,332 785,422.5" fill="none" stroke="#5F5E5A" stroke-width="1"/>
+    <polygon points="785,430 781.5,422.5 788.5,422.5" fill="#5F5E5A" stroke="#5F5E5A" stroke-width="0.5" stroke-linejoin="round"/>
+  </g>
+</svg>

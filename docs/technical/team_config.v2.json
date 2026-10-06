@@ -1,0 +1,107 @@
+{
+  "metadata": {
+    "status": "PILOT_DEFAULTS_NOT_FROZEN",
+    "version": "2.0",
+    "date": "2026-09-29",
+    "timezone": "America/New_York",
+    "decision_log_path": "docs/technical/decision_log.md",
+    "note": "Values are pilot defaults with an evidence label in the decision log (D-xx). null = unresolved. Freeze a copy per experiment before Phase 7."
+  },
+  "service": {
+    "start_local": "18:00",
+    "end_local": "02:00",
+    "after_midnight_date_rule": "rides after 00:00 belong to the previous service night (D-03)",
+    "wait_limit_s": 1200,
+    "ride_limit_s": 1500,
+    "rules_source": "PROVISIONAL (earlier 20/25-minute discussion; not a verified Hopkins rule) (D-04)"
+  },
+  "base_scenario": {
+    "window_local": ["18:00", "19:00"],
+    "fleet_size": 5,
+    "requests": 30,
+    "load_anchor_completed_per_van_hour": 6.2,
+    "stress_requests": 60,
+    "scale_ladder": {"S0": [1, 2], "S1": [1, 6], "S2": [3, 15], "M": [5, 30], "L": [27, 300]},
+    "warm_start": false,
+    "decision_ref": "D-05, D-06"
+  },
+  "fleet": {
+    "capacity_seats": [4, 7],
+    "start_positions": "hotspot_or_depot (ASSUMED) (D-07)",
+    "schedule_path": null,
+    "shift_end_rule": "stop new assignments at shift end; finish onboard riders"
+  },
+  "demand": {
+    "map_population_interpretation": "maps = COMPLETED rides (city O 24,056 / D 24,057) (D-01)",
+    "daily_totals_path": "data/processed/observations.csv",
+    "hourly_request_weights": null,
+    "party_size_mean": 1.39,
+    "party_size_probs": {"1": 0.72, "2": 0.19, "3": 0.06, "4": 0.03},
+    "party_size_status": "mean DERIVED (p08/p07); shape ASSUMED (D-08)",
+    "patience_spec": null,
+    "arrival_model": ["poisson", "burst_at_18:00"]
+  },
+  "spatial": {
+    "zones_path": "data/processed/zones_v0.csv",
+    "zone_points_path": "data/processed/zone_points_v0.csv",
+    "beta_per_min": [0.0, 0.1, 0.2],
+    "directional_variants": ["month_average", "campus_outbound_6pm"],
+    "balance_tolerance": 0.01,
+    "unknown_mass_rule": "cut/hidden bubbles at lower bound, then margins scaled to the city-map fence ~24,056 (D-09)"
+  },
+  "travel": {
+    "matrix_path": "data/processed/tt_points_v0.csv",
+    "zone_matrix_path": "data/processed/tt_zones_v0.csv",
+    "source": "OSRM demo server, car, free-flow, retrieved 2026-09-29",
+    "multiplier": null,
+    "stochastic_spec": null
+  },
+  "simulation": {
+    "pickup_dwell_s": null,
+    "dropoff_dwell_s": null,
+    "simultaneous_event_order": ["dropoff", "pickup", "new_request", "patience_check", "dispatch_tick"],
+    "commitment_rule": "freeze the current road movement and all onboard riders",
+    "reassignment_rule": "assigned-but-not-picked-up may be reassigned by B and C alike",
+    "overflow_rule": null,
+    "end_of_night_rule": "run until every accepted rider is dropped off"
+  },
+  "dispatch": {
+    "players": {
+      "N": "nearest van, no pooling (floor)",
+      "A": "immediate greedy insertion",
+      "B": "periodic greedy insertion, oldest first",
+      "C": "periodic joint route-selection MILP",
+      "H": "offline node-arc MILP with the whole hour known (ceiling; bracketed)"
+    },
+    "windows_s": [30, 60, 120],
+    "windows_status": "PILOT_CHOICES",
+    "urgent_margin_s": null,
+    "fallback": "shared_immediate_greedy",
+    "objective": "service_first_then_added_wait_then_travel"
+  },
+  "solver": {
+    "name": "HiGHS (highspy)",
+    "time_limit_s": null,
+    "max_new_per_route": 2,
+    "hindsight_time_limit_s": 1800,
+    "delay_accounting_rule": "decisions instantaneous in simulated time; solve time logged; solve > W flagged"
+  },
+  "calibration": {
+    "policy": "A",
+    "physics_targets": ["ride_p10"],
+    "throughput_target": "completed rides per van-hour at 6 pm (~6.2)",
+    "held_out_checks": ["ride_median", "ride_p90", "wait_quantiles_band", "cancel_vs_wait_slope (T3)", "occupancy lower bound (T5)"],
+    "knobs": ["speed_factor", "dwell_s", "demand_scale", "patience"],
+    "decision_ref": "D-10"
+  },
+  "evaluation": {
+    "replicates": null,
+    "seed_base": null,
+    "random_stream_scheme": "per request id, pre-generated before any policy runs",
+    "primary_metric": "timely passengers served (wait and ride within limits)",
+    "primary_comparison": "C vs B at the same W; ladder N-A-B-C-H",
+    "minimum_meaningful_gain": null,
+    "maximum_acceptable_harm": null,
+    "scenario_weights": "none: report per scenario"
+  }
+}

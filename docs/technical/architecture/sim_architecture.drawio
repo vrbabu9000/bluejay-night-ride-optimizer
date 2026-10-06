@@ -1,0 +1,330 @@
+<mxfile host="app.diagrams.net" modified="2026-09-30T01:59:08.000Z" agent="Claude Code (generated; edit freely in draw.io)" version="24.7.0" type="device">
+  <diagram id="p1" name="Overview (game framing)">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="534" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="p1-root" />
+        <mxCell id="p1-layer" parent="p1-root" />
+        <mxCell id="p1-builder" value="&lt;b&gt;Level builder&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;April hotspots to a scenario&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="70" y="40" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-runner" value="&lt;b&gt;Experiment runner&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Scenarios × players × seeds&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="640" y="40" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-engine" value="&lt;b&gt;Game engine (referee)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Clock, rules, rider behavior&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="70" y="170" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-dispatcher" value="&lt;b&gt;Dispatcher (player)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Reads state, sends commands&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="640" y="170" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-log" value="&lt;b&gt;Replay log&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Every event, time-stamped&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="70" y="300" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-viewer" value="&lt;b&gt;Replay viewer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Preview, play, fast-forward&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="70" y="430" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-scoreboard" value="&lt;b&gt;Scoreboard&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Served, waits, Lyft overflow&lt;/font&gt;" style="rounded=1;arcSize=12.5;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p1-layer">
+          <mxGeometry x="640" y="430" width="290" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-runner-builder" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-runner" target="p1-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-runner-dispatcher" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-runner" target="p1-dispatcher">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-builder-engine" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-builder" target="p1-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-engine-dispatcher" value="state / observation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.3125;exitDx=0;exitDy=0;entryX=0;entryY=0.3125;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-engine" target="p1-dispatcher">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1-e-dispatcher-engine" value="commands" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.6875;exitDx=0;exitDy=0;entryX=1;entryY=0.6875;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-dispatcher" target="p1-engine">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p1-e-engine-log" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-engine" target="p1-log">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-log-viewer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-log" target="p1-viewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-e-log-scoreboard" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p1-layer" source="p1-log" target="p1-scoreboard">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="785" y="332" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="p2" name="Players (dispatchers)">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="434" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="p2-root" />
+        <mxCell id="p2-layer" parent="p2-root" />
+        <mxCell id="p2-h-col1" value="Decides on each request" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#444441;" vertex="1" parent="p2-layer">
+          <mxGeometry x="210" y="38" width="260" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-h-col2" value="Decides every W seconds" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#444441;" vertex="1" parent="p2-layer">
+          <mxGeometry x="494" y="38" width="260" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-h-row1" value="Greedy, one at a time" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#444441;" vertex="1" parent="p2-layer">
+          <mxGeometry x="20" y="76" width="180" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-h-row2" value="Joint MILP, all pending" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#444441;" vertex="1" parent="p2-layer">
+          <mxGeometry x="20" y="176" width="180" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-h-row3" value="Benchmarks" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#444441;" vertex="1" parent="p2-layer">
+          <mxGeometry x="20" y="318" width="180" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-A" value="&lt;b&gt;A: immediate greedy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Inserts each request&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="210" y="76" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-B" value="&lt;b&gt;B: batched greedy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;A, but waits W seconds&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="494" y="76" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-notplanned" value="&lt;b&gt;Not planned&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Little to coordinate&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;dashed=1;dashPattern=6 4;" vertex="1" parent="p2-layer">
+          <mxGeometry x="210" y="176" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-C" value="&lt;b&gt;C: batched MILP&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;B, but decides jointly&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="494" y="176" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-separator" value="" style="shape=line;strokeWidth=1;dashed=1;dashPattern=6 4;strokeColor=#5F5E5A;fillColor=none;html=1;" vertex="1" parent="p2-layer">
+          <mxGeometry x="30" y="280" width="724" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-N" value="&lt;b&gt;N: floor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Nearest van, no pooling&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="210" y="318" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-H" value="&lt;b&gt;H: ceiling&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Decides once, sees all&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=14;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="494" y="318" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-gaps" value="&lt;b&gt;Gaps between players&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;&lt;b&gt;A − N&lt;/b&gt; = pooling&lt;br&gt;&lt;b&gt;B − A&lt;/b&gt; = waiting&lt;br&gt;&lt;b&gt;C − B&lt;/b&gt; = coordination&lt;br&gt;&lt;b&gt;H − C&lt;/b&gt; = headroom&lt;/font&gt;" style="rounded=1;arcSize=6.35;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=left;verticalAlign=top;spacingTop=14;spacingLeft=14;spacingRight=8;" vertex="1" parent="p2-layer">
+          <mxGeometry x="790" y="76" width="184" height="126" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="p3" name="Engine loop (one turn)">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="880" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="p3-root" />
+        <mxCell id="p3-layer" parent="p3-root" />
+        <mxCell id="p3-pop" value="&lt;b&gt;Pop next event from the queue&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Tie order: drop-offs, pickups, new requests,&lt;br&gt;patience checks, dispatch ticks&lt;/font&gt;" style="rounded=1;arcSize=10.53;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="30" width="290" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-update" value="&lt;b&gt;Update world state&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Van positions, loads, request states&lt;/font&gt;" style="rounded=1;arcSize=14.29;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="146" width="290" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-trigger" value="&lt;b&gt;Trigger fired?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="190" y="242" width="220" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-observe" value="&lt;b&gt;Build observation&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Current state + revealed requests only&lt;br&gt;(no future information)&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="374" width="290" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-decide" value="&lt;b&gt;Dispatcher.decide()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Observation in, commands out&lt;/font&gt;" style="rounded=1;arcSize=14.29;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="478" width="290" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-validate" value="&lt;b&gt;Referee validates commands&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Capacity, pickup before drop-off, same van,&lt;br&gt;wait/ride limits, frozen commitments,&lt;br&gt;shift end&lt;/font&gt;" style="rounded=1;arcSize=9.09;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="570" width="290" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-commit" value="&lt;b&gt;Commit + schedule arrivals&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Van arrival events go into the queue&lt;/font&gt;" style="rounded=1;arcSize=13.33;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="155" y="698" width="290" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-reject" value="&lt;b&gt;Log reason&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Rejected, state unchanged&lt;/font&gt;" style="rounded=1;arcSize=14.29;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="565" y="586" width="220" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-append" value="&lt;b&gt;Append to replay log&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Every event, time-stamped&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="70" y="798" width="860" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-cancel" value="&lt;b&gt;Cancel request&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Patience clock ran out&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="545" y="140" width="160" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-overflow" value="&lt;b&gt;Overflow (Lyft) rule&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Counts as Lyft overflow&lt;br&gt;or abandoned&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="745" y="140" width="170" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-end" value="&lt;b&gt;Accounting check&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;generated = completed + abandoned +&lt;br&gt;overflow + unserved at close&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="690" y="34" width="270" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-triggers" value="&lt;b&gt;Triggers&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;New request (on-request players)&lt;br&gt;Tick every W (batched players)&lt;br&gt;Urgent request (any player)&lt;/font&gt;" style="rounded=1;arcSize=9.52;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=left;verticalAlign=middle;spacingLeft=14;spacingRight=8;" vertex="1" parent="p3-layer">
+          <mxGeometry x="490" y="246" width="230" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-pop-update" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-pop" target="p3-update">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-update-trigger" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-update" target="p3-trigger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-trigger-observe" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-trigger" target="p3-observe">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-observe-decide" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-observe" target="p3-decide">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-decide-validate" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-decide" target="p3-validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-validate-commit" value="accepted" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-validate" target="p3-commit">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="38" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-validate-reject" value="rejected" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-validate" target="p3-reject">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-commit-append" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2674;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-commit" target="p3-append">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-reject-append" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7035;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-reject" target="p3-append">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-trigger-append" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.0558;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-trigger" target="p3-append">
+          <mxGeometry relative="1" as="geometry" x="-0.8763">
+            <Array as="points">
+              <mxPoint x="118" y="288" />
+            </Array>
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-append-pop" value="next event" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="p3-layer" source="p3-append" target="p3-pop">
+          <mxGeometry relative="1" as="geometry" x="-0.1051">
+            <Array as="points">
+              <mxPoint x="48" y="824" />
+              <mxPoint x="48" y="68" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-update-cancel" value="patience expiry" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-update" target="p3-cancel">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-cancel-overflow" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-cancel" target="p3-overflow">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-overflow-append" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8837;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-overflow" target="p3-append">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-e-pop-end" value="queue empty after the last arrival" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p3-layer" source="p3-pop" target="p3-end">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p3-e-trigger-note" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=none;endFill=0;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;dashPattern=2 3;" edge="1" parent="p3-layer" source="p3-trigger" target="p3-triggers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="p4" name="Data flow and files">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="753" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="p4-root" />
+        <mxCell id="p4-layer" parent="p4-root" />
+        <mxCell id="p4-lane-evidence" value="Evidence" style="rounded=1;arcSize=3.42;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="p4-layer">
+          <mxGeometry x="8" y="10" width="234" height="733" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-lane-world" value="World" style="rounded=1;arcSize=3.42;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="p4-layer">
+          <mxGeometry x="258" y="10" width="234" height="733" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-lane-simulation" value="Simulation" style="rounded=1;arcSize=3.42;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="p4-layer">
+          <mxGeometry x="508" y="10" width="234" height="733" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-lane-communication" value="Communication" style="rounded=1;arcSize=3.42;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#FFFFFF;strokeColor=#B4B2A9;fontColor=#444441;fontStyle=1;fontSize=13;verticalAlign=top;align=center;spacingTop=6;strokeWidth=1;" vertex="1" parent="p4-layer">
+          <mxGeometry x="758" y="10" width="234" height="733" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-april-pdf" value="&lt;b&gt;April PDF&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;12 charts on 11 pages&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="48" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-page-images" value="&lt;b&gt;Page images&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;data/raw/april/pNN.png&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="126" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-digitizers" value="&lt;b&gt;Digitizers&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/evidence&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="204" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-digitized" value="&lt;b&gt;Digitized data&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;data/processed/observations.csv&lt;br&gt;data/processed/map_clusters.csv&lt;br&gt;+ briefs in docs/evidence&lt;/font&gt;" style="rounded=1;arcSize=9.76;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="282" width="210" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-insights" value="&lt;b&gt;Insights T1–T10&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/insights&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="391" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-insight-figs" value="&lt;b&gt;Insight figures&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;outputs/insights&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-evidence">
+          <mxGeometry x="12" y="485" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-zones" value="&lt;b&gt;Zones + OSRM travel times&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/scenario&lt;br&gt;Travel-time matrix, cached routes&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-world">
+          <mxGeometry x="12" y="289" width="210" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-generator" value="&lt;b&gt;Scenario generator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/scenario&lt;br&gt;Gravity + IPF, then sampling&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-world">
+          <mxGeometry x="12" y="383" width="210" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-scenario-files" value="&lt;b&gt;Scenario files&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;requests_*.csv, fleet_*.csv&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-world">
+          <mxGeometry x="12" y="485" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-dispatchers" value="&lt;b&gt;Dispatchers&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/sim/dispatchers&lt;br&gt;N, A, B, C, H&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#EEEDFE;strokeColor=#534AB7;fontColor=#3C3489;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-simulation">
+          <mxGeometry x="12" y="383" width="210" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-runner" value="&lt;b&gt;Runner + engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/sim&lt;br&gt;Scenarios × players × seeds&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#E1F5EE;strokeColor=#0F6E56;fontColor=#085041;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-simulation">
+          <mxGeometry x="12" y="477" width="210" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-outputs" value="&lt;b&gt;Run outputs&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;replay.json, request_results,&lt;br&gt;run_manifest.json&lt;/font&gt;" style="rounded=1;arcSize=11.76;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-simulation">
+          <mxGeometry x="12" y="571" width="210" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-viewer" value="&lt;b&gt;Replay viewer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;src/viewer&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-communication">
+          <mxGeometry x="12" y="579" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-exp-figs" value="&lt;b&gt;Experiment figures&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Value ladder, heat map&lt;/font&gt;" style="rounded=1;arcSize=15.38;whiteSpace=wrap;html=1;fillColor=#F1EFE8;strokeColor=#5F5E5A;fontColor=#444441;strokeWidth=1;fontSize=13;align=center;verticalAlign=middle;spacingLeft=8;spacingRight=8;" vertex="1" parent="p4-lane-communication">
+          <mxGeometry x="12" y="657" width="210" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-pdf-images" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-april-pdf" target="p4-page-images">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-images-digitizers" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-page-images" target="p4-digitizers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-digitizers-data" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-digitizers" target="p4-digitized">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-data-insights" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-digitized" target="p4-insights">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-insights-figs" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-insights" target="p4-insight-figs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-data-zones" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-digitized" target="p4-zones">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-zones-generator" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-zones" target="p4-generator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-generator-files" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-generator" target="p4-scenario-files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-files-runner" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-scenario-files" target="p4-runner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-dispatchers-runner" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-dispatchers" target="p4-runner">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-runner-outputs" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-runner" target="p4-outputs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-outputs-viewer" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-outputs" target="p4-viewer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-e-outputs-figs" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5F5E5A;strokeWidth=1;endArrow=block;endFill=1;endSize=6;fontSize=11;fontColor=#444441;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="p4-layer" source="p4-outputs" target="p4-exp-figs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="625" y="693" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

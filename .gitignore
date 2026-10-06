@@ -227,3 +227,7 @@ HW Night Ride Data April 2026.pdf
 
 # misc
 .tokensave/
+
+# Digitized / derived April data (from the restricted PDF) — untracked until data-sharing is confirmed
+data/
+docs/evidence/
