@@ -1,0 +1,30 @@
+# Local OSRM routing server for the Blue Jay Night Ride project.
+#
+# Serves the Maryland extract (car profile, MLD algorithm) that infra/osrm/build.sh wrote to
+# data/osrm/maryland-latest.osrm.*; the extract and image it was built from are in
+# data/osrm/PROVENANCE.json. The data was built for MLD, so the server must run with
+# --algorithm mld (the default, CH, cannot load it).
+#
+#   docker compose -f infra/osrm/docker-compose.yml up -d      # start
+#   docker compose -f infra/osrm/docker-compose.yml ps         # status
+#   docker compose -f infra/osrm/docker-compose.yml logs --tail 50
+#   docker compose -f infra/osrm/docker-compose.yml down       # stop and remove the container
+#
+# Host port 5050 -> container port 5000 (macOS AirPlay Receiver already holds host port 5000).
+# Bound to 127.0.0.1 so the server is reachable from this Mac only, not from the local network.
+# Check it is up:
+#   curl -s "http://localhost:5050/route/v1/driving/-76.6205,39.3299;-76.6155,39.2904?overview=false"
+# --max-table-size 500: the default (100) is below the 188 locations of one full table request.
+name: bluejay-osrm
+
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:v6.0.0
+    platform: linux/arm64
+    container_name: bluejay-osrm
+    command: osrm-routed --algorithm mld --max-table-size 500 /data/maryland-latest.osrm
+    ports:
+      - "127.0.0.1:5050:5000"
+    volumes:
+      - ../../data/osrm:/data:ro
+    restart: unless-stopped
