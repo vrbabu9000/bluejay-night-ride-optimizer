@@ -1,2 +1,9 @@
-folium>=0.20
+# Runtime and test dependencies (minimum versions; the venv uses Python 3.10.6).
+# An exact lock file (and the HiGHS solver) is proposal P-11, added before Phase 4.
+numpy>=2.2
+pandas>=2.3
+scipy>=1.15
+matplotlib>=3.10
 pillow>=10
+folium>=0.20
+pytest>=9

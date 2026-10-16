@@ -1,5 +1,7 @@
 # Simulator architecture diagrams
 
+> **Status (12 Oct 2026): partly outdated.** These diagrams follow plan v2 (29 Sep). Pages 1, 3 and 4 still describe the engine, its loop and the data flow. **Page 2 (players N/A/B/C/H) predates the TransLoc-like baseline and the Lyft-rule research question** (decisions D-25 and D-26). The current proposed architecture, with dispatchers T/G/C/H and a separate Lyft policy module, is the Mermaid diagram in [`model_design.md` §8](../model_design.md). The diagrams will be redrawn after the scenario spec is approved; they are not edited here.
+
 Four diagrams of the Blue Jay Night Ride dispatch simulator, drawn as a game: a referee (the engine), players (the dispatchers), a replay log and a viewer. The source of truth is one editable draw.io file. The SVGs are standalone copies of the same four pages.
 
 | File | What it is |

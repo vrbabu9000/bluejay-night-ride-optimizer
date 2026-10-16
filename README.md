@@ -1,193 +1,157 @@
 # BlueJay Night Ride Optimizer
 
-A rolling-horizon mixed-integer optimization framework for evaluating dispatch and routing decisions in Johns Hopkins University's Homewood Blue Jay Night Ride service.
+A simulation study of Johns Hopkins University's **Homewood Blue Jay Night Ride**, an on-demand, shared, curb-to-curb van service dispatched with TransLoc OnDemand, with Lyft as overflow. The study asks which **Lyft transfer rules** serve riders best, and at what cost, under a realistic re-planning dispatcher.
 
-> **Project status:** Proposal and data-acquisition stage. JHU Transportation has offered operational reports and sample data; the team has not yet completed a field-level data audit.
+> **Project status (Oct 2026): Phase 3, building the world.**
+> - The evidence (April 2026 dashboards) is digitized and analysed.
+> - A local routing server is built.
+> - The operations research is done and critically reviewed.
+> - The **scenario specification is drafted and awaiting team agreement.**
+> - No scenario data has been generated from it yet.
+> - The simulator (Phase 4) needs separate approval.
+>
+> See [docs/plans/](docs/plans/README.md).
 
 ## Research question
+> **Which dispatcher-initiated Lyft transfer rules improve Homewood rider outcomes, under which demand and fleet conditions, and at what resource cost, with the van dispatcher held fixed at a TransLoc-like re-planning baseline?**
 
-Can a rolling-horizon Mixed-Integer Linear Program improve passenger service and shuttle utilization relative to transparent dispatch heuristics, while respecting vehicle capacity, pickup-before-drop-off precedence, wait-time limits, ride-time limits, and vehicle movements already underway?
+**Supporting questions:**
+- Does the ranking of rules hold under other dispatchers: no reassignment, greedy, small-instance exact?
+- How do demand bursts and vehicle availability over the night change it?
+- How do waiting-vs-riding priorities interact with the rule?
+- Is it robust to dispatcher lag, Lyft pickup time and rider patience?
 
-## Why this problem matters
+This is a question about an **operating policy** Hopkins controls. It is not a claim to beat TransLoc's algorithm. Why the question changed from the original "rolling-horizon MILP vs heuristics" is explained in [research_review.md](docs/technical/research_review.md).
 
-Blue Jay Night Ride is an on-demand, shared, curb-to-curb transportation service operating around the Homewood campus. Dispatchers must assign requests to vehicles while earlier trips are still in progress. Every routing decision can affect:
+## Approach
+1. **Evidence.** JHU shared only **aggregate** April 2026 TransLoc dashboards: daily and hourly counts, wait and ride percentiles, origin/destination heat maps. No trip records. We digitized every chart with error intervals and reconciled the charts against each other: completed rides agree within 0.4% across charts.
+2. **Insights.** Ten analysis tasks showed:
+   - the service is supply-limited;
+   - ~47% of requests are cancelled;
+   - the long ride-time tail comes from routing;
+   - Lyft carries ~25% of riders and tracks cancellations day by day.
+3. **Operations research.** How TransLoc OnDemand, the Hopkins dispatchers and the Lyft overflow work, with every claim graded by source ([transloc_operations.md](docs/technical/transloc_operations.md)).
+4. **Synthetic world.** Demand is fitted to the April origin/destination totals (gravity × IPF). Road times come from a pinned local OSRM. Latent rider traits (patience, no-show) are drawn per request, so every policy sees identical riders.
+5. **Simulation (planned).** An event-driven referee simulates the night:
+   - a TransLoc-like dispatcher re-plans van routes on every event and every 2 minutes, with a convex waiting penalty and a ride-time guardrail;
+   - a separate Lyft-rule module transfers waiting riders;
+   - results are compared on paired nights as frontiers of rider outcome against Lyft use ([model_design.md](docs/technical/model_design.md)).
 
-- Passenger waiting time
-- Passenger ride time and detours
-- Vehicle capacity and availability
-- Shuttle travel and empty mileage
-- The need for overflow transportation
+**Every value is labelled** OBSERVED / DERIVED / ASSUMED / SIMULATED, and assumptions are varied rather than hidden ([decision_log.md](docs/technical/decision_log.md)).
 
-Johns Hopkins describes the service as safety-first, with published pickup and ride-time parameters. This project treats those passenger-service requirements as central constraints rather than optimizing distance alone.
-
-## Mathematical framing
-
-The project is a **dynamic Dial-a-Ride Problem with time windows**, a vehicle-routing problem in which each request has a paired pickup and drop-off.
-
-The proposed node-arc MILP includes:
-
-- Binary route variables indicating whether a vehicle travels between two service events
-- Binary assignment variables matching requests to vehicles or an overflow option
-- Continuous variables for event times, passenger waiting, ride duration, and vehicle load
-- Constraints for route continuity, same-vehicle pickup and drop-off, pickup precedence, vehicle capacity, service time windows, maximum ride time, and committed actions
-
-A service-first objective will prioritize feasible passenger service before minimizing waiting, excess ride time, overflow, and vehicle travel:
-
-~~~text
-minimize
-    overflow penalty
-  + passenger waiting penalty
-  + excess ride-time penalty
-  + vehicle travel cost
-~~~
-
-Because requests arrive during service, the MILP will run inside a rolling-horizon controller:
-
-1. Observe current vehicle states and all known requests.
-2. Fix actions that have already started or cannot safely change.
-3. Solve the remaining assignment and routing problem under a time limit.
-4. Commit the next operational action.
-5. Add newly arrived requests and repeat.
-
-## Evaluation
-
-Every dispatch policy will receive the same chronological request stream, fleet availability, starting state, and travel-time assumptions.
-
-Planned comparisons:
-
-1. Reconstructed historical performance, if supported by the data
-2. Nearest-feasible vehicle assignment
-3. Greedy pickup-and-drop-off insertion
-4. Rolling-horizon MILP
-
-Primary outcomes:
-
-- Mean, median, and high-percentile passenger wait time
-- Percentage of pickups and rides meeting published service parameters
-- Passenger ride time and excess ride time
-- Requests served by a shuttle
-- Overflow or unserved requests, when identifiable
-- Total and estimated empty vehicle distance
-- Vehicle utilization and route balance
-- Solver time, feasible-solution rate, and optimality gap
-
-The project will use paired historical replay and sensitivity analysis rather than promising an improvement in advance. A result showing that a simple heuristic matches or outperforms the MILP would remain a valid and useful finding.
-
-## Data
-
-The requested de-identified operational fields include:
-
-- Request, assignment, arrival, pickup, and drop-off timestamps
-- Pickup and destination zones or suitably protected coordinates
-- Party size
-- Trip outcome, including cancellation or overflow when available
-- Pseudonymous vehicle identifiers, capacities, and in-service periods
-- Observed trip time, distance, or vehicle events when shareable
-
-The team will maintain a data dictionary that separates:
-
-- Fields directly supplied by JHU Transportation
-- Values derived from supplied data
-- Travel-time estimates from a road-network service
-- Assumptions or simulated values
-
-If only aggregate reports are available, the team will generate synthetic request streams calibrated to hourly demand and any available origin-destination summaries. Conclusions will clearly identify the role of simulated data.
-
-## Privacy and project boundaries
-
-This repository must not contain:
-
-- Rider names or university identifiers
-- Phone numbers or email addresses from trip records
-- Driver identities
-- Exact residential addresses
-- Raw restricted operational data
-- Credentials, API keys, or private TransLoc endpoints
-
-Only aggregate statistics and de-identified maps will appear in public outputs. The project is a retrospective decision-support study. It will not control live vehicles, modify TransLoc, or make deployment claims.
-
-## Relationship to prior work
-
-[VehiPathOptimizer](https://github.com/vrbabu9000/VehiPathOptimizer) is an earlier static Capacitated Vehicle Routing Problem project developed by Vignesh Rajesh Babu. It used Python, Google OR-Tools, OSRM distance matrices, and Folium route visualization.
-
-This project extends that experience by adding:
-
-- Paired passenger pickups and drop-offs
-- Pickup-before-drop-off precedence
-- Passenger wait and ride-time constraints
-- Requests revealed dynamically
-- Vehicles with existing passengers and committed movements
-- An explicit mixed-integer formulation
-- Historical replay and comparative evaluation
-
-## Planned repository structure
-
-~~~text
+## Repository layout
+```text
 .
 ├── README.md
-├── proposal_context_and_plan.md
 ├── docs/
-│   ├── proposal/
-│   ├── presentations/
-│   └── references/
-├── configs/
+│   ├── README.md              documentation index (start here)
+│   ├── technical/             research, model design, scenario spec, decisions, OSRM how-to, team guide builder
+│   ├── plans/                 every phase's plan, with versions and change logs
+│   ├── proposal/              written proposal (.docx, .tex)
+│   ├── presentations/         proposal deck and speaker notes
+│   ├── ai_use_log.md          AI-use disclosure log (course policy)
+│   └── evidence/              digitized-chart briefs (gitignored: restricted)
 ├── src/
-│   ├── data/
-│   ├── network/
-│   ├── simulation/
-│   ├── baselines/
-│   ├── optimization/
-│   └── evaluation/
-├── tests/
-├── notebooks/
-└── outputs/
-~~~
+│   ├── evidence/              chart and map digitizers, georeferencing
+│   ├── insights/              analysis tasks T1–T10
+│   ├── scenario/              locations, demand model, scenario generator v1 (paused), travel-time client
+│   └── demo/                  early folium routing demo
+├── infra/osrm/                local OSRM build script, docker-compose, validation
+├── tests/                     scenario-generator tests
+└── data/, outputs/            local data and results (gitignored)
+```
 
-This layout is planned and will be created as implementation begins. Restricted data will remain outside the public repository.
+## Getting started
+Requirements: Python 3.10+, plus Docker Desktop if you need the local router.
 
-## Project roadmap
+Create a virtual environment and install the dependencies:
+```bash
+python3 -m venv .venv
+```
+```bash
+.venv/bin/pip install -r requirements.txt
+```
+Run the tests:
+```bash
+.venv/bin/python -m pytest tests -q
+```
 
-- [x] Select the Homewood Blue Jay Night Ride use case
-- [x] Contact JHU Transportation about reports and sample data
-- [x] Define the initial DARP and rolling-horizon MILP strategy
-- [ ] Audit the supplied data and create a data dictionary
-- [ ] Confirm hard constraints and service goals with Transportation staff
-- [ ] Build and validate the travel-time matrix
-- [ ] Implement the replay simulator
-- [ ] Implement nearest-vehicle and insertion baselines
-- [ ] Implement and unit-test the static MILP
-- [ ] Add rolling-horizon reoptimization
-- [ ] Run historical replay and sensitivity experiments
-- [ ] Prepare the progress report and final analysis
+**Data is not in the repository.** `data/` and `docs/evidence/` are gitignored, because they derive from a restricted JHU PDF. Ask the team for the data folder.
+- The tests and the scenario code need `data/processed/`.
+- **Simulations will need only the travel-time matrix file**, not the routing server.
 
-## Team
-
-**Team FourSight**
-
-- Irfan Setiadi
-- Miles Zhou
-- Youzhi Zhang
-- Vignesh Rajesh Babu
-
-Course: EN.553.602, Research and Design in Mathematics: Data Mining
-
-Johns Hopkins University, Fall 2026
+**Local routing server (optional):** only for computing new travel times. Build and run instructions, portability limits and validation are in [osrm_local.md](docs/technical/osrm_local.md). It is tested on Apple Silicon only; copy map data only between machines of the same architecture.
 
 ## Documentation
+The full index is [docs/README.md](docs/README.md). Key documents:
 
-The detailed research context, formulation, execution plan, proposal-ready text, presentation map, risks, and references are available in [proposal_context_and_plan.md](proposal_context_and_plan.md).
+| Document | What it is |
+|---|---|
+| [research_review.md](docs/technical/research_review.md) | Critical review: framing, research questions, scope, assumption audit, calibration limits |
+| [transloc_operations.md](docs/technical/transloc_operations.md) | How TransLoc and the Hopkins Night Ride operate (graded evidence) |
+| [model_design.md](docs/technical/model_design.md) | Mathematical formulation, algorithms, Lyft rules, architecture |
+| [scenario_spec.md](docs/technical/scenario_spec.md) | **Draft** scenario specification (awaiting agreement) |
+| [compute_feasibility.md](docs/technical/compute_feasibility.md) | PC requirements, solvers, reproducibility, benchmark proposal |
+| [decision_log.md](docs/technical/decision_log.md) | Accepted decisions, status changes, open proposals |
+
+## Data, privacy and boundaries
+This repository must not contain:
+- rider names or university identifiers;
+- phone numbers or email addresses from trip records;
+- driver identities;
+- exact residential addresses;
+- raw restricted operational data;
+- credentials, API keys, or private TransLoc endpoints.
+
+**What may appear publicly:** aggregate statistics and de-identified maps only.
+
+**What the project is not:** this is a retrospective decision-support study. It does not control live vehicles, does not modify TransLoc, and makes no deployment claims.
+
+## Roadmap
+- [x] Select the Homewood Blue Jay Night Ride use case; submit the proposal
+- [x] Digitize and reconcile the April 2026 dashboards (gate G1 passed)
+- [x] Insight tasks T1–T10
+- [x] Research TransLoc and Hopkins operations; critical review of the research direction
+- [x] Local OSRM travel-time matrix and road routes
+- [ ] **Agree the scenario specification** (Homewood boundary, Lyft rules, objective, fleet range)
+- [ ] Re-write the pre-registration; generate the validation scenarios L1–L5
+- [ ] Build the event simulator, dispatchers and Lyft module (Phase 4); pass hand-checked validation
+- [ ] Benchmark computation; calibrate to April (keeping every parameter set that fits)
+- [ ] Run the Lyft-policy experiments and robustness checks
+- [ ] Mid-semester update; final report and presentation
+
+## Team
+**Team FourSight:** Irfan Setiadi, Miles Zhou, Youzhi Zhang, Vignesh Rajesh Babu.
+
+EN.553.602 Research and Design in Mathematics: Data Mining, Johns Hopkins University, Fall 2026. Instructor: Prof. Anthony J. Kearsley.
+
+## Relationship to prior work
+[VehiPathOptimizer](https://github.com/vrbabu9000/VehiPathOptimizer) is an earlier static capacitated vehicle-routing project by Vignesh Rajesh Babu (OR-Tools, OSRM, Folium). This project adds:
+- paired pickups and drop-offs;
+- dynamic requests;
+- vehicles with riders on board;
+- a re-planning dispatcher;
+- outsourced overflow.
 
 ## Selected references
+- Cordeau, J.-F. (2006). [A branch-and-cut algorithm for the dial-a-ride problem](https://doi.org/10.1287/opre.1060.0283). *Operations Research* 54(3), 573–586.
+- Cordeau, J.-F., & Laporte, G. (2007). [The dial-a-ride problem: models and algorithms](https://doi.org/10.1007/s10479-007-0170-8). *Annals of Operations Research* 153, 29–46.
+- Alonso-Mora, J., Samaranayake, S., Wallar, A., Frazzoli, E., & Rus, D. (2017). [On-demand high-capacity ride-sharing via dynamic trip-vehicle assignment](https://doi.org/10.1073/pnas.1611675114). *PNAS* 114(3), 462–467.
+- Gaul, D., Klamroth, K., & Stiglmayr, M. (2021). [Solving the dynamic dial-a-ride problem using a rolling-horizon event-based graph](https://doi.org/10.4230/OASIcs.ATMOS.2021.8). *ATMOS 2021*.
+- Johns Hopkins Facilities & Real Estate, [Shuttle Services](https://jhfre.jhu.edu/ts/transportation/shuttle-services/).
 
-- Cordeau, J.-F. (2006). [A Branch-and-Cut Algorithm for the Dial-a-Ride Problem](https://doi.org/10.1287/opre.1060.0283). *Operations Research*, 54(3), 573-586.
-- Cordeau, J.-F., and Laporte, G. (2007). [The Dial-a-Ride Problem: Models and Algorithms](https://doi.org/10.1007/s10479-007-0170-8). *Annals of Operations Research*, 153, 29-46.
-- Gaul, D., Klamroth, K., and Stiglmayr, M. (2021). [Solving the Dynamic Dial-a-Ride Problem Using a Rolling-Horizon Event-Based Graph](https://doi.org/10.4230/OASIcs.ATMOS.2021.8). *OASIcs ATMOS 2021*, 96, 8:1-8:16.
-- Johns Hopkins University Facilities & Real Estate. [Shuttle Services](https://jhfre.jhu.edu/ts/transportation/shuttle-services/).
+The full source lists, with access levels, are in [docs/technical/research_notes/](docs/technical/research_notes/).
 
 ## AI-use disclosure
+AI tools (OpenAI Codex early on; Anthropic Claude Code since September 2026) have been used to:
+- organise materials;
+- digitize charts;
+- research sources;
+- draft code and documentation.
 
-OpenAI Codex has been used to organize proposal materials, inspect prior public code, identify relevant literature, and draft initial documentation and mathematical structure. The team is responsible for verifying all citations, equations, assumptions, code, data descriptions, and submitted conclusions against original sources.
+Every use is logged with its purpose, how the output was used, and how it was verified, in [docs/ai_use_log.md](docs/ai_use_log.md), as the course syllabus requires. The team is responsible for verifying all citations, equations, assumptions, code and conclusions.
 
 ## License
+**Code:** MIT, see [LICENSE](LICENSE).
 
-A license has not yet been selected. Until the team and any data-owning stakeholders confirm the appropriate release terms, no license should be assumed for project materials or data.
+**Data and derived data:** not covered by the license. The JHU operational data and anything derived from it may not be redistributed; they stay outside the repository. Map data is © OpenStreetMap contributors (ODbL).
