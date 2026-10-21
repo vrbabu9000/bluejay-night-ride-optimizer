@@ -32,10 +32,11 @@ TOL = 0.01            # config spatial.balance_tolerance
 DIRECTIONS = ("month_average", "campus_outbound_6pm")
 
 
-@lru_cache(maxsize=1)
-def load_world():
+@lru_cache(maxsize=2)
+def load_world(matrix="v1"):
+    """Locations and the travel-time matrix: v1 = demo-server matrix (paused v1 scenarios), v2 = local OSRM (D-31)."""
     loc = pd.read_csv(PROCESSED / "locations_v1.csv")
-    tt = pd.read_csv(PROCESSED / "tt_locations_v1.csv")
+    tt = pd.read_csv(PROCESSED / f"tt_locations_{matrix}.csv")
     sec = tt.pivot(index="origin", columns="dest", values="seconds").loc[loc.loc_id, loc.loc_id]
     return loc, sec
 
@@ -54,8 +55,8 @@ def targets(direction):
 
 
 @lru_cache(maxsize=16)
-def _fit(beta_per_min, direction, min_trip_s):
-    loc, sec = load_world()
+def _fit(beta_per_min, direction, min_trip_s, matrix="v1"):
+    loc, sec = load_world(matrix)
     o, d, wo, wd = targets(direction)
     t = sec.loc[o.loc_id, d.loc_id].to_numpy()
     support = t >= min_trip_s
@@ -94,9 +95,9 @@ def _fit(beta_per_min, direction, min_trip_s):
     return table, diag
 
 
-def fit_od(beta_per_min: float, direction: str, min_trip_s: float = 60.0):
-    """Return (table, diag): table columns o_loc, d_loc, prob (sums to 1), seconds."""
-    table, diag = _fit(float(beta_per_min), direction, float(min_trip_s))
+def fit_od(beta_per_min: float, direction: str, min_trip_s: float = 60.0, matrix: str = "v1"):
+    """Return (table, diag): table columns o_loc, d_loc, prob (sums to 1), seconds (from the chosen matrix)."""
+    table, diag = _fit(float(beta_per_min), direction, float(min_trip_s), matrix)
     return table.copy(), dict(diag)
 
 
