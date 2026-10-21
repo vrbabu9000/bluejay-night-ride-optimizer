@@ -2,8 +2,8 @@
 
 **Status:** in progress.
 - 3A research: done, and reviewed critically on 12 Oct.
-- 3B scenario definition: **drafted (v0.1), awaiting team agreement**.
-- 3C data generation: **not started, and blocked until 3B is agreed**.
+- 3B scenario definition: **approved 20 Oct** (spec v0.2; decisions D-27–D-32).
+- 3C data generation: **L1–L5 generated 20 Oct** (`data/scenarios/v2/`); L6–L7 after calibration.
 - 3D local OSRM: complete.
 - The v1 generator, ladder and grid are **paused, not deleted**.
 
@@ -27,8 +27,8 @@ So 3B now has a full draft specification, mathematical design and computing plan
 | Step | What | Output | Gate | Status |
 |---|---|---|---|---|
 | **3A** Research + critical review | Operations of TransLoc/Hopkins; review of the framing; audit of the assumptions; missing angles | `transloc_operations.md` v1.1, `research_review.md`, `research_notes/` | Team review | **Done** |
-| **3B** Scenario definition | Inputs / policies / outcomes; Lyft rules; ladder L1–L7; compact experiment matrix; schemas; seeds; validation; calibration limits | `scenario_spec.md` v0.1, `model_design.md` v0.1, `compute_feasibility.md` v0.1 | **Team agrees in writing, and decisions D-A…D-G are settled** | **Draft, awaiting agreement** |
-| **3C** Scenario generation | Generator v2 (latent draws, availability profile, v2 matrix + MANIFEST); then L1–L5 files; L6–L7 after calibration | `data/scenarios/v2/` | Validation criteria in `scenario_spec.md` §12 | **Blocked by 3B** |
+| **3B** Scenario definition | Inputs / policies / outcomes; Lyft rules; ladder L1–L7; compact experiment matrix; schemas; seeds; validation; calibration limits | `scenario_spec.md` v0.1, `model_design.md` v0.1, `compute_feasibility.md` v0.1 | **Team agrees in writing, and decisions D-A…D-G are settled** | **Approved 20 Oct** (v0.2) |
+| **3C** Scenario generation | Generator v2 (latent draws, availability profile, v2 matrix + MANIFEST); then L1–L5 files; L6–L7 after calibration | `data/scenarios/v2/` | Validation criteria in `scenario_spec.md` §12 | **L1–L5 done 20 Oct**; L6–L7 after calibration |
 | **3D** Local OSRM | Pinned routing, v2 matrix, routes, snaps | `../osrm/` | Its acceptance checks | **Complete**; cross-machine policy proposed (P-02) |
 
 ## Sequence after approval (each step needs its own go-ahead)

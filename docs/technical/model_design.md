@@ -223,7 +223,7 @@ c_vk = Σ_{r∈S_k∪C_v} q_r·φ(W_r)  +  β·Σ_{r on route} q_r·H_r  +  γ·
 **How the module runs.** It runs after each dispatcher solve. It sees each open request's t_r, q_r, assignment state and predicted van pickup P̂_r from the current plan. It cannot see latent draws.
 
 **Every rule shares these mechanics:**
-- **eligibility:** q_r ≤ 4 and not committed or onboard;
+- **eligibility:** not committed or onboard; parties of 1–4 use a standard Lyft, parties of 5 a Lyft XL, kept together (D-33, 21 Oct; XL delay, availability and cost unknown, same latent delay in the base);
 - **consent:** a latent per-request draw against probability p_c;
 - **dispatcher lag ℓ:** from decision to the Lyft request being placed;
 - **Lyft pickup** at decision + ℓ + L_r, where L_r is a latent per-request Lyft delay;
@@ -256,7 +256,7 @@ A transfer is **not** a completion.
 - **Lyft trips and Lyft passengers** per night; Lyft km;
 - **van-km** (loaded and empty); van-hours are fixed by the availability profile;
 - **ETA churn**; maximum pending age; backlog after 02:00;
-- **subgroups:** party size (5+ cannot use Lyft) and zone (Homewood core vs Peabody area).
+- **subgroups:** party size (parties of 5 need a Lyft XL; XL trips reported separately) and zone (Homewood core vs Peabody area).
 
 **Better** means a point on the **frontier of rider outcome (e.g. P90 wait, share > 15 min) against resource use (Lyft trips)**. "Send everyone to Lyft" is just one end of that frontier, never the answer. Dollar costs appear only as labelled illustrations with stated price ranges.
 

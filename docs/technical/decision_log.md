@@ -60,3 +60,118 @@ One row per decision that sets a number or a rule. Status: OBSERVED / DERIVED / 
 | P-10 | Ladder L1–L7 (no-shows and cancellations separate) and a compact experiment matrix (36 primary cells) | `scenario_spec.md` §8–9 |
 | P-11 | HiGHS as the exact solver, deterministic settings; a lock file before Phase 4 | `compute_feasibility.md` §3, §5 |
 | P-12 | Hourly chart read as request hour (AS-25) | `research_review.md` §5 |
+
+## Accepted on 20 Oct 2026 (team decisions on scenario_spec v0.1 §14)
+| ID | Date | Decision | Value | Status | Basis / source | Alternatives | Owner / reviewer |
+|---|---|---|---|---|---|---|---|
+| D-27 | 2026-10-20 | Service boundary (D-A) | Homewood **including the Peabody area**, as April was operated | Team decision | `research_review.md` §4.2; ~20% of April O/D in the Peabody/downtown zones | Homewood core only; boundary as a factor (both rejected) | |
+| D-28 | 2026-10-20 | Lyft rule set (D-E) | Keep all of R0, R1(10), R1(15), R1u(10), R2(15), R3(2) (R4 optional). Run **one rule at a time** per scenario, everything else fixed; explain why the best rule won (spec §9.3) | Team decision | User, 20 Oct | Trim the set (rejected) | |
+| D-29 | 2026-10-20 | Objective (D-D) | Weighted: convex PWL wait penalty (slopes 1/2.5/5/10/20), β = 0.5, γ = 0.1 min/km, elastic guardrail max(25, 2·direct + 5) min; 15/20 (busy 20) as reporting thresholds | Team decision (accepts P-03, P-04) | `model_design.md` §4 | Lexicographic (kept as a variant) | |
+| D-30 | 2026-10-20 | Fleet (D-F) | **5–6 vans with 14 seats** at 18:00, as a per-scenario factor, tapering in April's shape; demand **scaled to the fleet** so requests per van-hour match April (~11 average, ~13 at 6 pm); the load ratio ρ is the calibration knob | Team decision (replaces P-06; accepts P-07 at 14 seats) | User, 20 Oct: "proportional to the problem we are solving" | f × 27.6-van range (replaced) | |
+| D-31 | 2026-10-20 | Travel matrix (D-C) | `tt_locations_v2.csv` (local OSRM) + `MANIFEST.json`; the matrix is the canonical cross-machine artifact | Team decision (accepts P-02; supersedes D-12 for v2 scenarios) | `compute_feasibility.md` §4 | Demo-server v1 matrix (kept for v1 only) | |
+| D-32 | 2026-10-20 | Ladder (D-G) | L1–L7; no-shows (L2) and cancellations (L3) separate; Lyft mechanics at L4; L5 pilot; L6 main; L7 confirmatory | Team decision (accepts P-10, modified for 5–6 vans and 4 patterns) | `scenario_spec.md` §8–9 | — | |
+
+Still proposals: P-05 (rolling-horizon details), P-08 (patience form), P-09 details (parameters as in spec §6), P-11 (HiGHS + lock file, Phase 4), P-12 (request-hour reading). These are fixed in `preregistration_v2.md` once the team confirms generation.
+
+## Added on 21 Oct 2026
+| ID | Date | Decision | Value | Status | Basis / source | Alternatives | Owner / reviewer |
+|---|---|---|---|---|---|---|---|
+| D-33 | 2026-10-21 | Lyft eligibility of parties of 5 | Parties of 5 are Lyft-eligible through a larger vehicle (e.g. Lyft XL) and stay together; parties of 1–4 use a standard Lyft. XL trips are counted separately. XL availability, pickup delay and cost are UNKNOWN: the base uses the same latent Lyft delay and no surcharge | **Accepted modelling instruction**, from **user-supplied operational knowledge** (not independently verified Hopkins policy) | User correction, 21 Oct. Replaces the 2018 News-Letter rule ("5+ riders always get a van, Lyft gives us four seats"), which referred to standard 4-seat Lyft cars. The 2018 evidence is kept, dated, in `transloc_operations.md` | Keep parties of 5 ineligible (rejected: contradicts current operational knowledge); split the party (rejected: the party stays together) | |
+| D-34 | 2026-10-21 | Geographic representation | The **reference** keeps point-based clusters (188 points; unchanged, frozen). A **dispersed variant** `dispersed_v1` spreads the 19 coarse city-view clusters over 6 road satellites each (400 m disk, snap ≤ 75 m, inside the approximate modelled region, outside the campus frame, ≥ 100 m apart, equal weights) | Variant **implemented and verified**; whether it becomes the base geography for L6 is **provisional** | Resolution criterion: city view 4× coarser than the campus view (position uncertainty 101 m vs ~28 m); one coarse point received ~11 Mount Vernon pickups per 162-request night | Spread only the 10 downtown points (rejected: inconsistent with the resolution criterion); per-request jitter (rejected: unbounded new routing points) | |
+| D-35 | 2026-10-21 | Request volume formula | N_h = ρ_h × v_h with ρ_h = (C_h/30)·(R/C)/V_h hour by hour; largest-remainder rounding; 18:00–21:00 at 5 vans → 64/50/48 = 162 (April taper) or 64/50/54 = 168 (constant) | **Provisional** (depends on the unresolved constant-vs-taper availability choice and on calibration of ρ) | `scenario_spec.md` §3.2; p06/p07/p09 | Night-average ρ ≈ 11 (rejected: hides the 6 pm peak); one 5/27.56 factor for every hour (rejected: correct only under the April taper) | |
+
+## Scenario design trail (report-ready, 21 Oct 2026)
+This section explains, in plain terms, the choices that build a scenario's *inputs*. Outcomes (waits, cancellations, Lyft transfers, completions) are produced by the simulator and are not chosen here.
+
+**Status words used below:**
+- **accepted:** the team decided;
+- **provisional:** a working value that may change;
+- **implemented:** in code;
+- **verified:** checked by tests.
+
+### 1. When requests can arrive
+| | |
+|---|---|
+| **Question** | Over which window do requests arrive in the main experiments? |
+| **Approach** | 18:00–21:00. After 21:00 no new requests arrive; the simulation continues until every request is resolved |
+| **Why** | The busiest three hours; 18:00 is the first hour of service, so there is no inherited backlog |
+| **Evidence / instruction** | Team decision (ladder level L6); hourly completed rides peak at 6 pm (p09) |
+| **Alternatives** | 18:00–20:00 (rejected by the team); the full night (kept for the confirmatory level L7) |
+| **Limitations** | The closing and van-availability rules after 21:00 are still to be specified |
+| **Sensitivity** | Not a factor |
+| **Status** | Accepted |
+| **Files** | `scenario_spec.md` §8 |
+
+### 2. How many requests arrive in each hour
+| | |
+|---|---|
+| **Question** | How many requests should five vans face from 18:00 to 21:00? |
+| **Approach** | Copy April's workload per vehicle, hour by hour, and give the scenario's vans that workload: requests in hour h = ρ_h × vans in hour h |
+| **How ρ_h is built** | ρ_h = completed rides in that hour per night × recorded requests per completed ride (2.087) ÷ average vehicles in that hour. This gives 12.85, 10.10 and 10.71 for 18:00, 19:00 and 20:00 |
+| **Rounding** | Hourly values are rounded so that they add up to the rounded total (largest-remainder rule) |
+| **Result** | **64 / 50 / 48 = 162** if vans taper as in April; **64 / 50 / 54 = 168** with a constant five vans |
+| **Why** | The data give workload per vehicle, not demand for a five-van system. Matching hour by hour keeps the 6 pm peak, which a night average would flatten |
+| **Evidence** | April status totals (p07), completed rides by hour (p09), vehicles by hour (p06) |
+| **Alternatives** | A night-average load of ≈ 11 (rejected); one scaling factor for every hour (correct only under the April taper) |
+| **Assumptions** | Every status is one request, and Denied is zero. The request-to-completion ratio is the same in every hour. The hourly chart counts completed rides by request hour. The vehicle chart ("All services") stands in for Homewood vans |
+| **Limitations** | April gives a plausible range, not a precise count. ~145–205 is an **illustrative sensitivity range, not a confidence interval**: fewer true Homewood vehicles push the count up, rebookings push it down. Scaling demand down with the fleet keeps the workload per van but not the density of requests, so pooling chances are lower than in the real system |
+| **Sensitivity** | The calibration setting ρ; a high-load pattern (+30%) |
+| **Status** | **Provisional**. The constant-vs-tapering availability choice is **not decided**, and this section does not decide it |
+| **Files** | `scenario_spec.md` §3.2; decision D-35 |
+
+### 3. When requests arrive within an hour
+| | |
+|---|---|
+| **Question** | At what times within an hour do requests arrive? |
+| **Approach** | A fixed count per hour, at uniformly random times. This is a Poisson process *conditional on its count* |
+| **Seeds** | A named "times" stream per level, pattern and night. Every policy replays identical times |
+| **Why** | Clean paired comparisons |
+| **Alternatives** | A random hourly count (Poisson); kept as a variant |
+| **Limitations** | Night-to-night variation in volume is removed. April's daily requests varied ~11% (1,434–2,145) |
+| **Sensitivity** | The random-count variant; the burst pattern |
+| **Status** | Accepted design; implemented for L5 |
+| **Files** | `generator_v2.py`; `scenario_spec.md` §3.2, §11 |
+
+### 4. Where requests start and end: representation
+| | |
+|---|---|
+| **Question** | At which exact places do requests appear? |
+| **Approach** | **Reference:** each request sits at its April map-cluster point (188 points), snapped to the nearest road. **Dispersed variant:** each of the 19 coarse city-view clusters is spread over 6 road locations within ~400 m |
+| **Dispersed details** | Each satellite carries one sixth of the cluster's weight. The variant shares the reference's request times, cluster-level pairs, party sizes and rider traits |
+| **Why** | City-view bubbles are 4× coarser than campus-view bubbles. Each stands for a whole neighbourhood, so the reference stacks many requests on one spot (~11 Mount Vernon pickups per 162-request night). That flatters pooling exactly where long, isolated trips make Lyft attractive |
+| **Evidence** | Map digitization and georeferencing (p02–p05); OSRM snapping |
+| **Alternatives** | Spread only the 10 downtown points (inconsistent criterion); jitter every request (unbounded routing) |
+| **Assumptions** | The 400 m radius. The region boundary (convex hull of the April points + 100 m) is an **approximation, not a verified service boundary**. Satellites are synthetic locations, not recovered addresses |
+| **Limitations** | With 6 random satellites, each cluster's effective centre shifts 30–243 m. Clusters next to the campus frame or the region edge lose candidates on one side |
+| **Sensitivity** | Reference vs dispersed; radius 250 / 600 m |
+| **Status** | Variant **implemented and verified** (6 tests). Choosing which geography is the L6 base is **provisional** |
+| **Files** | `spread.py`, `build_dispersed_v2.py`, `tests/test_spread.py`; decision D-34 |
+
+### 5. Which origin goes with which destination
+| | |
+|---|---|
+| **Question** | The maps give separate totals of pickups and drop-offs per place. How are they paired into trips? |
+| **Approach** | Gravity × IPF. Pairs start with weight pickups(o) × drop-offs(d) × e^(−β_geo × drive minutes), with β_geo = 0.1 per minute; pairs under 60 s of driving are excluded. Iterative scaling then makes every place's totals equal April's |
+| **Why** | Standard in transport planning; reproduces both observed margins exactly (largest error ~10⁻¹⁰) |
+| **Evidence** | April map margins (completed rides only) |
+| **Alternatives** | β_geo = 0 (no distance preference) or 0.2 |
+| **Assumptions** | Requests share the geography of completed rides (cancelled requests' locations are unobserved). The pairing rule itself. The same geography in every hour |
+| **Limitations** | The data cannot distinguish β_geo values: all of them reproduce the margins. In the dispersed variant the 60-s rule is applied at cluster level, and the 2 satellite pairs (out of 840 requests) that fell under 60 s were redrawn |
+| **Sensitivity** | β_geo = 0 / 0.1 / 0.2; the campus-outbound direction variant |
+| **Status** | Accepted (D-18); β_geo provisional; implemented and verified |
+| **Files** | `demand.py`; decision D-18 |
+| **Note** | β_geo (distance decay) is unrelated to the ride-cost weight β = 0.5 in the dispatcher's objective |
+
+### 6. Lyft for parties of five
+| | |
+|---|---|
+| **Question** | Can a party of five be transferred to Lyft? |
+| **Approach** | Yes, as one party in a larger vehicle (Lyft XL); parties of 1–4 use a standard Lyft. XL trips are reported separately |
+| **Why** | User-supplied operational knowledge (21 Oct). The 2018 rule excluding 5+ riders referred to standard 4-seat Lyft cars |
+| **Alternatives** | Exclude parties of five; split the party (both rejected) |
+| **Assumptions** | XL is available like standard Lyft, with the same pickup delay and no cost difference. **All unknown**; nothing is invented |
+| **Limitations** | About 1% of requests (≈ 1.6 per 162-request night), so effects are small but visible in the subgroup report |
+| **Sensitivity** | XL delay longer than standard; XL scarcity at peaks |
+| **Status** | Accepted modelling instruction (not verified Hopkins policy) |
+| **Implemented** | In the L4 answer key (the party of 5 is transferred whole by XL under four rules) and the tests. The simulator itself is not built |
+| **Files** | `generator_v2.py`, L4 `handcheck.csv`, `tests/test_scenario_v2.py`; decision D-33 |

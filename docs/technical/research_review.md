@@ -200,7 +200,7 @@ Built from the operations note §F and the literature note §7, reconciled by th
 | AS-13 | Denial | Supported | None inside the area and hours | No |
 | AS-14 | Fleet by hour | **Uncertain, partly contradicted** | Calibrated range 18–27.6 at 6 pm with the observed taper; not "22" as fact | **Yes** |
 | AS-15 | Capacity 14 | Uncertain (2018) | 10–14 seats; check whether it binds (booking cap 5, mean load ~1.8) | No |
-| AS-16 | Party size | Supported | Mean 1.39, max 5; party ≥ 5 is never sent to Lyft (Lyft seats 4) | No (but it defines eligibility) |
+| AS-16 | Party size | Supported | Mean 1.39, max 5. ~~Party ≥ 5 is never sent to Lyft (Lyft seats 4)~~ **Corrected 21 Oct (D-33): parties of 5 go by Lyft XL, kept together** | No (but it defines the XL class) |
 | AS-17 | Dwell | Uncertain | 30 s per stop + the 3-min no-show wait | No |
 | AS-18 | Curb-to-curb | Supported; stops out of scope | Curb-to-curb at hotspot points | No |
 | AS-19 | Walk-ups | Uncertain | None | No |
@@ -235,7 +235,7 @@ These go in the main design or a mandatory robustness block. The rest can wait o
 | Dispatcher delay, transfer capacity, consent | **Core** (lag); sensitivity (capacity, consent) | These are the policy's operating knobs and costs |
 | Fleet changes, breaks, shift ends, after-close completion | **Core** (availability profile, shift ends); sensitivity (breaks); reported (after-close tail) | Utilisation sets how often a trigger fires; a van leaving mid-plan strands assignments |
 | Travel-time uncertainty, dwell, snapping | Sensitivity (travel multiplier, dwell); documented (snapping) | Shifts van and Lyft waits similarly; unlikely to reorder rules |
-| Tail outcomes, equity across locations and party sizes | **Core metrics** | Policy effects live in P90/P95; parties of 5 can't use Lyft; edge locations wait longest |
+| Tail outcomes, equity across locations and party sizes | **Core metrics** | Policy effects live in P90/P95; parties of 5 need a Lyft XL (D-33, 21 Oct); edge locations wait longest |
 | Optimization latency and budget overrun | **Engine rule now; measurement deferred** | Rule: if a solve exceeds its budget, keep the last plan and insert new requests greedily, and log it. Matters little at our sizes |
 
 **Omissions that could flip the Lyft conclusions:**
