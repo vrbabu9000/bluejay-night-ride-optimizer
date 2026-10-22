@@ -1,6 +1,6 @@
-# Scenario-design methodology and build contract (v1.2, 22 Oct 2026)
+# Scenario-design methodology and build contract (v1.3, 22 Oct 2026)
 
-**What this is.** This document explains how the simulated Night Ride evenings are built from April 2026's aggregate dashboard, what each design choice rests on, and what has to be built next. It is the methodology material planned in Phase 3 plan v4. It reflects the consolidation review of 21 Oct 2026 (decisions D-45 to D-51) and, in v1.1, what the first simulator milestone actually built and verified on 22 Oct (D-51 update, D-52, D-53); v1.2 adds the D-53 decision experiment and the curb-wait convention D-54. v1.0 and v1.1 are archived in `archive/`.
+**What this is.** This document explains how the simulated Night Ride evenings are built from April 2026's aggregate dashboard, what each design choice rests on, and what has to be built next. It is the methodology material planned in Phase 3 plan v4. It reflects the consolidation review of 21 Oct 2026 (decisions D-45 to D-51) and, in v1.1, what the first simulator milestone actually built and verified on 22 Oct (D-51 update, D-52, D-53); v1.2 adds the D-53 decision experiment and the curb-wait convention D-54; v1.3 adds the approval of A and M2. v1.0–v1.2 are archived in `archive/`.
 
 **How to read it.** The core (§1–§9) is meant to be read straight through. The appendices hold the arithmetic, the full reconciliation register and the document map.
 
@@ -9,8 +9,8 @@
 | Question | Authoritative document |
 |---|---|
 | What was decided, when and why | `decision_log.md` (wins any conflict) |
-| What the simulator must do: inputs, states, event order, outputs | `scenario_spec.md` v0.6, especially **§17 (build contract)** |
-| The mathematics of the dispatcher and the Lyft rules | `model_design.md` v0.4 |
+| What the simulator must do: inputs, states, event order, outputs | `scenario_spec.md` v0.7, especially **§17 (build contract)** |
+| The mathematics of the dispatcher and the Lyft rules | `model_design.md` v0.5 |
 | What was built and how it was checked | `src/sim/` and §7 of this document |
 | An explanatory companion for readers | `methodology_pdf/BlueJay_Scenario_Methodology.pdf` (not authoritative) |
 | Why the scenario looks the way it does | this document |
@@ -169,12 +169,12 @@ Both routes below are 10 km.
 
 ---
 
-## 7. Implementation status after M0–M1 (22 Oct 2026)
+## 7. Implementation status after M0–M2 (22 Oct 2026)
 **What was built** (`src/sim/`, Phase 4 milestone M0–M1; settings D-52 and its amendments):
 - `inputs.py`: loads the frozen scenario files read-only and refuses to run if a content hash differs from `FROZEN_v2.json`.
 - `engine.py`: the event engine (referee). It owns the clock, the same-second order of spec §17.3, every state, and the hidden rider traits, which it applies only when their event happens.
 - `dispatch.py`: dispatcher C. Per van, every subset of ≤ 3 open requests with its best order of all stops (exact), then a set-partitioning MILP solved by HiGHS, with an explicit M bound, exact integer costs, status handling and a canonical tie rule.
-- `lyft.py`: the transfer rules, exercised only before 18:15 in L4 (M0 scope).
+- `lyft.py`: the transfer rules. They act at every epoch since M2 (`lyft_window="evening"`); the M0 harness (rules only before 18:15 in L4) stays selectable with `lyft_window="m0"`.
 - `run.py`: writes `events.csv`, `epochs.jsonl`, `outcomes.csv`, `run_manifest.json` and a readable `narrative.md` to `outputs/sim/<level>_<rule>/`.
 
 **What was verified** (commands in §8):
@@ -189,7 +189,7 @@ Both routes below are 10 km.
 | Hidden traits | The observation has no hidden-trait fields; perturbing patience values that never fire leaves plans unchanged | Independent verification tests |
 | Reproducibility | Two runs give identical event logs and epoch records (wall times excluded) | Both test files |
 | Frozen inputs | Content hashes unchanged; no data written | Tests and `run_manifest.json` |
-| Test suite | 140 tests pass on 22 Oct (after the D-53 experiment): 46 pre-existing scenario tests, 32 engine tests and 7 curb-wait tests (coordinator), 27 independent route tests and 28 independent pending-price tests (verification agents) | `.venv/bin/python -m pytest -q` |
+| Test suite | 253 tests pass on 22 Oct (after M2): 46 pre-existing scenario tests; 39 engine and curb-wait tests (coordinator); 38 independent route tests, 29 independent pending-price tests and 101 independent M2 integration tests (verification agents) | `.venv/bin/python -m pytest -q` |
 | Integrated review | Ready to hand to the team once its should-fix items were addressed (all addressed 22 Oct: status labels, plan audit, wording) | `research_notes/m0_m1_integrated_review_2026-10-22.md` |
 
 **What M1 showed on L4 under R0** (a designed validation case; these are simulated outcomes, not evidence about the real service):
@@ -208,15 +208,33 @@ Both routes below are 10 km.
 | Assignment changes | 29 | 27 | 35 |
 | MILP time (s) / extra variables | 0.10 / 0 | 0.10 / 0 | 4.8 / up to 9,828 |
 
-A is a lower bound on any future service (with small stated exceptions) and adds nothing to the model; B is an estimate that can err in both directions and grows with requests × candidate routes (135,100 extra variables and 19.6 s for a synthetic five-van, 20-request epoch). **Recommendation: A**, for its meaning and cost, not because of this one night; it awaits the team's approval, and the code default stays the original price until then. Full table and a worked epoch: `outputs/sim/d53_comparison.md` (regenerate with `cd src && ../.venv/bin/python -m sim.compare`).
+A is a lower bound on any future service (with small stated exceptions) and adds nothing to the model; B is an estimate that can err in both directions and grows with requests × candidate routes (135,100 extra variables and 19.6 s for a synthetic five-van, 20-request epoch). **Recommendation: A**, for its meaning and cost, not because of this one night. **Approved provisionally by the team on 22 Oct and now the default** (decision log D-53 approval; design trail §11). Full table and a worked epoch: `outputs/sim/d53_experiment/d53_comparison.md` (regenerate with `cd src && ../.venv/bin/python -m sim.compare`). On runtime: A added no variables and its MILP time was unchanged; total evening runtime differed only because candidate generation followed a different trajectory.
+
+**M2: the Lyft rules with C over the whole L4 evening (22 Oct; D-55).** Each rule ran separately on the same frozen L4 inputs, with R0 as the reference and C using A and D-54. Every epoch was proven optimal over its candidate set. Every request ended in exactly one terminal state. Offers, accepted transfers, bookings and completions reconcile, standard and XL separately. A party of five is always one XL booking. These are simulated outcomes of one designed integration evening; they do not rank the rules.
+
+| L4, 16 requests (29 passengers) | R0 | R1(10) | R1(15) | R1u(10) | R2(15) | R3(2) |
+|---|---|---|---|---|---|---|
+| Van / Lyft completed | 16 / 0 | 9 / 7 | 11 / 5 | 13 / 3 | 4 / 12 | 4 / 12 |
+| Offers: accepted / declined | 0 / 0 | 7 / 1 | 5 / 1 | 3 / 1 | 12 / 1 | 12 / 1 |
+| Transfers before / from 18:15 | 0 / 0 | 3 / 4 | 0 / 5 | 3 / 0 | 8 / 4 | 8 / 4 |
+| Wait P90, requests picked up (n = 16), min | 31.2 | 20.3 | 25.4 | 22.9 | 13.2 | 11.8 |
+| Requests reached within 15 min (of 16) | 5 | 7 | 6 | 7 | 15 | 15 |
+| Van-km | 38.0 | 24.6 | 24.9 | 33.8 | 16.5 | 16.5 |
+
+Findings from the logs (thresholds unchanged):
+- **R1u(10) transfers nobody after 18:15.** C puts every waiting request into some van's plan within at most 4 minutes, so "continuously unassigned for 10 minutes" never holds while vans are on duty. The rule measures assignment, not waiting.
+- **Elapsed-time rules can send a rider to Lyft whose van was predicted sooner.** Under R1(15), R001 is transferred at 18:15 with its van due at 18:17:44, while the Lyft arrives at 18:25.
+- **R2(15) and R3(2) are similar but not identical:** they transfer R011 at 18:20 and 18:17 respectively.
+
+Report: `outputs/sim/m2_L4_report.md`, containing the table, one epoch from van ETA through rule trigger and transfer to the re-solved plan, one rider's complete timeline, and the changes for riders who stayed on vans.
 
 **Status by item:**
 
 | Status | Item |
 |---|---|
-| **Implemented and verified** | Event engine for L1–L4 events (requests, movement, boarding, drop-offs, curb waits and no-shows, designed cancellations, commitment, periodic re-planning, backlog completion); dispatcher C; L4 pre-18:15 Lyft mechanics; logs and narrative |
+| **Implemented and verified** | Event engine for L1–L4 events (requests, movement, boarding, drop-offs, curb waits and no-shows, designed cancellations, commitment, periodic re-planning, backlog completion); dispatcher C with pending price A (approved provisionally); curb-wait convention D-54; the Lyft rules all evening on L4 with the full transfer lifecycle (M2); logs, narratives and reports |
 | **Implemented, provisional** | All D-52 settings (K = 3, Ψ = 1000, solver budget, tie rule); p = 0.089 presence (L1–L4 do not depend on it); the engine conventions in spec §17.9 |
-| **Documented only** | Lyft rules after 18:15 with the dispatcher (M2); evaluation metrics and bootstrap CIs; pre-registration |
+| **Documented only** | Evaluation metrics across many nights and bootstrap CIs (M3); pre-registration |
 | **Not started** | Heuristic T; hindsight H; L6/L7 builders; calibration; the M5 benchmark; the experiment grid |
 
 **Limitations to keep in view:**
@@ -241,18 +259,24 @@ Then read `outputs/sim/L4_R0/narrative.md` (requests, van movements, plan change
 .venv/bin/python -m pytest -q tests/test_sim_engine.py tests/test_sim_independent.py
 ```
 
-### Next milestone: M2, Lyft rules with the dispatcher on L4
-**Entry conditions:** the team approves a pending-price formulation (D-53; A recommended). The curb-wait convention is settled (D-54).
+### How to inspect the M2 demonstration
+```bash
+cd src && for r in R0 "R1(10)" "R1(15)" "R1u(10)" "R2(15)" "R3(2)"; do ../.venv/bin/python -m sim.run --level L4 --rule "$r"; done; ../.venv/bin/python -m sim.m2_report
+```
+Then read `outputs/sim/m2_L4_report.md`; each run's detail is in `outputs/sim/L4_<rule>/` (`narrative.md`, `events.csv`, `epochs.jsonl`).
 
-**What it adds:** the transfer rules running after 18:15 alongside C, on the same frozen L4 inputs, with transfers leaving van planning at the decision (spec §17.5).
+### Next milestone: M3, the paired-night pipeline on L5
+**Entry decision:** the L5 policy settings for the rehearsal. L5's frozen inputs specify no dispatcher lag or consent probability, and carry a `p_noshow` value the simulator must not read (D-48 errata). Proposed: lag 2 min and consent 1.0 (the spec's base), presence p = 0.089 (provisional, D-48), placeholder patience as frozen; also which metric set to compute (D-50 is a proposal).
 
-**What it would demonstrate:** each rule's transfers traced through a whole evening, with an auditable proof that no rider is ever served twice and that the waits and Lyft counts add up, on one designed night. It would not rank the rules.
+**What it adds:** all six rules on the 30 paired L5 nights (2 vans, 28 requests with a burst, random patience, presence and Lyft delays), with metrics, paired differences and bootstrap intervals.
+
+**What it would demonstrate:** that pairing, cancellations, no-shows, metrics and intervals work end to end over many nights, and the size of the night-to-night variation (input to the power check). Too small, and with placeholder parameters, for any conclusion about the rules.
 
 ### How it grows to the five-van demonstration
 | Milestone | Adds | Shows |
 |---|---|---|
 | ~~M0–M1~~ | ~~Referee; C on L4 under R0~~ | **Done 22 Oct** (§7) |
-| M2 | The Lyft rules after 18:15 with C on L4 | Transfer bookkeeping through a full evening |
+| ~~M2~~ | ~~The Lyft rules all evening with C on L4~~ | **Done 22 Oct** (§7, D-55) |
 | M3 | L5, 30 seeds | Pairing, metrics, bootstrap CIs, pilot variance for the power check |
 | M4 | The L6 builder, 64 / 50 / 54 (new scenario generation; needs go-ahead) | Inputs for the demonstration |
 | M5 | First hour only: 5 vans, 64 requests; **benchmark** | Whether C fits the budget, which **confirms or overturns D-51** |
@@ -262,7 +286,8 @@ Then read `outputs/sim/L4_R0/narrative.md` (requests, van movements, plan change
 ---
 
 ## 9. Open decisions for the team
-1. **D-53:** approve the pending-price formulation (A recommended; or keep the original, or B) before M2.
+1. ~~D-53~~: A approved provisionally (22 Oct).
+1a. **L5 policy settings for M3** (lag, consent, presence p; metric set), see §8.
 2. ~~Curb-wait convention~~: settled by D-54 (22 Oct).
 3. **Review of the provisional D-52 settings** (K = 3, Ψ, solver budget, tie rule) and of the proposed conventions D-46, D-47(2), D-48, D-50.
 4. **Later, not now:** accepting the dashboard status mapping that pins p ≈ 8.9% (Appendix C), and the calibration targets.
@@ -302,7 +327,8 @@ Then read `outputs/sim/L4_R0/narrative.md` (requests, van movements, plan change
 | Unused frozen columns | R | `lyft_noshow_u`, `eta_noise` kept for compatibility; no regeneration | D-41; spec §17.7 |
 | Notation collision (L_r) | R | Guardrail renamed G_r; Lyft delay λ_r | model_design v0.2 |
 | Dispatcher algorithm | R | C provisionally selected, conditional on M5 (21 Oct) | D-51 update |
-| Pending price defers long waiters | X | Experiment done; A recommended, awaiting team approval | D-53 update 2 |
+| Pending price defers long waiters | R (provisional) | A approved provisionally and made the default (22 Oct) | D-53 approval; trail §11 |
+| Lyft rules interacting with C all evening | R | Implemented and verified on L4 (M2) | D-55 |
 | Curb-wait planning view | R | Possible boarding at expiry, planning only | D-54 |
 | Candidate rule, K, M, Ψ, solver budget, ties | R (provisional) | Fixed before any comparison | D-52 and amendments |
 | L4 counts in the phase log ("28" / "32") | R | Correct figure: 22 transfer decisions (4 XL) and 4 declines | phase3 log, 21 Oct |
@@ -355,8 +381,8 @@ The arithmetic is exact; the uncertainty is entirely in the mapping. If some Lyf
 | Document | Version | Status after this review |
 |---|---|---|
 | `decision_log.md` | — | D-45–D-51 added; D-44 financial part and trail §10 superseded; D-41 simplified |
-| `scenario_spec.md` | v0.6 | Build contract §17 with §17.9 implementation conventions, D-53 formulations, D-54 (v0.5 archived) |
-| `model_design.md` | v0.4 | Pending-price formulations and M bound; D-54 (v0.3 archived) |
+| `scenario_spec.md` | v0.7 | Build contract §17 with §17.9 implementation and M2 conventions (v0.6 archived) |
+| `model_design.md` | v0.5 | Pending price A approved; Lyft module as implemented (v0.4 archived) |
 | `preregistration_v2.md` | draft, revised 21 Oct | Statistics corrected (20 Oct draft archived) |
 | `research_review.md` | v1.0 | Annotated in place |
 | `src/sim/` | M0–M1 | Event engine, dispatcher C, Lyft rules (pre-18:15), runner |

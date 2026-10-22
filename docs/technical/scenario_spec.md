@@ -1,4 +1,4 @@
-# Scenario specification v0.6 (22 Oct 2026)
+# Scenario specification v0.7 (22 Oct 2026)
 
 **Built 20 Oct:** L1–L5 are generated in `data/scenarios/v2/` (34 scenarios; hashes in `FROZEN_v2.json`), with hand-check sheets for L1–L4 (`handcheck.csv` + `HANDCHECK.md`). L6–L7 wait for calibration.
 
@@ -12,6 +12,8 @@ v0.4 (21 Oct, documentation consolidation; §18):
 - **simulator build rules added as §17** (D-46–D-48);
 - stale counts, pairing and evidence wording corrected (D-49).
 
+v0.7 (22 Oct): M2 integration conventions and the approval of pending price A (§17.5, §17.8, §17.9, §21).
+
 v0.6 (22 Oct): curb-wait planning convention (D-54) and the selectable pending-price formulations of the D-53 experiment (§17.9, §20).
 
 v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–M1 implementation); §17 gains the conventions the implementation needed (§17.9); stale or ambiguous items found while writing the explanatory PDF are corrected (§19).
@@ -23,7 +25,7 @@ v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–
 - where they disagree, the decision log wins, then this file.
 
 The report-ready reasoning for each scenario-design choice is in the decision log, section "Scenario design trail".
-- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5 (22 Oct) are archived in `archive/`.
+- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5–v0.6 (22 Oct) are archived in `archive/`.
 - It supersedes, for new work, the paused v1 scenario contract and v1 pre-registration. Both are kept unchanged.
 
 ---
@@ -368,7 +370,7 @@ Ties inside a class are broken by request ID, then van ID.
 - **Pending requests** (served by no route in the current plan) keep a **tentative ETA**: the cheapest feasible insertion, computed outside the solver. Lyft rules that read ETAs read this value; the log records why the request is pending (competition or candidate cap) (D-47).
 
 ### 17.5 Transfers and the Lyft service (D-43, D-45, D-46)
-- **Consent.** In the base p_c = 1, so every decision is a booking request and there is no offer stage. Where p_c < 1 (L4 uses 0.9; the consent sensitivity uses 0.8), a rule's decision is an **offer**: a rider with `consent_u` > p_c declines, stays with the vans, is never offered again, and the decline is counted (D-45).
+- **Consent.** In the base p_c = 1, so every decision is a booking request and there is no offer stage. Where p_c < 1 (L4 uses 0.9; the consent sensitivity uses 0.8), a rule's decision is an **offer**: a rider accepts iff `consent_u` < p_c (so `consent_u` ≥ p_c declines; consistent with §3.3), stays with the vans, is never offered again, and the decline is counted (D-45).
 - A (consented) transfer decision at τ removes the request from van planning **at τ**, atomically, and puts it in `xfer_hold`.
 - At τ + ℓ the booking is placed (`lyft_booked`). If the rider's deadline falls inside the lag, the result is `cancel_after_transfer` and **no booking** is counted.
 - Lyft arrival = booking + `lyft_delay_s`. Presence uses the same draw U_r and the same p as for the van (D-48). Present → boarding dwell s = 30 s (the same as for vans, as in the L4 answer key) → direct ride of t₀(o,d) × m_L → `lyft_completed` at drop-off. Absent → `noshow_lyft` after the 180-s wait.
@@ -388,7 +390,7 @@ Ties inside a class are broken by request ID, then van ID.
 
 ### 17.8 Required logs
 - **Event log:** every event with time, class, request, van, old and new state.
-- **Epoch log:** trigger, open requests, candidates per van, solver status and gap, the chosen plan, pending requests with their reason and tentative ETA, and Lyft rule decisions with the quantity the rule read.
+- **Epoch log:** trigger, open requests, candidates per van, solver status and gap, the chosen plan, pending requests with their reason and tentative ETA, and Lyft rule decisions with the quantity the rule read. When a rule is active: the **plan the rule read** (routes, plan ETAs, and for each pending request its pending price and tentative ETA), what the rule read for each eligible request, its transfers and declines, and whether a re-solve followed (D-55).
 - **Plan audit** after every epoch: capacity, precedence, commitments, shift ends, guardrail (no new or increased violation), and the transfer invariant.
 - **Run manifest:** input hashes (`FROZEN_*.json`), policy file, code version, solver version and settings.
 
@@ -400,9 +402,21 @@ Ties inside a class are broken by request ID, then van ID.
 - **Planning a committed pickup:** the dispatcher plans as if the rider boards (it cannot see the presence draw).
 - **0-s legs** (consecutive stops at the same point): the arrival is processed in the same second, after that second's departures; this is the one exception to the class order of §17.3.
 - **Ties inside a class:** by key, so request IDs (R…) sort before van IDs (V…).
-- **Pending price (D-53):** selectable `original` (next tick; the documented D-29 price and the current default), `A` (earliest physically possible pickup; recommended, awaiting team approval) or `B` (after a chosen route; experimental). M = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r for every formulation.
+- **Pending price (D-53):** `A` (earliest physically possible pickup) is the **default, approved provisionally** on 22 Oct; `original` (next tick, the D-29 price) reproduces M1 and `B` (after a chosen route) the D-53 experiment. M = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r for every formulation.
 - **Dispatcher C:** candidates, units, pending price and its M bound, solver settings, status handling (no fallback) and tie-breaking are as recorded in D-52 and its amendment; the code is `src/sim/dispatch.py`.
-- **M0 Lyft harness:** in L4 the rules act only before 900 s (the hand-checkable window). General post-18:15 Lyft integration is M2.
+- **Lyft window:** in M2 and later the rule acts at every epoch (`lyft_window="evening"`). The M0 harness (`"m0"`: in L4 the rules act only before 900 s, the hand-checkable window) stays selectable to reproduce M0.
+- **What a rule reads (D-55):** the plan ETA for a request assigned in the plan it reads; for a pending request, the **tentative ETA** (cheapest feasible insertion into the chosen routes, computed outside the MILP, ignoring the cap); none if no van can feasibly take it (treated as infinite). The tentative ETA is distinct from A's pending price; neither is a promised pickup time.
+- **Rule pass:** once per epoch, on the first solve; accepted transfers and declines are applied, then one re-solve; the rule is not re-evaluated on the re-solved plan in the same second.
+- **R1u clock:** a request's "unassigned since" time is updated from the plan the rule read and again from the re-solved plan.
+
+## 21. Changes from v0.6 (22 Oct 2026)
+| v0.6 | v0.7 | Why |
+|---|---|---|
+| Pending price default "original" | Default A (approved provisionally); original and B kept as options | D-53 approval |
+| Lyft rules only in the M0 window | Rules act all evening; M0 window selectable | D-55 |
+| What a rule reads, rule pass and R1u clock implicit | Stated | D-55 (integration review) |
+| Consent boundary worded two ways | Accept iff consent_u < p_c | Integration review |
+| Epoch log without the plan the rule read | Logged, with the re-solve flag | D-55 |
 
 ## 20. Changes from v0.5 (22 Oct 2026)
 | v0.5 | v0.6 | Why |

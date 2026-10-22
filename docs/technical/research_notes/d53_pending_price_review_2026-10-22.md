@@ -266,3 +266,16 @@ If the team wants to *remove* the bias rather than shrink it, B (or a variant th
 - do not choose it from the L4 outcome numbers in §4.
 
 **One-line takeaway for the team:** *The pending price never changes how many riders are served, only which ones wait when the cap binds; A makes the price physically honest at zero cost, B makes it look ahead at a real cost, and neither predicts the future schedule.*
+
+---
+
+## Addendum (22 Oct 2026, after the team approved A)
+
+- **The default is now A.** `Config().pending_price` is now "A". The preserved evidence runs moved to `outputs/sim/d53_experiment/L4_R0_pp-{original,A,B}/`, and `outputs/sim/L4_R0/` is now the default (A) arm.
+- **The logged-run checks now point at the preserved folders.** They read `d53_experiment/L4_R0_pp-original`, `-A`, `-B` and `L4_R0_M1_reference`. The epochs were re-checked: 46 / 45 / 48 / 46, all matching the enumeration.
+- **The synthetic cases are unaffected by the default.** They still pass `pending_price` explicitly.
+- **New check:** `test_default_is_A_and_reproduces_preserved_A_run`.
+  - It runs L4 R0 in memory with `sim.engine.Engine` and `sim.run.policy_for(scen, "R0")`, and asserts the policy's dispatcher equals `Config()`.
+  - The resulting `events.csv` text is **byte-identical** to `d53_experiment/L4_R0_pp-A/events.csv`.
+  - Nothing is written to `outputs/`.
+- **Result:** `.venv/bin/python -m pytest -q tests/test_pending_price_independent.py` → 29 passed in 41 s. The added run accounts for about 38 s of that.

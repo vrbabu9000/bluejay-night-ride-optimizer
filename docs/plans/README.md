@@ -6,7 +6,7 @@
 | `phase1/` | Phase 1, Evidence: digitize all 12 April charts | v1 (as executed) | **Done**; G1 passed 30 Sep |
 | `phase2/` | Phase 2, Insights: T1-T10, zones v0, OSRM table | v1 (as executed) | **Done** 30 Sep |
 | `phase3/` | Phase 3, Build the world | **v4** (21 Oct) | **In progress**: L1–L5 generated; design consolidated 21 Oct (D-45–D-51); methodology report and build contract written; simulator started in Phase 4; v1 paused |
-| `phase4/` | Phase 4, Simulator and dispatcher | **v1** (22 Oct) | **In progress**: M0–M1 done and verified; D-53 experiment and D-54 done; M2 waits on the team's D-53 choice |
+| `phase4/` | Phase 4, Simulator and dispatcher | **v1** (22 Oct) | **In progress**: M0–M1 done and verified; A approved; M2 done and verified; M3 waits on the L5 policy settings |
 | `osrm/` | Local OSRM (standalone): plan, agent prompts, log | v1 | **Complete** 2 Oct (one team-policy decision pending: how teammates get the map data) |
 
 ## Rules (same spirit as the guide's versioning rule)

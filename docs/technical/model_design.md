@@ -1,8 +1,8 @@
-# Mathematical design and architecture (v0.4 draft, 22 Oct 2026)
+# Mathematical design and architecture (v0.5 draft, 22 Oct 2026)
 
 **Status:** a design document. Dispatcher C and the event engine are **implemented for L1–L4** (Phase 4 M0–M1, 22 Oct; `src/sim/`, decision log D-52); everything else here (T, G, H, the Lyft module after 18:15, evaluation) is a proposal, not implemented.
 
-**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. **v0.4 (22 Oct 2026):** pending-price formulations and the D-53 experiment; curb-wait planning (D-54); v0.3 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
+**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. **v0.4 (22 Oct 2026):** pending-price formulations and the D-53 experiment; curb-wait planning (D-54); v0.3 archived. **v0.5 (22 Oct 2026):** pending price A approved provisionally and made the default; the Lyft module runs all evening (M2, D-55); v0.4 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
 
 **Sources:**
 - `research_review.md` (direction and assumptions);
@@ -137,7 +137,7 @@ c_vk = Σ_{r∈S_k∪C_v} q_r·φ(W_r)  +  β·Σ_{r on route} q_r·H_r  +  γ·
   - *A:* b_r = q_r·φ(max(tn, L_r) − t_r), with L_r = min_v (free_v + T(loc_v, o_r)), the earliest physically possible pickup. This is a lower bound on any future service (up to a ≤ 13-s triangle-inequality exception, vans not yet on duty, and the next-tick floor). It is still optimistic when the nearest van is busy with its chosen route;
   - *B:* b_r = min over the chosen columns j of q_r·φ(max(tn, e_j + T(l_j, o_r)) − t_r), linearised with continuous z_rj ∈ [0,1], z_rj ≤ y_j, Σ_j z_rj = u_r. It is an estimate, not a bound: several pending riders may claim the same van's free time (optimistic), and a later epoch may insert the rider earlier (pessimistic). It adds |R| × |columns| variables and rows.
   - **M** = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r is valid for all three, because 0 ≤ b_r ≤ bmax_r. It guarantees the fewest pending *requests* only for proven-optimal solutions.
-  - **Neither A nor B is a guaranteed feasible future schedule for all pending riders.** Recommendation: A (D-53 update 2), awaiting team approval; the default stays original until then.
+  - **Neither A nor B is a guaranteed feasible future schedule for all pending riders.** **A is approved provisionally and is the default** (D-53 approval, 22 Oct), for its meaning and cost; its limitations are kept in the decision log and design-trail §11. The original reproduces M1; B remains an experimental option.
 - So: every open request has a single-insertion candidate; a pending request carries a **tentative ETA** (its cheapest feasible insertion, computed outside the solver) that the Lyft rules read; and the epoch log records **why** it is pending.
 - **M and π_r must be identical for all players** (literature note R-4); a weak π_r lets a solver look good by starving hard requests.
 
@@ -235,7 +235,7 @@ c_vk = Σ_{r∈S_k∪C_v} q_r·φ(W_r)  +  β·Σ_{r on route} q_r·H_r  +  γ·
 
 **Trade-off.** An integrated model (Lyft as a third option inside the solve, at cost κ) can pick the trips that are expensive for the fleet rather than merely late (Grahn et al. 2023; outsourcing literature). But κ has no defensible value, and integrating the rule changes the algorithm too. The integrated variant is therefore **deferred** and, if run, swept over κ as a penalty weight (not a price).
 
-**How the module runs.** It runs after each dispatcher solve. It sees each open request's t_r, q_r, assignment state and predicted van pickup P̂_r from the current plan. It cannot see latent draws.
+**How the module runs (implemented in M2, D-55).** It runs once per epoch, after the first dispatcher solve; accepted transfers leave van planning at once and the dispatcher re-solves once; the rule is not re-run on the re-solved plan in the same second. For a pending request it reads the tentative ETA (cheapest feasible insertion), which is distinct from the pending price. It sees each open request's t_r, q_r, assignment state and predicted van pickup P̂_r from the current plan. It cannot see latent draws.
 
 **Every rule shares these mechanics:**
 - **eligibility:** not committed or onboard; parties of 1–4 use a standard Lyft, parties of 5 a Lyft XL, kept together (D-33, 21 Oct; XL delay and availability unknown, same latent delay in the base; standard and XL counted separately);
@@ -333,6 +333,12 @@ flowchart LR
 ---
 
 ## 9. Changes
+### v0.4 → v0.5 (22 Oct 2026)
+| v0.4 | v0.5 | Decision |
+|---|---|---|
+| A recommended, default original | A approved provisionally, default | D-53 approval |
+| Lyft module described, not run after 18:15 | Implemented all evening; once-per-epoch rule pass | D-55 |
+
 ### v0.3 → v0.4 (22 Oct 2026)
 | v0.3 | v0.4 | Decision |
 |---|---|---|
