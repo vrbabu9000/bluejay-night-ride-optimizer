@@ -45,3 +45,6 @@ Found while preparing `BlueJay_Scenario_Methodology.pdf` (21–22 Oct 2026). **T
 - No-shows: 24,095 + 2,359 = 26,454; 2,359/26,454 = 8.92%; 2,359/50,297 = 4.69%.
 - Party mean 1.405; 1% of 168 = 1.68. φ(5/10/15/20) = 5/17.5/42.5/92.5; TransLoc check 2.5 > 2.
 - PDF Table 13 (L4 R0, 18:15 plan): waiting 546.58, riding 53.25, driving 1.65 and pending price 295.83 (total 897.32), re-derived independently from `outputs/sim/L4_R0/epochs.jsonl` and matching `narrative.md`. R002's earliest pickup 18:19:28 → 5·φ(19.47) ≈ 435.8 vs 262.5 pending, a 173-point gap matching the D-53 update.
+
+## D-53 / D-54 round (22 Oct 2026)
+No new conflict found between methodology v1.2, spec v0.6, model_design v0.4 and the decision log on the pending-price formulations, the M bound, the recommendation (A, awaiting team approval; code default still original) or the curb-wait convention (D-54). Table 14 of the PDF was re-derived from `outputs/sim/L4_R0`, `L4_R0_pp-A` and `L4_R0_pp-B` (outcome and epoch files, read only) and matches `d53_comparison.md` and methodology v1.2 §7.
