@@ -1,4 +1,4 @@
-# Scenario specification v0.5 (22 Oct 2026)
+# Scenario specification v0.6 (22 Oct 2026)
 
 **Built 20 Oct:** L1–L5 are generated in `data/scenarios/v2/` (34 scenarios; hashes in `FROZEN_v2.json`), with hand-check sheets for L1–L4 (`handcheck.csv` + `HANDCHECK.md`). L6–L7 wait for calibration.
 
@@ -12,6 +12,8 @@ v0.4 (21 Oct, documentation consolidation; §18):
 - **simulator build rules added as §17** (D-46–D-48);
 - stale counts, pairing and evidence wording corrected (D-49).
 
+v0.6 (22 Oct): curb-wait planning convention (D-54) and the selectable pending-price formulations of the D-53 experiment (§17.9, §20).
+
 v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–M1 implementation); §17 gains the conventions the implementation needed (§17.9); stale or ambiguous items found while writing the explanatory PDF are corrected (§19).
 
 **Authoritative documents for implementation:**
@@ -21,7 +23,7 @@ v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–
 - where they disagree, the decision log wins, then this file.
 
 The report-ready reasoning for each scenario-design choice is in the decision log, section "Scenario design trail".
-- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) are archived in `archive/`.
+- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5 (22 Oct) are archived in `archive/`.
 - It supersedes, for new work, the paused v1 scenario contract and v1 pre-registration. Both are kept unchanged.
 
 ---
@@ -393,12 +395,21 @@ Ties inside a class are broken by request ID, then van ID.
 ### 17.9 Conventions fixed by the M0–M1 implementation (D-52)
 - **Moving vans:** a van is re-routable only at a stop; once it departs toward a stop it completes that leg.
 - **Cancelled pickup:** if the rider cancels while the van is driving, the van still reaches the curb, finds no rider and is free at once (no dwell).
-- **No-show:** recorded 180 s after curb arrival; the van then leaves without dwell. During the wait the dispatcher sees the van free at arrival + 180 s without the rider; this is what the driver observes (no late boarding is assumed).
+- **No-show:** recorded 180 s after curb arrival; the van then leaves without dwell. The simulator never boards an absent rider.
+- **Curb-wait planning (D-54):** while the timer runs, the pickup stays committed and the planner assumes, for planning only, that the rider may board at expiry (30-s dwell, seat, drop-off obligation with the guardrail counted from expiry). The planner sees this state as `P_curb_wait` ("not present yet, timer running"), distinct from a terminal no-show; the obligation is removed when the no-show expires (an epoch trigger). Once every request is resolved, remaining plans are void. The M1 view (no-show treated as certain during the timer) is selectable only to reproduce M1.
 - **Planning a committed pickup:** the dispatcher plans as if the rider boards (it cannot see the presence draw).
 - **0-s legs** (consecutive stops at the same point): the arrival is processed in the same second, after that second's departures; this is the one exception to the class order of §17.3.
 - **Ties inside a class:** by key, so request IDs (R…) sort before van IDs (V…).
+- **Pending price (D-53):** selectable `original` (next tick; the documented D-29 price and the current default), `A` (earliest physically possible pickup; recommended, awaiting team approval) or `B` (after a chosen route; experimental). M = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r for every formulation.
 - **Dispatcher C:** candidates, units, pending price and its M bound, solver settings, status handling (no fallback) and tie-breaking are as recorded in D-52 and its amendment; the code is `src/sim/dispatch.py`.
 - **M0 Lyft harness:** in L4 the rules act only before 900 s (the hand-checkable window). General post-18:15 Lyft integration is M2.
+
+## 20. Changes from v0.5 (22 Oct 2026)
+| v0.5 | v0.6 | Why |
+|---|---|---|
+| During an absent rider's curb wait the planner saw the no-show as certain | Pickup stays committed; possible boarding at expiry for planning only | D-54 |
+| One pending price | Three selectable formulations; default unchanged until the team decides | D-53 update 2 |
+| Plans could outlive the last resolved request | Void once every request is resolved | D-54 (defect found) |
 
 ## 19. Changes from v0.4 (22 Oct 2026)
 | v0.4 | v0.5 | Why |

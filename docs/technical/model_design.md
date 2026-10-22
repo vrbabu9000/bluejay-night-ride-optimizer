@@ -1,8 +1,8 @@
-# Mathematical design and architecture (v0.3 draft, 22 Oct 2026)
+# Mathematical design and architecture (v0.4 draft, 22 Oct 2026)
 
 **Status:** a design document. Dispatcher C and the event engine are **implemented for L1–L4** (Phase 4 M0–M1, 22 Oct; `src/sim/`, decision log D-52); everything else here (T, G, H, the Lyft module after 18:15, evaluation) is a proposal, not implemented.
 
-**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
+**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. **v0.4 (22 Oct 2026):** pending-price formulations and the D-53 experiment; curb-wait planning (D-54); v0.3 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
 
 **Sources:**
 - `research_review.md` (direction and assumptions);
@@ -131,7 +131,13 @@ c_vk = Σ_{r∈S_k∪C_v} q_r·φ(W_r)  +  β·Σ_{r on route} q_r·H_r  +  γ·
 **Pending price π_r** = q_r·φ(W_r^next) + M, where W_r^next is the wait if r is picked up no earlier than the next epoch, and M is large.
 - *Correction (D-47).* v0.1 claimed that any feasible assignment then beats leaving r pending, so a request stays pending only when no candidate can take it. That is **false**: with a large M the solver first **maximises the number of requests served** over the candidate set, but a request can still stay pending when routes compete for it (taking r means dropping two others) or when the candidate cap excludes it.
 - **M (D-52):** per epoch, M = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r q_r·φ(W_r^next). Then every optimal solution leaves the fewest *requests* pending that the candidate set allows (proof: a solution with j fewer pending gains at least jM, more than any possible difference in route costs plus pending φ terms; checked by full enumeration on all 46 L4 R0 epochs by the independent tests, and on the math review's runs under the earlier drop order).
-- **Known bias (open, D-53):** π_r charges the wait at the next tick, which is earlier than any physically possible pickup, while a served request is charged its real pickup. When the cap binds, the cheapest requests to defer are those that would be picked up late, often the longest waiters. This works against the purpose of the convex φ. Two alternatives that keep the M bound are recorded in D-53; neither is implemented.
+- **Known bias of the original price (D-53):** π_r charges the wait at the next tick, which is earlier than any physically possible pickup, while a served request is charged its real pickup. When the cap binds, the cheapest requests to defer are those that would be picked up late, often the longest waiters. This works against the purpose of the convex φ.
+- **Three formulations (D-53 experiment, 22 Oct; selectable, `Config.pending_price`).** In each, π_r = b_r + M:
+  - *original:* b_r = q_r·φ(tn − t_r);
+  - *A:* b_r = q_r·φ(max(tn, L_r) − t_r), with L_r = min_v (free_v + T(loc_v, o_r)), the earliest physically possible pickup. This is a lower bound on any future service (up to a ≤ 13-s triangle-inequality exception, vans not yet on duty, and the next-tick floor). It is still optimistic when the nearest van is busy with its chosen route;
+  - *B:* b_r = min over the chosen columns j of q_r·φ(max(tn, e_j + T(l_j, o_r)) − t_r), linearised with continuous z_rj ∈ [0,1], z_rj ≤ y_j, Σ_j z_rj = u_r. It is an estimate, not a bound: several pending riders may claim the same van's free time (optimistic), and a later epoch may insert the rider earlier (pessimistic). It adds |R| × |columns| variables and rows.
+  - **M** = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r is valid for all three, because 0 ≤ b_r ≤ bmax_r. It guarantees the fewest pending *requests* only for proven-optimal solutions.
+  - **Neither A nor B is a guaranteed feasible future schedule for all pending riders.** Recommendation: A (D-53 update 2), awaiting team approval; the default stays original until then.
 - So: every open request has a single-insertion candidate; a pending request carries a **tentative ETA** (its cheapest feasible insertion, computed outside the solver) that the Lyft rules read; and the epoch log records **why** it is pending.
 - **M and π_r must be identical for all players** (literature note R-4); a weak π_r lets a solver look good by starving hard requests.
 
@@ -327,6 +333,12 @@ flowchart LR
 ---
 
 ## 9. Changes
+### v0.3 → v0.4 (22 Oct 2026)
+| v0.3 | v0.4 | Decision |
+|---|---|---|
+| One pending price with a known bias | Three formulations, M bound for each, A recommended | D-53 update 2 |
+| No-show treated as certain during the curb wait | Possible boarding at expiry, for planning only | D-54 |
+
 ### v0.2 → v0.3 (22 Oct 2026)
 | v0.2 | v0.3 | Decision |
 |---|---|---|

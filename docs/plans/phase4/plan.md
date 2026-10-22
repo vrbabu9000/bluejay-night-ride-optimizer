@@ -1,8 +1,8 @@
 # Phase 4, Simulator and dispatcher: plan (v1, 22 Oct 2026)
 
-**Status:** in progress. M0–M1 done and verified on 22 Oct; M2 waits on two team decisions (below).
+**Status:** in progress. M0–M1 done and verified on 22 Oct; the D-53 decision experiment and the curb-wait convention (D-54) done on 22 Oct; M2 waits on the team's choice of pending price.
 
-**Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.5 §17 (build contract) and `docs/technical/model_design.md` v0.3; decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.1 §8.
+**Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.6 §17 (build contract) and `docs/technical/model_design.md` v0.4; decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.2 §8.
 
 **Previous versions:** none. Why it changes: `log.md`.
 
@@ -16,7 +16,8 @@
 |---|---|---|
 | M0 | Event engine reproduces L1–L3 answer keys and the L4 pre-18:15 Lyft mechanics | **Done 22 Oct** (methodology §7) |
 | M1 | C on L4 under R0, with event and epoch logs and a readable narrative | **Done 22 Oct** |
-| M2 | Lyft rules after 18:15 with C on L4 | Waits on D-53 (pending price) and the curb-wait convention |
+| M1.5 | D-53 decision experiment (original / A / B pending price) and curb-wait convention D-54 | **Done 22 Oct**; A recommended, awaiting approval |
+| M2 | Lyft rules after 18:15 with C on L4 | Waits on the team's D-53 choice |
 | M3 | L5, 30 seeds: pairing, metrics, bootstrap CIs, pilot variance | Not started |
 | M4 | L6 builder, 64 / 50 / 54 (new scenario generation; needs go-ahead) | Not started |
 | M5 | First hour, 5 vans, 64 requests: benchmark of C | Not started; confirms or overturns D-51 |
