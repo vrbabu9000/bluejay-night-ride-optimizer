@@ -133,11 +133,11 @@
 \vspace{0.12in}
 {\sffamily\Large\color{heading} Scenario methodology and simulator contract,\\ explained\par}
 \vspace{0.35in}
-{\large An explanatory companion to the scenario methodology (v1.2), the scenario specification (v0.6) and the model design (v0.4)\par}
+{\large An explanatory companion to the scenario methodology (v1.3), the scenario specification (v0.7) and the model design (v0.5)\par}
 \vspace{0.3in}
 {\sffamily\small
 \begin{tabular}{@{}ll@{}}
-Status & Version 1.0 for team review. Section~7 reports the verified M0--M1 status.\\
+Status & Version 1.0 for team review. Section~7 reports the verified M0--M2 status.\\
 Date & 22 October 2026\\
 Sources read & Versions and fingerprints in \cref{app:sources}\\
 \end{tabular}\par}
@@ -443,7 +443,7 @@ The same rule with April-shaped availability (5, 4.95, 4.46 vans) gives 64 / 50 
 \cardrow{Sensitivity}{Lyft delay median 5 / 8 / 12 minutes, plus scarcity; lag 0 / 2 / 5 minutes; consent 1.0 / 0.8; dispatcher capacity (at most 3 transfers per 10 minutes); $f > 0$ (\st{lyft_failed}); longer or scarcer XL.}
 \end{blockcard}
 
-\textbf{The rules under study.} The Lyft rule is evaluated after every dispatcher solve, at time $\tau$. Only riders still pending with the vans (not committed, not on board) are eligible. Every rule counts waiting from the original request, and the rider's patience keeps running after a transfer (spec §6). \Cref{tab:rules} lists the rules; all are kept and run one at a time (\D{28}) \Accepted.
+\textbf{The rules under study.} The Lyft rule is evaluated once per epoch, after the first dispatcher solve, at time $\tau$ (\cref{sec:rulepass}). Only riders still pending with the vans (not committed, not on board) are eligible. Every rule counts waiting from the original request, and the rider's patience keeps running after a transfer (spec §6). \Cref{tab:rules} lists the rules; all are kept and run one at a time (\D{28}) \Accepted.
 
 \begin{table}[!htbp]
 \centering\small
@@ -552,9 +552,19 @@ Integer seconds make ties common. The contract fixes the order by event class (\
 \item A request that no route in the current plan serves stays \textbf{pending}. It still carries a \textbf{tentative ETA}, its cheapest feasible insertion computed outside the solver, and the log records why it is pending (competition with other requests, or the candidate cap). Lyft rules that read ETAs read this value (\D{47}(3)).
 \end{itemize}
 
+\subsection{The Lyft rule pass}\label{sec:rulepass}
+How the rule fits into an epoch was made explicit when the rules were run with the dispatcher all evening (\D{55}; spec §17.9):
+\begin{itemize}
+\item \textbf{Once per epoch, no cascade.} The dispatcher solves; the rule is evaluated once on that plan; accepted transfers and declines are applied; the dispatcher re-solves once. The rule is \emph{not} evaluated again on the re-solved plan in the same second.
+\item \textbf{What the rule reads.} For a request assigned in the plan, the plan's ETA. For a pending request, its \emph{tentative ETA}: the cheapest feasible insertion into the chosen routes, computed outside the MILP and ignoring the cap. If no van can feasibly take it, there is no ETA (treated as infinite).
+\item \textbf{Tentative ETA is not the pending price.} The tentative ETA is what the rule reads; the pending price (formulation A) is what the MILP charges for leaving a request waiting. They are computed differently, and \textbf{neither is a promised pickup time}.
+\item \textbf{R1u's clock.} The ``unassigned since'' time of a request is updated from the plan the rule read and again from the re-solved plan.
+\item \textbf{Logged.} When a rule is active, the epoch log keeps the plan the rule read (routes, plan ETAs, and each pending request's price and tentative ETA), what it read for each eligible request, its transfers and declines, and whether a re-solve followed (spec §17.8).
+\end{itemize}
+
 \subsection{Transfers and the Lyft service}
 \begin{itemize}
-\item \textbf{Consent.} In the base, $p_c = 1$, so every decision is a booking request. Where $p_c < 1$ (L4 uses 0.9; the consent sensitivity 0.8), a decision is an \emph{offer}: a rider whose \fn{consent_u} exceeds $p_c$ declines, stays with the vans, is never offered again, and the decline is counted.
+\item \textbf{Consent.} In the base, $p_c = 1$, so every decision is a booking request. Where $p_c < 1$ (L4 uses 0.9; the consent sensitivity 0.8), a decision is an \emph{offer}: a rider accepts if and only if \fn{consent_u} $< p_c$, so a draw equal to $p_c$ declines. A declining rider stays with the vans, is never offered again, and the decline is counted.
 \item \textbf{Transfer at the decision.} A consented decision at $\tau$ removes the request from van planning \emph{at $\tau$}, atomically, and puts it in \st{xfer_hold}. Leaving at the booking instead was rejected, because with $\ell$ = 120~s equal to the tick a van could be sent to a rider who is about to leave by Lyft.
 \item \textbf{Booking after the lag.} At $\tau + \ell$ the booking is placed. If the rider's deadline falls inside the lag, the outcome is \st{cancel_after_transfer} and \textbf{no booking} is counted.
 \item \textbf{Arrival and ride.} The Lyft arrives at booking + $\lambda_r$. The presence test uses the same $U_r$ and $p$ as for vans. A present rider boards (30~s dwell, as for vans) and rides directly; an absent one becomes \st{noshow_lyft} after 180~s.
@@ -599,7 +609,7 @@ Building the simulator required a few rules the contract had not spelled out. Th
 \item \textbf{Planning a committed pickup:} the dispatcher plans as if the rider boards, because it cannot see the presence draw.
 \item \textbf{0-s legs} (consecutive stops at the same point): the arrival is processed in the same second, after that second's departures. This is the one exception to the class order of \cref{tab:order}.
 \item \textbf{Ties inside a class} are broken by key, so request IDs (R\ldots) sort before van IDs (V\ldots).
-\item \textbf{M0 Lyft harness:} in L4 the transfer rules act only before 18:15 (900~s), the hand-checkable window. Lyft rules running alongside the dispatcher after 18:15 are milestone M2.
+\item \textbf{Lyft window:} from M2 on, the rule acts at every epoch of the evening. The M0 harness, in which the L4 rules act only before 18:15 (900~s, the hand-checkable window), stays selectable to reproduce M0 (spec §17.9).
 \end{itemize}
 
 \subsection{Terminal states and the dashboard view}
@@ -666,13 +676,26 @@ where $T_r$ is the direct van time \Assumed. The form is \Accepted{} (\D{29}). T
 \end{equation}
 where $W_r^{\text{next}}$ is its wait if picked up no earlier than the next epoch and $M$ is large. With a large $M$ the solver first serves as many requests as it can within its candidate routes, then minimises points. A request can still be left pending when routes compete for it (taking it would mean dropping two others) or when the candidate cap leaves it out (\D{47}(3), a \Correction{} of an earlier claim that this could not happen). $M$ must be the same for every dispatcher, otherwise a dispatcher could look good by starving hard requests. In the implementation $M$ is set at each epoch to an explicit bound that guarantees every optimal plan leaves the fewest requests pending that the candidate set allows (\D{52}).
 
-\textbf{A known bias, and three ways to price a pending request} (\D{53}). The price above charges a pending request as if it were picked up at the next epoch, earlier than any physically possible pickup, while a served request is charged its real, later pickup. When the candidate cap binds, the cheapest requests to defer can therefore be the longest waiters, which works against the purpose of the convex $\varphi$. The implementation now offers three selectable formulations. In each, $\pi_r = b_r + M$:
+\textbf{A known bias, and three ways to price a pending request} (\D{53}). The price above charges a pending request as if it were picked up at the next epoch, earlier than any physically possible pickup, while a served request is charged its real, later pickup. When the candidate cap binds, the cheapest requests to defer can therefore be the longest waiters, which works against the purpose of the convex $\varphi$. The implementation offers three selectable formulations; A is now the default. In each, $\pi_r = b_r + M$:
 \begin{itemize}
-\item \textbf{Original:} $b_r = q_r\,\varphi(t_{\text{next}} - t_r)$, the wait at the next epoch. This is the documented price (\D{29}).
-\item \textbf{A, earliest physical pickup:} $b_r = q_r\,\varphi(\max(t_{\text{next}}, L_r) - t_r)$, where $L_r$ is the earliest time any van could physically reach the rider from where it will next be free. A is a \emph{lower bound} on any future service, with small stated exceptions: a triangle-inequality slack of at most 13~s in the travel table, vans not yet on duty, and the next-epoch floor. It is still optimistic when the nearest van is busy with its own chosen route. It adds no variables.
+\item \textbf{Original:} $b_r = q_r\,\varphi(t_{\text{next}} - t_r)$, the wait at the next epoch. This was the documented price (\D{29}) and the M1 default; it remains an option to reproduce M1.
+\item \textbf{A, earliest physical pickup:} $b_r = q_r\,\varphi(\max(t_{\text{next}}, L_r) - t_r)$, where $L_r$ is the earliest time any on-duty van could physically reach the rider directly from where it will next be free. A is a \emph{lower bound} on any future service, with small stated exceptions: a triangle-inequality slack of at most 13~s in the travel table, vans not yet on duty, and the next-epoch floor. It is still optimistic when the nearest van is busy with its own chosen route. It adds no variables.
 \item \textbf{B, after a chosen route:} $b_r$ is the wait the rider would have if picked up at the end of one of the chosen routes, the cheapest such route being used. B is an \emph{estimate, not a bound}. It can under-charge, when several pending riders claim the same van's free time, and over-charge, when a later epoch inserts the rider earlier. Its size grows with the number of requests times the number of candidate routes.
 \end{itemize}
-The same $M$ bound is valid for all three. It guarantees the fewest pending requests only for solutions proven optimal. \textbf{Neither A nor B describes a feasible joint future schedule} for all pending riders. The team's experiment and its recommendation are in \cref{sec:status}. \textbf{Recommendation A awaits team approval; the code default is still the original price} \Open.
+The same $M$ bound is valid for all three. It guarantees the fewest pending requests only for solutions proven optimal. \textbf{Neither A nor B describes a feasible joint future schedule} for all pending riders. The experiment behind the choice is in \cref{sec:status}.
+
+\textbf{The decision: A, approved provisionally and now the default} \Provisional. There were two separate approvals: first the team authorized only an \emph{experiment} comparing the three formulations, and then it approved A (\D{53} approval; design trail §11). The reasons are:
+\begin{itemize}
+\item A replaces next-tick-only pricing with a direct physical pickup estimate, $L_r$ = the minimum over on-duty vans of (free time + direct travel to the origin);
+\item it adds no variables to the MILP;
+\item the verified $M$ bound keeps the intended request-count priority for proven-optimal solutions;
+\item B grew the model substantially (about 9,800 extra variables on L4, about 135,000 in a synthetic five-van epoch) without giving a reliable estimate of deferred service, since it can err in both directions.
+\end{itemize}
+The approval does \emph{not} rest on any single rider's earlier pickup or on the lower maximum wait of one evening.
+
+\textbf{Runtime.} A added no variables, and its MILP solve time was essentially unchanged from the original (0.10~s versus 0.10~s per evening). The whole evening ran longer (about 35~s versus 25~s) only because candidate generation followed a different trajectory, not because of A.
+
+\textbf{Limitations that remain.} A ignores the competing work of the van that could arrive first, so it can still under-price postponement. It does not guarantee oldest-first service, accurate future pickup times, or a feasible joint schedule for all pending requests. ``Earliest physical pickup'' rests on the implementation's assumptions: only vans already on duty count, travel is direct with no detours, the price is floored at the next tick, and there is a triangle-inequality exception of at most 13~s on 3 matrix pairs. On L4 the change \emph{redistributed} waiting: the longest waits fell and some younger requests waited longer. It did not improve every outcome or establish general superiority. The choice is to be revisited if the five-van benchmark (M5) shows the remaining bias matters, if the team changes the request-count priority, or if a cheaper and reliable estimate of deferred service appears.
 
 \subsection{The route-selection model}
 \textbf{Candidate routes.} For each van $v$, routes $k$ are built in advance. Each is an ordered stop list that starts at the van's committed next stop, keeps all drop-offs of riders already on board and any committed pickup, and adds a subset $S_k$ of open requests (pickup before drop-off). The ``committed work only'' route is always included, so a feasible plan always exists. Capacity, pickup-before-drop-off, commitments, shift ends and the guardrail are all enforced while routes are built; each candidate is simulated forward to give every rider's pickup and drop-off times.
@@ -811,10 +834,10 @@ Because these traits are drawn once per request and shared by every rule, a ride
 
 % ================================================================== 7
 \section{Implementation status, provisional assumptions and next milestones}\label{sec:status}
-This section reports what the first simulator milestone (M0--M1, 22 October 2026) built and verified, taken from \fn{scenario_methodology.md} v1.2 §7--§9. It keeps two things apart: what has been \textbf{verified} and what is only \textbf{planned}.
+This section reports what the simulator milestones M0--M2 (22 October 2026) built and verified, taken from \fn{scenario_methodology.md} v1.3 §7--§9. It keeps two things apart: what has been \textbf{verified} and what is only \textbf{planned}.
 
 \begin{callout}[What this section does and does not show]
-Only designed validation cases (L1--L4, plus a run-time probe on one L5 night) have been simulated. The outcomes below are \Simulated{} outcomes of a \Designed{} case, not evidence about the real service. \textbf{No Lyft-rule comparison has been run, and no rule has won.}
+Only designed validation cases (L1--L4, plus a run-time probe on one L5 night) have been simulated. The outcomes below are \Simulated{} outcomes of \Designed{} cases, not evidence about the real service. M2 ran every Lyft rule through one designed integration evening to check that the pieces work together; \textbf{that is not a comparison of rules, and no rule has won.}
 \end{callout}
 
 \subsection{What was built}
@@ -823,14 +846,14 @@ The code lives in \fn{src/sim/}, with settings recorded in \D{52} and its amendm
 \item \textbf{Input loader:} reads the frozen scenario files read-only and refuses to run if a content hash differs from the frozen record.
 \item \textbf{Event engine (the referee):} owns the clock, the same-second order of \cref{tab:order}, every request state and the hidden rider traits, which it applies only when their event happens.
 \item \textbf{Dispatcher C:} for each van, every subset of at most three open requests with its best order of all stops (found exactly), then the selection model of \cref{sec:math} solved by HiGHS, with the explicit $M$ bound, exact integer costs, status handling and a fixed tie rule.
-\item \textbf{Lyft rules:} exercised only before 18:15 in L4 (the M0 scope).
+\item \textbf{Lyft rules:} from M2 they act at every epoch of the L4 evening, with the full transfer lifecycle (\D{55}); the M0 window (before 18:15 only) stays selectable to reproduce M0.
 \item \textbf{Runner:} writes the event log, the epoch log, per-request outcomes, a run manifest and a readable narrative.
 \end{itemize}
 
 \subsection{What was verified}
 \begin{table}[H]
 \centering\small
-\caption[What M0--M1 verified]{What M0--M1 verified (\fn{scenario_methodology.md} v1.2 §7).}\label{tab:verified}
+\caption[What M0--M1 verified]{What M0--M1 verified (\fn{scenario_methodology.md} v1.3 §7).}\label{tab:verified}
 \begin{tabularx}{\textwidth}{@{}P{3.2cm}L@{}}
 \toprule
 \textbf{Check} & \textbf{Result}\\
@@ -842,14 +865,14 @@ Best order per subset & For 40 van states of the L4 R0 run, every subset of at m
 Invariants & One terminal state per request; no request both in a van route and a Lyft state; capacity; committed pickups served by the committing van; no ride over the guardrail in these runs\\
 Hidden traits & The dispatcher's observation has no hidden-trait fields; changing patience values that never fire leaves plans unchanged\\
 Reproducibility & Two runs give identical event logs and epoch records (wall times excluded); frozen inputs unchanged\\
-Test suite & 140 tests pass on 22 October, after the pending-price experiment: 46 pre-existing scenario tests, 32 engine tests and 7 curb-wait tests, 27 independent route tests and 28 independent pending-price tests\\
+Test suite & 253 tests pass on 22 October, after M2: 46 pre-existing scenario tests; 39 engine and curb-wait tests; 38 independent route tests, 29 independent pending-price tests and 101 independent M2 integration tests\\
 Integrated review & Ready to hand to the team once its should-fix items were addressed; all were addressed on 22 October (status labels, plan audit, wording)\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\subsection{What M1 showed on L4 under R0}
-L4 is a designed case: two vans come on duty at 18:15, when nine requests are already waiting. Under R0 (no transfers), the run showed the following \Simulated:
+\subsection{What M1 showed on L4 under R0 (original pending price)}
+L4 is a designed case: two vans come on duty at 18:15, when nine requests are already waiting. The M1 run used the pending price then in force, the original one. Under R0 (no transfers), it showed the following \Simulated:
 \begin{itemize}
 \item At 18:15 the MILP jointly assigns three requests to each van (the cap $K = 3$), sequences them, and leaves three pending, with the cap recorded as the reason (\cref{tab:plan1815}).
 \item The plan changes at most epochs while the queue lasts, because uncommitted requests are reassigned; committed pickups never move.
@@ -859,7 +882,7 @@ L4 is a designed case: two vans come on duty at 18:15, when nine requests are al
 
 \begin{table}[H]
 \centering\small
-\caption[The 18:15 plan in L4 under R0]{The plan chosen at 18:15 in L4 under R0 \Designed\ \Simulated. Times are the curb arrivals planned at 18:15; later epochs revised some of them. Points use $\varphi$ and the party size. The three pending requests are priced at the next tick (18:16:00), excluding $M$. Re-derived for this document from \fn{outputs/sim/L4_R0/epochs.jsonl}; they match the run's narrative. A mirror plan (the vans swapped) scores the same.}\label{tab:plan1815}
+\caption[The 18:15 plan in L4 under R0]{The plan chosen at 18:15 in L4 under R0 \Designed\ \Simulated. Times are the curb arrivals planned at 18:15; later epochs revised some of them. Points use $\varphi$ and the party size. The three pending requests are priced at the next tick (18:16:00), excluding $M$. Re-derived for this document from the preserved M1 run, \fn{outputs/sim/L4_R0_M1_reference/epochs.jsonl}; they match that run's narrative. A mirror plan (the vans swapped) scores the same.}\label{tab:plan1815}
 \begin{tabularx}{\textwidth}{@{}llrrrrL@{}}
 \toprule
 \textbf{Van} & \textbf{Request} & \textbf{Party} & \textbf{Requested} & \textbf{Planned curb} & \textbf{Wait} & \textbf{Points}\\
@@ -888,7 +911,7 @@ On 22 October the team authorized a bounded experiment, not an adoption (\D{53} 
 
 \begin{table}[H]
 \centering\small
-\caption[Pending-price formulations compared on L4 under R0]{Pending-price formulations compared on one designed night (L4 under R0, 16 requests) \Designed\ \Simulated. These numbers describe behaviour on this night; they are not a ranking, and no Lyft rule was involved. Waits are in minutes over the 16 riders picked up. Re-derived for this document from the three runs' outcome and epoch files; assignment changes are quoted from \fn{outputs/sim/d53_comparison.md}.}\label{tab:d53}
+\caption[Pending-price formulations compared on L4 under R0]{Pending-price formulations compared on one designed night (L4 under R0, 16 requests) \Designed\ \Simulated. These numbers describe behaviour on this night; they are not a ranking, and no Lyft rule was involved. Waits are in minutes over the 16 riders picked up. Re-derived for this document from the three runs' outcome and epoch files in \fn{outputs/sim/d53_experiment/}; assignment changes are quoted from its \fn{d53_comparison.md}.}\label{tab:d53}
 \begin{tabularx}{\textwidth}{@{}LP{3.05cm}P{3.05cm}P{3.05cm}@{}}
 \toprule
 \textbf{Measure} & \textbf{Original} & \textbf{A} & \textbf{B}\\
@@ -904,19 +927,70 @@ MILP time (s) / extra variables & 0.10 / 0 & 0.10 / 0 & 4.8 / up to 9,828\\
 
 \textbf{How to read it.} Removing the impossible part of the bias shortens the longest waits: R005 waited 44 minutes under the original price and about 32--33 under A or B. The cost is that waiting shifts toward younger requests. R009, the newest request at 18:15, waited 9:48 under the original price and about 35 minutes under A or B. That is the priority the convex penalty intends, but it is a trade-off and is stated as one. B is larger and slower: in a synthetic five-van, 20-request epoch it needed 135,100 extra variables and 19.6~s.
 
-\textbf{Recommendation: A, awaiting team approval} \Open. A has a one-sentence meaning (a pending rider is never charged less than the cheapest pickup any van could physically make), adds no variables or solver time, and keeps the $M$ bound. It is recommended for its meaning and cost, not because of this one night. Its remaining bias points the same way as before, but is smaller. B would stay at most a labelled sensitivity check. \textbf{Until the team decides, the code default remains the original price.} The finding should be revisited if the five-van benchmark (M5) shows a different pattern.
+\textbf{Outcome: A approved provisionally and made the default} \Provisional. The team then approved A as the pending-price formulation (\D{53} approval), for the reasons given in \cref{sec:math}: its meaning and its cost, not this one night. The original price and B remain explicit options, to reproduce M1 and the experiment. The M1 outputs and the experiment's outputs are preserved unchanged.
+
+\subsection{M2: the Lyft rules with the dispatcher, over the whole L4 evening}
+In M2 (\D{55}) each rule ran separately on the same frozen L4 inputs, with R0 as the reference. Dispatcher C used pending price A and the curb-wait convention, and the L4 settings were a lag of 2 minutes, a Lyft delay of 8 minutes and a consent probability of 0.9. All the following held:
+\begin{itemize}
+\item every epoch was proven optimal over its candidate set (one epoch each under R2 and R3 had nothing to decide);
+\item every request ended in exactly one terminal state;
+\item offers, accepted transfers, bookings and completed Lyft trips reconcile, standard and XL separately, and the party of five is always one XL booking;
+\item the R0 run reproduces the experiment's A arm exactly.
+\end{itemize}
+
+\begin{table}[H]
+\centering\small
+\caption[M2 on L4: one designed integration evening]{M2 on L4: each rule run separately on one designed integration evening (16 requests, 29 passengers) \Designed\ \Simulated. \textbf{These numbers show that the pieces work together and that every rider and booking is counted once; they do not rank the rules.} Waits are in minutes over the 16 requests picked up, in either mode. ``Reached'' counts every request whose vehicle reached the curb within 15 minutes. Re-derived for this document from each run's outcome and event files; they match \fn{outputs/sim/m2_L4_report.md}.}\label{tab:m2}
+\begin{tabularx}{\textwidth}{@{}Lcccccc@{}}
+\toprule
+\textbf{Measure} & \textbf{R0} & \textbf{R1(10)} & \textbf{R1(15)} & \textbf{R1u(10)} & \textbf{R2(15)} & \textbf{R3(2)}\\
+\midrule
+Van / Lyft completed & 16 / 0 & 9 / 7 & 11 / 5 & 13 / 3 & 4 / 12 & 4 / 12\\
+Offers accepted / declined & 0 / 0 & 7 / 1 & 5 / 1 & 3 / 1 & 12 / 1 & 12 / 1\\
+Transfers before / from 18:15 & 0 / 0 & 3 / 4 & 0 / 5 & 3 / 0 & 8 / 4 & 8 / 4\\
+Wait P90 & 31.2 & 20.3 & 25.4 & 22.9 & 13.2 & 11.8\\
+Reached within 15 min (of 16) & 5 & 7 & 6 & 7 & 15 & 15\\
+Van-km & 38.0 & 24.6 & 24.9 & 33.8 & 16.5 & 16.5\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{What the logs show} (thresholds unchanged):
+\begin{itemize}
+\item \textbf{R1u(10) transfers nobody after 18:15.} Once the vans are on duty, C puts every waiting request into some van's plan within at most 4 minutes, so ``continuously unassigned for 10 minutes'' never holds. The rule measures assignment, not waiting; its three transfers all happen before 18:15, when no van exists.
+\item \textbf{Elapsed-time rules can send a rider to Lyft whose van was due sooner.} Under R1(15), R001 is transferred at 18:15 although its van was predicted at 18:17:44 and the Lyft arrives at 18:25. That is what a rule based only on time waited does; it is not a defect.
+\item \textbf{R2(15) and R3(2) are similar, not identical.} They transfer R011 at 18:20 and at 18:17 respectively. Their summary rows coincide partly by chance on this small evening.
+\end{itemize}
+
+\textbf{One transfer, end to end (R2(15) at 18:20).} The dispatcher solves first. The rule then reads R011's plan ETA, a pickup at 18:35:20, which would mean a total wait of 18:50 from its 18:16:30 request, more than 15 minutes, so the rule fires. It transfers R011, R012, R015 and R016, each of which leaves van planning at once, and the dispatcher re-solves once. \Cref{tab:m2step} shows what the re-solve changed for the riders who stayed on the vans. These are \emph{planned} times at that epoch, read from the epoch log, not promises.
+
+\begin{table}[H]
+\centering\small
+\caption[Planned drop-offs before and after the 18:20 re-solve under R2(15)]{Planned drop-offs of riders who stayed on van V1, before and after the 18:20 re-solve under R2(15) \Designed\ \Simulated. Planned times at that epoch, not promises. Checked against the plan the rule read and the re-solved plan in \fn{outputs/sim/L4_R2-15/epochs.jsonl}.}\label{tab:m2step}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Rider} & \textbf{Plan the rule read} & \textbf{Re-solved plan}\\
+\midrule
+R013 & 18:45:59 & 18:32:30\\
+R003 & 18:42:57 & 18:35:18\\
+R014 & 18:38:18 & 18:39:31\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Limitations of M2.} This is one designed evening of 16 requests with no cancellations or no-shows in its frozen inputs; those paths are covered only by controlled in-memory test cases. The no-cascade rule is confirmed structurally, but L4 never produced a case where a second rule pass would have fired. Nothing here ranks the rules.
 
 \subsection{Status by item}
 \begin{table}[H]
 \centering\small
-\caption{Status by item after M0--M1 (\fn{scenario_methodology.md} v1.2 §7).}\label{tab:statusitems}
+\caption{Status by item after M0--M2 (\fn{scenario_methodology.md} v1.3 §7).}\label{tab:statusitems}
 \begin{tabularx}{\textwidth}{@{}P{3.6cm}L@{}}
 \toprule
 \textbf{Status} & \textbf{Items}\\
 \midrule
-Implemented and verified & Event engine for L1--L4 events (requests, movement, boarding, drop-offs, curb waits and no-shows, designed cancellations, commitment, periodic re-planning, backlog completion); dispatcher C; L4 pre-18:15 Lyft mechanics; logs and narrative\\
+Implemented and verified & Event engine for L1--L4 events (requests, movement, boarding, drop-offs, curb waits and no-shows, designed cancellations, commitment, periodic re-planning, backlog completion); dispatcher C with pending price A (approved provisionally); the curb-wait convention \D{54}; the Lyft rules all evening on L4 with the full transfer lifecycle (M2); logs, narratives and reports\\
 Implemented, provisional & All \D{52} settings ($K = 3$, $\Psi = 1000$, solver budget, tie rule); presence $p = 0.089$ (L1--L4 do not depend on it); the conventions of \cref{sec:conventions}\\
-Documented only & Lyft rules after 18:15 with the dispatcher (M2); evaluation metrics and bootstrap intervals; pre-registration\\
+Documented only & Evaluation metrics across many nights and bootstrap intervals (M3); pre-registration\\
 Not started & Heuristic T; hindsight H; the L6 and L7 builders; calibration; the M5 benchmark; the experiment grid\\
 \bottomrule
 \end{tabularx}
@@ -927,22 +1001,22 @@ Not started & Heuristic T; hindsight H; the L6 and L7 builders; calibration; the
 \item C is optimal \textbf{over its candidate set at each epoch, subject to solver status}; it is not optimal over all routes or over the evening, and it is myopic.
 \item $K = 3$ is a tractability choice for pure Python. It shapes ETAs and pending status, so it is part of the held-fixed dispatcher.
 \item Guardrail excesses can still arise between epochs (after a no-show wait, or where the travel matrix breaks the triangle inequality by up to 12.7~s). None occurred in these runs; reports must attribute any that do.
-\item During an absent rider's curb wait the planner now keeps the pickup committed and plans for a possible boarding at expiry (\D{54}, adopted 22 October; planning only, not Hopkins policy).
+\item During an absent rider's curb wait the planner keeps the pickup committed and plans for a possible boarding at expiry (\D{54}, adopted 22 October; planning only, not Hopkins policy).
 \item Shift ends (tapering, L7) are not implemented, and the rule's wording is open.
 \end{itemize}
 
 \subsection{Next milestone and how the work grows}
-\textbf{M2, Lyft rules with the dispatcher on L4} (planned). \emph{Entry condition:} the team approves a pending-price formulation (\D{53}; A recommended), because rules R2 and R3 read the ETAs and pending status it produces. The curb-wait convention is settled (\D{54}). \emph{What it adds:} the transfer rules running after 18:15 alongside C, on the same frozen L4 inputs, with transfers leaving van planning at the decision. \emph{What it would show:} each rule's transfers traced through a whole evening, with an auditable proof that no rider is served twice and that waits and Lyft counts add up, on one designed night. It would \textbf{not} rank the rules.
+\textbf{M3, the paired-night pipeline on L5} (planned). \emph{Entry decision:} the L5 policy settings for the rehearsal. L5's frozen inputs specify no dispatcher lag or consent probability, and they carry a \fn{p_noshow} value the simulator must not read (\D{48} errata). The proposal is a lag of 2 minutes and consent 1.0 (the specification's base), presence $p = 0.089$ (provisional, \D{48}) and the placeholder patience as frozen. The team must also decide which metric set to compute, since \D{50} is a proposal. \emph{What it adds:} all six rules on the 30 paired L5 nights (2 vans, 28 requests with a burst, random patience, presence and Lyft delays), with metrics, paired differences and bootstrap intervals. \emph{What it would show:} that pairing, cancellations, no-shows, metrics and intervals work end to end over many nights, and how large the night-to-night variation is, an input to the power check. It is too small, and its parameters are placeholders, so it supports \textbf{no} conclusion about the rules.
 
 \begin{table}[H]
 \centering\small
-\caption{Milestones (\fn{scenario_methodology.md} v1.2 §8). Only M0--M1 is done; the rest is a plan.}\label{tab:milestones}
+\caption{Milestones (\fn{scenario_methodology.md} v1.3 §8). M0--M2 are done; the rest is a plan.}\label{tab:milestones}
 \begin{tabularx}{\textwidth}{@{}P{1.6cm}LLP{1.9cm}@{}}
 \toprule
 \textbf{Milestone} & \textbf{Adds} & \textbf{Shows} & \textbf{State}\\
 \midrule
 M0--M1 & Referee; C on L4 under R0 & Exact answer keys; joint optimization on overlapping requests & Done, verified\\
-M2 & Lyft rules after 18:15 with C on L4 & Transfer bookkeeping through a full evening & Planned\\
+M2 & The Lyft rules all evening with C on L4 & Transfer bookkeeping through a full evening & Done, verified\\
 M3 & L5, 30 seeds & Pairing, metrics, bootstrap intervals, pilot variance & Planned\\
 M4 & The L6 builder, 64 / 50 / 54 (needs go-ahead) & Inputs for the demonstration & Planned\\
 M5 & First hour: 5 vans, 64 requests; benchmark & Whether C fits the budget, confirming or overturning \D{51} & Planned\\
@@ -954,11 +1028,11 @@ M7 & The experiment grid & The research answer & Planned\\
 
 \subsection{Open decisions for the team}
 \begin{enumerate}
-\item \D{53}: approve a pending-price formulation (A recommended; or keep the original, or B), before M2.
-\item The curb-wait convention is settled by \D{54} (22 October).
+\item The L5 policy settings for M3 (lag, consent, presence $p$) and the metric set.
 \item Review of the provisional \D{52} settings ($K = 3$, $\Psi$, solver budget, tie rule) and of the proposed conventions \D{46}, \D{47}(2), \D{48} and \D{50}.
 \item Later, not now: accepting the dashboard status mapping that pins $p \approx 8.9\%$, and the calibration targets.
 \end{enumerate}
+Settled on 22 October: the pending price (A, provisionally, \D{53} approval) and the curb-wait convention (\D{54}).
 
 \begin{table}[H]
 \centering\small
@@ -971,14 +1045,15 @@ Held-fixed van dispatcher (\D{51}) & C, conditional on the M5 benchmark & \Provi
 Simulator build conventions (\D{46}) & spec §17 & \Proposed\\
 Guardrail convention; solver settings (\D{47}(2), (4)) & no new or increased violation; gap 0, node limit & \Proposed\\
 Candidate rule (\D{52} and amendment) & $K = 3$ new pickups per route; all stops reordered & \Provisional\\
-Pending-price formulation (\D{53}) & original is the code default; A recommended, awaiting approval & \Open\\
+Pending-price formulation (\D{53}) & A, the default; original and B kept as options & \Provisional\\
+Curb-wait convention (\D{54}) & pickup stays committed; possible boarding at expiry, planning only & \Provisional\\
+L5 policy settings for M3 & lag 2 min, consent 1.0, $p = 0.089$ proposed; metric set & \Open\\
 No-show probability $p$ (\D{48}) & $\approx$ 8.9\% per arrival under the mapping & \Proposed\\
 Margins and primary metric (\D{50}) & 1 min / 2 points; share not reached in 15 min & \Proposed\\
 Request count (\D{35}, \D{36}) & 64 / 50 / 54 = 168 & \Provisional\\
 Patience distribution and range (\D{39}) & Weibull 1.5, median 18; 50--75\% & \Provisional\\
 L6 base geography (\D{34}) & reference or dispersed & \Provisional\\
 Status mapping behind $p$ & not accepted & \Open\\
-Curb-wait convention (\D{54}) & pickup stays committed; possible boarding at expiry, planning only & \Provisional\\
 Shift-end rule (L7 only) & two wordings; not implemented & \Open\\
 \bottomrule
 \end{tabularx}
@@ -1053,6 +1128,8 @@ D-53 (upd.) & 22 Oct & Review findings and proposals A and B for the pending pri
 D-53 (upd.~2) & 22 Oct & Pending-price experiment: three selectable formulations compared on L4; recommendation A & Experiment done; A awaits team approval; default stays original\\
 D-54 & 22 Oct & Curb-wait planning: pickup stays committed; possible boarding at expiry for planning only; obligation removed at no-show expiry & Adopted as planning default; provisional\\
 D-52 (am.~4) & 22 Oct & Robustness fixes: exact-integer tie enumeration; plans voided once all requests are resolved; richer epoch logs & Implemented\\
+D-53 (appr.) & 22 Oct & Pending price A approved after a separate experiment approval; A becomes the default; original and B kept as options & Approved, provisional\\
+D-55 & 22 Oct & M2: Lyft rules with C over the whole L4 evening; rule pass, what a rule reads, R1u clock and consent made explicit & Implemented and verified\\
 \end{longtable}
 }
 
@@ -1158,13 +1235,14 @@ This companion was prepared from the files below, last read on 22 October 2026. 
 \endhead
 \bottomrule
 \endfoot
-\fn{scenario_methodology.md} & v1.2, 22 Oct 2026 & \texttt{17025bb880d0bc7a}\\
-\fn{scenario_spec.md} & v0.6, 22 Oct 2026 & \texttt{1fd80b709dde9936}\\
-\fn{model_design.md} & v0.4 draft, 22 Oct 2026 & \texttt{0599d4ed77c9dd58}\\
-\fn{decision_log.md} & through \D{54} and \D{52} amendment 4, 22 Oct 2026 & \texttt{b22e512c1a5e2e35}\\
+\fn{scenario_methodology.md} & v1.3, 22 Oct 2026 & \texttt{20fa76a050d4c610}\\
+\fn{scenario_spec.md} & v0.7, 22 Oct 2026 & \texttt{f2d74e9806946dd7}\\
+\fn{model_design.md} & v0.5 draft, 22 Oct 2026 & \texttt{407d2d5bcfb7f1c5}\\
+\fn{decision_log.md} & through \D{55} (with \D{53} approval), 22 Oct 2026 & \texttt{2c68be1f052d55c7}\\
 \fn{preregistration_v2.md} & draft, revised 22 Oct 2026 & \texttt{6b05cf0ffed51b73}\\
-\fn{outputs/sim/L4_R0/}\newline\fn{epochs.jsonl} & original-price arm (D-53 run), read only & \texttt{30904f546fc98f28}\\
-\fn{outputs/sim/}\newline\fn{d53_comparison.md} & D-53 comparison, read only & \texttt{38f11a09deafbc91}\\
+\fn{outputs/sim/}\newline\fn{L4_R0_M1_reference/}\newline\fn{epochs.jsonl} & M1 run, original price (Table 13), read only & \texttt{7b962cc5a96ee9e0}\\
+\fn{outputs/sim/}\newline\fn{d53_experiment/}\newline\fn{d53_comparison.md} & D-53 experiment (Table 14), read only & \texttt{38f11a09deafbc91}\\
+\fn{outputs/sim/}\newline\fn{m2_L4_report.md} & M2 report (Tables 15--16), read only & \texttt{dbc1e1dc841d5cf2}\\
 \end{longtable}
 }
 
@@ -1176,10 +1254,10 @@ Literature and vendor sources are cited as the source documents cite them; full 
 
 \subsection*{Project documents}
 \begin{itemize}[leftmargin=1.2em]
-\item Team FourSight. \emph{Scenario-design methodology and build contract}, v1.2, 22 Oct 2026 (\fn{scenario_methodology.md}).
-\item Team FourSight. \emph{Scenario specification}, v0.6, 22 Oct 2026 (\fn{scenario_spec.md}), especially §17, the simulator build contract.
-\item Team FourSight. \emph{Mathematical design and architecture}, v0.4 draft, 22 Oct 2026 (\fn{model_design.md}).
-\item Team FourSight. \emph{Decision log} (plan v2), D-01 to D-54 with the scenario design trail (\fn{decision_log.md}).
+\item Team FourSight. \emph{Scenario-design methodology and build contract}, v1.3, 22 Oct 2026 (\fn{scenario_methodology.md}).
+\item Team FourSight. \emph{Scenario specification}, v0.7, 22 Oct 2026 (\fn{scenario_spec.md}), especially §17, the simulator build contract.
+\item Team FourSight. \emph{Mathematical design and architecture}, v0.5 draft, 22 Oct 2026 (\fn{model_design.md}).
+\item Team FourSight. \emph{Decision log} (plan v2), D-01 to D-55 with the scenario design trail (\fn{decision_log.md}).
 \item Team FourSight. \emph{Pre-registration v2}, draft revised 22 Oct 2026 (\fn{preregistration_v2.md}).
 \end{itemize}
 

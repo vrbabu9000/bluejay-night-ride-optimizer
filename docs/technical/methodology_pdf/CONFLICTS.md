@@ -48,3 +48,13 @@ Found while preparing `BlueJay_Scenario_Methodology.pdf` (21–22 Oct 2026). **T
 
 ## D-53 / D-54 round (22 Oct 2026)
 No new conflict found between methodology v1.2, spec v0.6, model_design v0.4 and the decision log on the pending-price formulations, the M bound, the recommendation (A, awaiting team approval; code default still original) or the curb-wait convention (D-54). Table 14 of the PDF was re-derived from `outputs/sim/L4_R0`, `L4_R0_pp-A` and `L4_R0_pp-B` (outcome and epoch files, read only) and matches `d53_comparison.md` and methodology v1.2 §7.
+
+## M2 / A-approval round (22 Oct 2026)
+No conflict between methodology v1.3, spec v0.7, model_design v0.5 and the decision log on: A approved provisionally as the default (D-53 approval, trail §11), the rule pass, what a rule reads, the R1u clock and the consent boundary (D-55, spec §17.5, §17.9).
+
+Residues (wording only; the PDF follows D-55):
+- `scenario_methodology.md` v1.3 §7 "What was built" still lists `lyft.py` as "exercised only before 18:15 in L4 (M0 scope)"; since M2 the rules act all evening (D-55; spec §17.9 Lyft window).
+- Methodology v1.3 §7 heads its verification table "What was verified" with M0–M1 checks while the test row counts M2 tests; the PDF keeps the M0–M1 title and lists the 253 tests.
+
+Note: since A became the default, `outputs/sim/L4_R0/` is the A run. PDF Table 13 (the original-price 18:15 plan) is therefore re-derived from `outputs/sim/L4_R0_M1_reference/`, and Table 14 from `outputs/sim/d53_experiment/`. Tables 15–16 were re-derived from the six M2 runs and the R2(15) epoch log; all match the reports.
+- *Coordinator, 22 Oct:* the `lyft.py` wording above is now corrected in `scenario_methodology.md` §7 (and in the code docstring). The PDF needed no change because it already follows D-55.
