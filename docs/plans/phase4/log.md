@@ -1,0 +1,5 @@
+# Phase 4, Simulator and dispatcher: log (append only)
+
+| Date | Version | Event | Why / who | Evidence / outcome |
+|---|---|---|---|---|
+| 2026-10-22 | v1 | **M0–M1 built and verified.** `src/sim/` (inputs, engine, dispatcher C, Lyft rules before 18:15, runner); tests `tests/test_sim_engine.py` (coordinator) and `tests/test_sim_independent.py` + `tests/independent_check.py` (independent verification agent); independent math review `research_notes/m1_math_review_2026-10-21.md`; integrated review requested. Settings D-52 (K = 3; free drop order after the verification finding; exact integer costs; explicit M; HiGHS settings; no fallback) | Team authorization of a bounded M0–M1, with C provisionally selected (D-51) | L1–L3 keys to the second; L4 pre-18:15: 22 transfers, 4 declines across the five rule runs; L4 R0: 46/46 epochs optimal over the candidate set, MILP choice = full enumeration; 101 tests pass. Finding D-53 (pending price can defer the longest waiters) left open for the team. Frozen hashes unchanged |

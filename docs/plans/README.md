@@ -5,7 +5,8 @@
 | `master/` | The master plan v2 (29 Sep 2026): research design, phases 0-8, gates, agent plan | v2 | Phases 0-2 done from it; phases 3-8 being re-planned phase by phase |
 | `phase1/` | Phase 1, Evidence: digitize all 12 April charts | v1 (as executed) | **Done**; G1 passed 30 Sep |
 | `phase2/` | Phase 2, Insights: T1-T10, zones v0, OSRM table | v1 (as executed) | **Done** 30 Sep |
-| `phase3/` | Phase 3, Build the world | **v3** (12 Oct) | **In progress**: research reviewed; `scenario_spec.md` v0.2 **approved 20 Oct**; generation awaiting go-ahead; v1 paused |
+| `phase3/` | Phase 3, Build the world | **v4** (21 Oct) | **In progress**: L1–L5 generated; design consolidated 21 Oct (D-45–D-51); methodology report and build contract written; simulator started in Phase 4; v1 paused |
+| `phase4/` | Phase 4, Simulator and dispatcher | **v1** (22 Oct) | **In progress**: M0–M1 done and verified; M2 waits on D-53 and the curb-wait convention |
 | `osrm/` | Local OSRM (standalone): plan, agent prompts, log | v1 | **Complete** 2 Oct (one team-policy decision pending: how teammates get the map data) |
 
 ## Rules (same spirit as the guide's versioning rule)

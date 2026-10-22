@@ -1,6 +1,6 @@
 # Critical review of the research direction (v1.0, 12 Oct 2026)
 
-**Status:** for team review. It reviews `transloc_operations.md` (v1.0, 2 Oct) and the Phase 3 v2 direction before the scenarios are finalised. It changes no data and no code.
+**Status:** for team review. *21 Oct 2026: a few lines are annotated in place (D-39, D-45, D-49); the text is otherwise unchanged.* It reviews `transloc_operations.md` (v1.0, 2 Oct) and the Phase 3 v2 direction before the scenarios are finalised. It changes no data and no code.
 
 **What it draws on:**
 - three research notes, written in parallel by separate agents and checked by the main session:
@@ -79,7 +79,7 @@ A **straw man baseline** is weaker than what is really used, so that beating it 
 4. Dollar savings. There are no Lyft prices.
 
 ### 2.6 What we can defensibly claim
-> "In a simulation of the Homewood Night Ride whose dispatcher has the structure TransLoc published (event-plus-periodic re-planning with reassignment and a convex waiting penalty), and whose outputs fall within April 2026's observed ranges, Lyft transfer rule X changes rider outcome Y by Z (paired, N nights, confidence interval) at a resource cost of K Lyft trips and V van-hours, and this ranking holds across dispatcher variants D and assumption ranges S."
+> "In a simulation of the Homewood Night Ride whose dispatcher has the structure TransLoc published (event-plus-periodic re-planning with reassignment and a convex waiting penalty), and whose outputs fall within April 2026's observed ranges, Lyft transfer rule X changes rider outcome Y by Z (paired, N nights, confidence interval) using K Lyft bookings and V van-km *[wording 21 Oct: resource use, not cost; D-45]*, and this ranking holds across dispatcher variants D and assumption ranges S."
 
 The claim is **relative, conditional and robustness-qualified**. It is about **operating policies under a realistic dispatcher**, not about beating the vendor's algorithm.
 
@@ -96,7 +96,7 @@ The claim is **relative, conditional and robustness-qualified**. It is about **o
 A comparison that changes both at once cannot attribute the effect.
 
 **Primary question (accepted direction; wording refined):**
-> **Which dispatcher-initiated Lyft transfer rules improve Homewood rider outcomes, under which demand and fleet conditions, and at what resource cost, when the van dispatcher is held fixed at a TransLoc-like re-planning baseline?**
+> **Which dispatcher-initiated Lyft transfer rules improve Homewood rider outcomes, under which demand and fleet conditions, and at what resource use (Lyft bookings, van-km; no money, D-45), when the van dispatcher is held fixed at a TransLoc-like re-planning baseline?**
 
 **Supporting questions:**
 - **SQ1, robustness to the dispatcher:** does the ranking of Lyft rules hold under the dispatcher variants (no reassignment, a slower re-plan, greedy, and small-instance exact)?
@@ -110,7 +110,7 @@ A comparison that changes both at once cannot attribute the effect.
 **Explicitly excluded:**
 - East Baltimore;
 - designated-stop consolidation;
-- fleet purchase decisions and dollar budgets (we report resource use, with prices as labelled illustrations only);
+- fleet purchase decisions, dollar budgets and Lyft prices (we report resource use as counts only; superseded wording 21 Oct, D-45: no illustrative prices either);
 - claims about beating TransLoc's algorithm;
 - idle-vehicle repositioning (deferred);
 - events forecasting (Approach 2);
@@ -193,7 +193,7 @@ Built from the operations note §F and the literature note §7, reconciled by th
 | AS-06 | Lyft trigger | Uncertain; **the core factor** | **Elapsed time pending/unassigned** is the closest documented form (East Baltimore FAQ: "within ten minutes without a van assigned"; HYPOTHESIS for Homewood). It is one of the compared rules (scenario_spec §6), not the default | **Yes** |
 | AS-07 | Dispatcher capacity | Uncertain | Unlimited in the base; capacity and lag stress variants | **Yes** at high transfer volume |
 | AS-08 | Lyft supply and wait | Uncertain; no data | Pickup delay with median ~8 min and a tail to 20 (ASSUMED), unpooled. **Peak-scarcity variant is required**: unlimited Lyft favours aggressive rules | **Yes** |
-| AS-09 | Patience | Needs sensitivity | Abandonment hazard rising with time waited (and the shown ETA, as a variant). Calibrated so rider cancellations are about two thirds of "Canceled" | **Yes** |
+| AS-09 | Patience | Needs sensitivity | Abandonment hazard rising with time waited (and the shown ETA, as a variant). Calibrated so rider cancellations are about two thirds of "Canceled" *[21 Oct: superseded by D-39, a provisional 50–75% sensitivity range, not exhaustive (D-49)]* | **Yes** |
 | AS-10 | What "Canceled" contains | Uncertain | Lyft transfers ≈ 1/3 (range 23–46%); variant with transfers not in "Canceled" | Yes (calibration) |
 | AS-11 | Rebooking | Uncertain | None in the base; variant 0.2–0.5 with a delay | Moderate |
 | AS-12 | No-show | Supported (rate) | 4.7% of requests; the van waits 3 min | No |
@@ -232,7 +232,7 @@ These go in the main design or a mandatory robustness block. The rest can wait o
 | Reassignment stability, ETA churn, commitments near pickup | **Core** (engine rule + metric) | A predicted-wait rule acts on ETAs that churn; commit rules decide what can be transferred. Report ETA churn |
 | Cancellation, no-show, rebooking | **Core** (cancellation, no-show); sensitivity (rebooking) | The Lyft rule acts on the same pending population that cancels |
 | Lyft availability and pickup uncertainty at peaks | **Core** | The benefit of a transfer is the gap between van and Lyft wait; Lyft may be scarce exactly at peaks |
-| Dispatcher delay, transfer capacity, consent | **Core** (lag); sensitivity (capacity, consent) | These are the policy's operating knobs and costs |
+| Dispatcher delay, transfer capacity, consent | **Core** (lag); sensitivity (capacity, consent) | These are the policy's operating knobs |
 | Fleet changes, breaks, shift ends, after-close completion | **Core** (availability profile, shift ends); sensitivity (breaks); reported (after-close tail) | Utilisation sets how often a trigger fires; a van leaving mid-plan strands assignments |
 | Travel-time uncertainty, dwell, snapping | Sensitivity (travel multiplier, dwell); documented (snapping) | Shifts van and Lyft waits similarly; unlikely to reorder rules |
 | Tail outcomes, equity across locations and party sizes | **Core metrics** | Policy effects live in P90/P95; parties of 5 need a Lyft XL (D-33, 21 Oct); edge locations wait longest |
