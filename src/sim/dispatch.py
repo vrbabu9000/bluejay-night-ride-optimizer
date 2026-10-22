@@ -57,7 +57,7 @@ PHI_SLOPES_120 = (2, 5, 10, 20, 40)              # 120 x slope per second (= 1, 
 @dataclass(frozen=True)
 class Config:
     K: int = 3                     # max new (uncommitted) pickups per candidate route (D-52)
-    pending_price: str = "original"        # "original" | "A" | "B" (D-53 experiment; see pending_prices())
+    pending_price: str = "A"               # D-53 approval (provisional): "A"; "original" reproduces M1, "B" the experiment
     fix_existing_drop_order: bool = False   # True: existing riders keep the committed-only drop order (faster,
                                             # smaller candidate set; an explicit setting, never switched automatically)
     beta: float = 0.5              # points per passenger-minute riding
@@ -485,8 +485,8 @@ def _milp(cols, vids, rids, pi, cfg, extra_rows=(), zterms=(), obj_cap=None):
             n_rows += 1
     for lo, hi, idx, vals in extra_rows:
         h.addRow(lo, hi, len(idx), np.array(idx, dtype=np.int32), np.array(vals, dtype=float))
-    if obj_cap is not None:
-        h.addRow(-np.inf, obj_cap, len(costs), np.arange(len(costs), dtype=np.int32), np.array(costs))
+    if obj_cap is not None:                            # scaled to points: unscaled (~1e10 U) it broke HiGHS postsolve
+        h.addRow(-np.inf, obj_cap / PT, len(costs), np.arange(len(costs), dtype=np.int32), np.array(costs) / PT)
     if not cols and not rids:                          # nothing to decide (no van on duty, nothing open)
         return {"status": "empty", "chosen": [], "obj": 0, "bound": 0.0, "gap": 0.0, "nodes": 0, "n_rows": 0}
     if h.run() == highspy.HighsStatus.kError:
@@ -553,7 +553,11 @@ def _canonical(cols, vids, rids, pi, cfg, chosen, obj, zterms=()):
     last = chosen
     for _ in range(cfg.max_tie_solves):
         cuts.append((-np.inf, len(last) - 1.0, last, [1.0] * len(last)))
-        res = _milp(cols, vids, rids, pi, cfg, extra_rows=cuts, zterms=zterms, obj_cap=obj + 0.5)
+        try:
+            res = _milp(cols, vids, rids, pi, cfg, extra_rows=cuts, zterms=zterms, obj_cap=obj + 0.5)
+        except RuntimeError:                           # a tie re-solve never decides optimality; label, do not stop
+            status = "tie_enumeration_incomplete"
+            break
         if res["status"] == "feasible_unproven":
             status = "tie_enumeration_incomplete"
             break

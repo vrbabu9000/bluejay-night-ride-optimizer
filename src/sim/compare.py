@@ -1,8 +1,9 @@
 """D-53 comparison of pending-price formulations on one frozen level (default L4 under R0).
 
-    cd src && ../.venv/bin/python -m sim.compare            (expects the three runs written by sim.run)
+    cd src && ../.venv/bin/python -m sim.compare            (reads the preserved D-53 runs)
 
-Reads outputs/sim/L4_R0/ (original), L4_R0_pp-A/, L4_R0_pp-B/ and writes outputs/sim/d53_comparison.md:
+Reads outputs/sim/d53_experiment/L4_R0_pp-{original,A,B}/ (the runs of the D-53 experiment, preserved when A became
+the default) and writes outputs/sim/d53_experiment/d53_comparison.md:
 one comparison table, the requests whose wait changed, and a worked epoch in which each formulation's chosen plan
 is re-priced under all three formulations, separating route costs from pending prices.
 """
@@ -15,7 +16,7 @@ import pandas as pd
 
 from . import dispatch as D
 from . import inputs
-from .run import OUT, clock, enumerate_plans, pending_charge, pts, run_name, _mmss
+from .run import OUT, clock, enumerate_plans, pending_charge, pts, _mmss
 
 ARMS = ("original", "A", "B")
 
@@ -25,8 +26,11 @@ class _Req:                     # the minimum of an Engine that run.pending_char
         self.req = {r.rid: r for r in scen.requests}
 
 
-def load_run(level, rule, arm):
-    d = OUT / run_name(level, rule, arm)
+D53_DIR = OUT / "d53_experiment"
+
+
+def load_run(level, rule, arm, root=D53_DIR):
+    d = root / f"{level.replace('/', '_')}_{rule}_pp-{arm}"
     ep = [json.loads(x) for x in open(d / "epochs.jsonl")]
     return {"dir": d, "epochs": ep, "out": pd.read_csv(d / "outcomes.csv"),
             "manifest": json.loads((d / "run_manifest.json").read_text())}
@@ -176,7 +180,7 @@ def main():
             L.append(f"| {rid} | {x.party} | {clock(x.t_request_s)} | " + " | ".join(_mmss(w) for w in ws) + " | "
                      + " | ".join(_mmss(outs[arm].loc[rid, "ride_s"]) for arm in ARMS) + " |")
     L += ["", worked_epoch(runs, scen, travel, a.epoch)]
-    path = OUT / "d53_comparison.md"
+    path = D53_DIR / "d53_comparison.md"
     path.write_text("\n".join(L) + "\n")
     print(f"wrote {path}")
 

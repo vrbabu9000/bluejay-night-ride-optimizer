@@ -145,6 +145,11 @@ class VanCtx:
             assert self.riders[c[0]] == c[2]
             x = ref.req[c[0]]
             self.committed_wait = x["q"] * phi_ref(c[2] - x["t"])
+        if c and c[1] == "P_curb_wait":
+            # D-54: absent rider, 180-s timer running; for planning the rider may board when the timer expires
+            assert c[0] in self.riders and self.riders[c[0]] == c[2] + 180 and van.free_s == c[2] + 180 + DWELL, c
+            x = ref.req[c[0]]
+            self.committed_wait = x["q"] * phi_ref(self.riders[c[0]] - x["t"])
 
 
 def evaluate(ref, ctx, seq, new, limits):
@@ -292,6 +297,24 @@ def brute_force_subset(ref, ctx, S, base_order, limits):
 # ---------- route selection over a given candidate set ----------
 def next_tick(tau):
     return (tau // TICK + 1) * TICK
+
+
+def pending_base(ref, obs, kind):
+    """Pending price b_r (REF units, excluding M), from the D-52 / D-53 (approval) definitions.
+    original: q*phi(tn - t).  A: q*phi(max(tn, L_r) - t), L_r = min over on-duty vans of free_s + T(loc, o_r).
+    With no van on duty, every request is necessarily pending; the dispatch docstring prices it at 'original' then.
+    Returns (b, L)."""
+    tn = next_tick(obs.tau)
+    b, L = {}, {}
+    for x in obs.open:
+        if kind == "original" or not obs.vans:
+            b[x.rid] = x.q * phi_ref(tn - x.t)
+        elif kind == "A":
+            L[x.rid] = min(v.free_s + ref.vt(v.loc, x.o) for v in obs.vans)
+            b[x.rid] = x.q * phi_ref(max(tn, L[x.rid]) - x.t)
+        else:
+            raise ValueError(kind)
+    return b, L
 
 
 def enumerate_combinations(cands_by_van, open_rids):

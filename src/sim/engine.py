@@ -305,16 +305,21 @@ class Engine:
     def _epoch(self, triggers):
         obs = self.observation()
         plan, cands = D.solve(obs, self.travel, self.pol.dispatcher)
-        transfers, declines, rule_reads = [], [], {}
+        transfers, declines, rule_reads, plan_read = [], [], {}, None
         if self.pol.rule != "R0" and self.now < self.pol.rule_active_before_s:
+            plan_read = self._plan_summary(plan)
             self._update_assignment(plan)
             for x in obs.open:
                 st = self.rs[x.rid]
                 if st.declined_s is not None:
                     continue
-                pred = plan.predicted_pickup.get(x.rid, plan.pending_info.get(x.rid, {}).get("tentative_eta_s"))
+                if x.rid in plan.predicted_pickup:
+                    pred, src = plan.predicted_pickup[x.rid], "plan ETA"
+                else:
+                    pred = plan.pending_info.get(x.rid, {}).get("tentative_eta_s")
+                    src = "tentative ETA (pending)" if pred is not None else "no feasible insertion (infinite)"
                 rule_reads[x.rid] = {"elapsed_s": self.now - x.t, "unassigned_since_s": st.unassigned_since,
-                                     "predicted_pickup_s": pred}
+                                     "predicted_pickup_s": pred, "source": src}
                 if L.fires(self.pol.rule, self.now, x.t, st.unassigned_since, pred, self.pol.lag_s):
                     if self._hidden[x.rid].consent_u < self.pol.consent_p:
                         transfers.append(x.rid)
@@ -341,6 +346,8 @@ class Engine:
         self.observations.append(obs)
         rec = self._epoch_record(obs, plan, cands, triggers, transfers, declines, rule_reads)
         rec["audit"] = audit
+        rec["lyft"]["plan_read_by_rule"] = plan_read          # the plan the rule evaluated (None for R0 / no rule)
+        rec["lyft"]["resolved_after_transfer"] = bool(transfers)   # if True, "chosen" is the re-solved plan
         self.epochs.append(rec)
 
     def _audit(self, obs, plan):
@@ -384,6 +391,17 @@ class Engine:
         if bad:
             raise RuntimeError(f"plan audit failed at {self.now}: " + "; ".join(bad))
         return "pass: capacity, precedence, one van per request, guardrail for new riders, transfer invariant"
+
+    def _plan_summary(self, plan):
+        """Compact record of a plan: routes with arrival times, predicted pickups, pending requests with their
+        pending price (what the MILP charged) and tentative ETA (what the Lyft rules read); neither is a promise."""
+        return {"routes": {v: {"seq": [f"{k}:{x}" for k, x in r.seq], "arrivals_s": list(r.arrivals)}
+                           for v, r in plan.routes.items()},
+                "predicted_pickup_s": dict(plan.predicted_pickup),
+                "pending": {r: {"pending_price_u": i.get("pending_price_u"), "tentative_eta_s": i.get("tentative_eta_s"),
+                                "earliest_pickup_s": i.get("earliest_pickup_s"), "reason": i.get("reason")}
+                            for r, i in plan.pending_info.items()},
+                "status": plan.log["status"], "objective_u": plan.log["objective_u"]}
 
     def _update_assignment(self, plan):
         assigned = set().union(*[r.S for r in plan.routes.values()]) if plan.routes else set()

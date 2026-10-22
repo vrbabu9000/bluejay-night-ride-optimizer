@@ -13,10 +13,12 @@ from sim import engine as E
 from sim import inputs, lyft, run
 
 
-def _run(level, rule="R0"):
+def _run(level, rule="R0", pending_price="A"):
+    """M0-era runs: the Lyft rules use the M0 window (before the vans come on duty in L4), as the answer key does."""
     scen = inputs.load(level)
     m = scen.params["travel_multiplier"]
-    return E.Engine(scen, inputs.Travel(m, m), run.policy_for(scen, rule)).run(), scen
+    pol = run.policy_for(scen, rule, pending_price=pending_price, lyft_window="m0")
+    return E.Engine(scen, inputs.Travel(m, m), pol).run(), scen
 
 
 @pytest.fixture(scope="module")
@@ -161,8 +163,14 @@ def test_joint_route_selection_at_1815(l4):
     assert len(ep["open"]) == 9 and ep["solver"]["status"] == "optimal"
     vids = ["V1", "V2"]
     q = {o["rid"]: o["q"] for o in ep["open"]}
-    t = {o["rid"]: o["t_s"] for o in ep["open"]}
-    pend = {r: q[r] * D.phi_u(ep["solver"]["next_tick_s"] - t[r]) + ep["solver"]["M_u"] for r in q}
+    tr = inputs.Travel(1.0, 1.0)
+    sc = inputs.load("L4")
+    R = {r.rid: r for r in sc.requests}
+    tn = ep["solver"]["next_tick_s"]
+    assert ep["solver"]["pending_price"] == "A"
+    L = {r: min(v["free_s"] + tr.van(v["loc"], R[r].o) for v in ep["vans"]) for r in q}       # A, recomputed here
+    pend = {r: q[r] * D.phi_u(max(tn, L[r]) - R[r].t) + ep["solver"]["M_u"] for r in q}
+    assert {r: pend[r] - ep["solver"]["M_u"] for r in q} == ep["solver"]["pending_base_u"]
     best, min_pending = None, 99
     for a, b in itertools.product(ep["candidates"]["V1"], ep["candidates"]["V2"]):
         if set(a["S"]) & set(b["S"]):
@@ -215,7 +223,7 @@ def test_reproducible(l4):
 def _engine(level, rule="R0", **pol):
     scen = inputs.load(level)
     m = scen.params["travel_multiplier"]
-    p = run.policy_for(scen, rule)
+    p = run.policy_for(scen, rule, lyft_window="m0")
     p = dataclasses.replace(p, **pol)
     return E.Engine(scen, inputs.Travel(m, m), p), scen
 
@@ -267,7 +275,7 @@ def test_cancel_during_lag_books_nothing_and_after_booking_is_counted():
     # R001 is transferred at 0 s: booking at 120 s, Lyft arrival at 600 s
     h["R001"] = inputs.Hidden(60, h["R001"].noshow_u, h["R001"].consent_u, h["R001"].lyft_delay_s)    # inside the lag
     h["R004"] = inputs.Hidden(400, h["R004"].noshow_u, h["R004"].consent_u, h["R004"].lyft_delay_s)   # after booking
-    eng = E.Engine(scen, inputs.Travel(1.0, 1.0), run.policy_for(scen, "R2(15)")).run()
+    eng = E.Engine(scen, inputs.Travel(1.0, 1.0), run.policy_for(scen, "R2(15)", lyft_window="m0")).run()
     o = {r["request_id"]: r for r in eng.outcomes()}
     assert o["R001"]["outcome"] == "cancel_after_transfer" and o["R001"]["booking_s"] is None
     assert o["R001"]["cancel_s"] == 60

@@ -15,7 +15,9 @@ breaks 5, 10, 15, 20):
     objective = sum chosen c + sum_pending (M + price)
     tie rule: requests in ID order, assigned van compared by numeric van ID, pending last.
 
-Also re-checks the logged whole-evening L4 runs (original, A, B and the preserved M1 reference) epoch by epoch.
+Also re-checks the preserved whole-evening L4 runs (outputs/sim/d53_experiment/L4_R0_pp-{original,A,B} and
+outputs/sim/L4_R0_M1_reference) epoch by epoch, and checks that a fresh in-memory L4 R0 run under the default
+config (A) reproduces the preserved pp-A events.csv byte for byte.
 
 Run: .venv/bin/python -m pytest -q tests/test_pending_price_independent.py      (-s prints the per-case findings)
 """
@@ -433,7 +435,9 @@ def test_M_magnitude_below_2_53():
 
 
 # ---------------------------------------------------------------- logged whole-evening runs
-RUNS = {"L4_R0": "original", "L4_R0_pp-A": "A", "L4_R0_pp-B": "B", "L4_R0_M1_reference": "original"}
+# preserved D-53 evidence runs (outputs/sim/L4_R0/ is now the default-A arm and is not checked here)
+RUNS = {"d53_experiment/L4_R0_pp-original": "original", "d53_experiment/L4_R0_pp-A": "A",
+        "d53_experiment/L4_R0_pp-B": "B", "L4_R0_M1_reference": "original"}
 
 
 def _requests():
@@ -443,9 +447,9 @@ def _requests():
 
 @pytest.mark.parametrize("run", list(RUNS))
 def test_logged_run_epochs(run, travel):
+    """Every optimal epoch of a preserved run, by full enumeration of the logged candidates."""
     path = ROOT / "outputs" / "sim" / run / "epochs.jsonl"
-    if not path.exists():
-        pytest.skip(f"{path} not present")
+    assert path.exists(), f"{path} missing: the preserved D-53 evidence is required"
     man = json.loads((path.parent / "run_manifest.json").read_text())
     assert man["travel_multiplier"] == {"m_v": 1.0, "m_L": 1.0}
     kind = RUNS[run]
@@ -498,3 +502,22 @@ def test_logged_run_epochs(run, travel):
         n_checked += 1
     assert n_checked >= 40
     print(f"\n[{run}] {n_checked} epochs re-checked by full enumeration")
+
+
+def test_default_is_A_and_reproduces_preserved_A_run():
+    """A fresh L4 R0 run under the default dispatcher config (pending_price "A", D-53 approval), run in memory
+    (nothing written to outputs/), gives events byte-identical to the preserved D-53 pp-A run."""
+    import io
+    import pandas as pd
+    from sim import engine as E
+    from sim import run as RUN
+    assert D.Config().pending_price == "A"
+    scen = inputs.load("L4")
+    m = scen.params["travel_multiplier"]
+    pol = RUN.policy_for(scen, "R0")
+    assert pol.dispatcher == D.Config()
+    eng = E.Engine(scen, inputs.Travel(m_v=m, m_L=m), pol).run()
+    buf = io.StringIO()
+    pd.DataFrame(eng.events).to_csv(buf, index=False)
+    ref = (ROOT / "outputs" / "sim" / "d53_experiment" / "L4_R0_pp-A" / "events.csv").read_bytes()
+    assert buf.getvalue().encode() == ref

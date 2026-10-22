@@ -21,7 +21,7 @@ def _run(convention):
     scen = inputs.load("L4")
     h = scen.hidden["R003"]
     scen.hidden["R003"] = inputs.Hidden(h.patience_s, 0.0, h.consent_u, h.lyft_delay_s)     # absent at the curb
-    pol = run.policy_for(scen, "R0", curb_wait=convention)
+    pol = run.policy_for(scen, "R0", pending_price="original", curb_wait=convention)   # case built on the M1 trajectory
     return E.Engine(scen, inputs.Travel(1.0, 1.0), pol).run()
 
 

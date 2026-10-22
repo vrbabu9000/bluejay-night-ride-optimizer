@@ -31,15 +31,21 @@ def U(ref_units):
     return 2 * ref_units
 
 
-def _execute(level, rule="R0", hidden=None, fixed=False):
-    """fixed=False: the default dispatcher (riders aboard reordered freely with the new stops);
-    fixed=True: the optional restriction fix_existing_drop_order=True."""
+def _execute(level, rule="R0", hidden=None, fixed=False, price=None, window=None):
+    """price / window None = sim.run.policy_for's own default (pending price A, Lyft window "evening").
+    fixed=True: the optional restriction fix_existing_drop_order=True (default False: riders aboard reordered freely).
+    window="m0": the M0 harness (in L4 the Lyft rules act only before 900 s); price="original": the M1 pricing."""
     scen = inputs.load(level)
     if hidden is not None:
         scen.hidden = hidden(scen.hidden)
     m = scen.params["travel_multiplier"]
     travel = inputs.Travel(m, m)                               # fresh oracle: no candidate cache shared across runs
-    pol = run.policy_for(scen, rule)
+    kw = {}
+    if price is not None:
+        kw["pending_price"] = price
+    if window is not None:
+        kw["lyft_window"] = window
+    pol = run.policy_for(scen, rule, **kw)
     if fixed:
         pol = dataclasses.replace(pol, dispatcher=dataclasses.replace(pol.dispatcher, fix_existing_drop_order=True))
     solves = []
@@ -56,28 +62,39 @@ def _execute(level, rule="R0", hidden=None, fixed=False):
     finally:
         D.solve = orig
     assert solves and all(x.cfg.fix_existing_drop_order is fixed for x in solves)
+    if price is not None:
+        assert all(x.cfg.pending_price == price for x in solves)
     return SimpleNamespace(level=level, rule=rule, scen=scen, eng=eng, solves=solves, ref=X.Ref(level, m),
-                           fixed=fixed)
+                           fixed=fixed, price=solves[0].cfg.pending_price, window=window)
 
 
 @lru_cache(maxsize=None)
-def get_run(level, rule="R0", fixed=False):
-    """Call positionally (get_run("L4", "R0") and get_run("L4", "R0", False) are distinct cache keys otherwise)."""
-    return _execute(level, rule, fixed=fixed)
+def get_run(level, rule, fixed, price, window):
+    """All arguments positional and explicit, so equal configurations share one cached run."""
+    return _execute(level, rule, fixed=fixed, price=price, window=window)
 
 
-def test_default_is_free_drop_order():
-    assert D.Config().fix_existing_drop_order is False
+DEFAULT = ("L4", "R0", False, None, None)            # current defaults: free drop order, pending price A
+M1 = ("L4", "R0", True, "original", None)            # M1-era dispatcher: fixed drop order, original pending price
+
+
+def test_defaults_are_pinned():
+    """The configurations these tests label 'default' really are the current defaults."""
+    cfg = D.Config()
+    assert cfg.fix_existing_drop_order is False and cfg.pending_price == "A"
+    scen = inputs.load("L4")
+    assert run.policy_for(scen, "R1(10)").rule_active_before_s == math.inf                       # evening window
+    assert run.policy_for(scen, "R1(10)", lyft_window="m0").rule_active_before_s == scen.params["vans_on_duty_from_s"]
 
 
 @pytest.fixture(scope="module")
 def l4r0():
-    return get_run("L4", "R0", False)
+    return get_run(*DEFAULT)
 
 
-@pytest.fixture(scope="module", params=["free", "fixed"])
+@pytest.fixture(scope="module", params=["default_free_A", "m1_fixed_original"])
 def l4r0_mode(request):
-    return get_run("L4", "R0", request.param == "fixed")      # positional: shares the lru_cache entry
+    return get_run(*(DEFAULT if request.param == "default_free_A" else M1))
 
 
 def _van_states(r):
@@ -156,7 +173,7 @@ def test_best_order_per_subset(l4r0_mode):
             assert len(S) <= 3
             ok, mc, _, _ = X.evaluate(ref, ctx, seq, set(S), limits if S else None)
             assert ok and Fraction(c, X.IMPL_UNITS_PER_POINT) == Fraction(mc, X.REF), (obs.tau, van.vid, sorted(S))
-    print(f"\n[best-order {'fixed' if r.fixed else 'free'}] {n_states} van states; {n_sub} subsets brute-forced ({n_sub3} with |S|=3, "
+    print(f"\n[best-order {'fixed' if r.fixed else 'free'}, price {r.price}] {n_states} van states; {n_sub} subsets brute-forced ({n_sub3} with |S|=3, "
           f"{n_absent} infeasible), {n_orders} complete orders enumerated; {n_perm_total} committed-only orders")
     assert n_states >= 30 and n_sub >= 1000
 
@@ -167,7 +184,7 @@ def test_best_order_per_subset(l4r0_mode):
 def test_route_selection_exhaustive(l4r0_mode):
     rn = l4r0_mode
     ref = rn.ref
-    n_ep = n_comb = n_ties = 0
+    n_ep = n_comb = n_ties = n_priced_A = n_A_above_tick = 0
     for s in rn.solves:
         obs, plan = s.obs, s.plan
         rids = [x.rid for x in obs.open]
@@ -182,11 +199,19 @@ def test_route_selection_exhaustive(l4r0_mode):
                 assert ok and U(mc) == c, (obs.tau, van.vid, sorted(S), c, U(mc))
                 rows.append((frozenset(S), U(mc)))
             per_van.append((van.vid, rows))
-        tn = X.next_tick(obs.tau)
-        phi_next = {r: q[r] * U(X.phi_ref(tn - t[r])) for r in rids}
-        M = 1 + sum(max(c for _, c in rows) - min(c for _, c in rows) for _, rows in per_van) + sum(phi_next.values())
-        pi = {r: phi_next[r] + M for r in rids}
-        assert plan.log["M_u"] == M, (obs.tau, plan.log["M_u"], M)
+        # pending price: my own implementation of the configured formulation ('original' or 'A')
+        kind = s.cfg.pending_price
+        assert kind in ("original", "A"), kind
+        b_ref, L = X.pending_base(ref, obs, kind)
+        b = {r: U(b_ref[r]) for r in rids}
+        M = 1 + sum(max(c for _, c in rows) - min(c for _, c in rows) for _, rows in per_van) + sum(b.values())
+        pi = {r: b[r] + M for r in rids}
+        assert plan.log["M_u"] == M, (obs.tau, kind, plan.log["M_u"], M)
+        assert plan.log["pending_base_u"] == b, (obs.tau, kind, plan.log["pending_base_u"], b)
+        if L:
+            assert plan.log["earliest_pickup_s"] == L, (obs.tau, plan.log["earliest_pickup_s"], L)
+            n_priced_A += len(L)
+            n_A_above_tick += sum(L[r] > X.next_tick(obs.tau) for r in L)
         best_obj, best_keys, min_pending, argmin_pending = None, [], None, None
         for combo in X.enumerate_combinations(per_van, rids):
             n_comb += 1
@@ -223,7 +248,9 @@ def test_route_selection_exhaustive(l4r0_mode):
             f"tau={obs.tau}: impl {X.canonical_key(impl_assign, rids)} is not the canonical optimum {min(best_keys)}"
         assert argmin_pending == min_pending, f"tau={obs.tau}: optimum leaves {argmin_pending} pending, min {min_pending}"
         assert plan.log["objective_u"] == best_obj
-    print(f"\n[route-selection {'fixed' if rn.fixed else 'free'}] {n_ep} epochs, {n_comb} combinations enumerated, {n_ties} epochs with tied optima")
+    print(f"\n[route-selection {'fixed' if rn.fixed else 'free'}, price {rn.price}] {n_ep} epochs, {n_comb} "
+          f"combinations enumerated, {n_ties} epochs with tied optima; A-priced (request, epoch) pairs {n_priced_A}, "
+          f"of which L_r > next tick: {n_A_above_tick}")
     assert n_ep == len(rn.eng.epochs) and n_ep > 0
 
 
@@ -240,7 +267,7 @@ def _fnum(s):
 
 @pytest.mark.parametrize("level", ["L1", "L2", "L3"])
 def test_answer_keys_l1_l3(level):
-    r = get_run(level, "R0", False)
+    r = get_run(level, "R0", False, None, None)        # current defaults (no Lyft rule in L1-L3)
     ev = r.eng.events
     key = _key(level)
     states = X.per_request_states(ev)
@@ -294,9 +321,24 @@ def test_answer_keys_l1_l3(level):
                                                                                k[f"cost_{van.vid}"])
 
 
+def _l4_m0(rule):
+    """L4 answer key = M0 evidence: pinned to lyft_window="m0". R0 never transfers, so its window is immaterial
+    (asserted below: no Lyft event at all) and it shares the default run."""
+    return DEFAULT if rule == "R0" else ("L4", rule, False, None, "m0")
+
+
 @pytest.mark.parametrize("rule", L4_RULES)
 def test_answer_key_l4(rule):
-    r = get_run("L4", rule, False)
+    _check_l4_key(get_run(*_l4_m0(rule)), rule)
+
+
+@pytest.mark.parametrize("rule", L4_RULES[1:])
+def test_answer_key_l4_pre_1815_evening_window(rule):
+    """With the M2 evening window the decisions before 18:15 are the same, so the key must still hold there."""
+    _check_l4_key(get_run("L4", rule, False, None, "evening"), rule)
+
+
+def _check_l4_key(r, rule):
     ev = r.eng.events
     params = r.scen.params
     lag, delay, start = params["lyft_lag_s"], params["lyft_delay_s"], params["vans_on_duty_from_s"]
@@ -334,12 +376,14 @@ def test_answer_key_l4(rule):
 # ======================================================================================================
 # 4. accounting and invariants on every run
 # ======================================================================================================
-RUNS = [("L1", "R0"), ("L2", "R0"), ("L3", "R0")] + [("L4", rule) for rule in L4_RULES]
+RUNS = ([(lv, "R0", False, None, None) for lv in ("L1", "L2", "L3")] + [_l4_m0(rule) for rule in L4_RULES]
+        + [("L4", rule, False, None, "evening") for rule in L4_RULES[1:]] + [M1])
 
 
-@pytest.mark.parametrize("level,rule", RUNS)
-def test_accounting_and_invariants(level, rule):
-    r = get_run(level, rule, False)
+@pytest.mark.parametrize("cfg", RUNS, ids=lambda c: "-".join(str(x) for x in c))
+def test_accounting_and_invariants(cfg):
+    level, rule = cfg[0], cfg[1]
+    r = get_run(*cfg)
     ev, ref = r.eng.events, r.ref
     # (a) one terminal state per request; legal transitions; the state chain is consistent
     states = X.per_request_states(ev)

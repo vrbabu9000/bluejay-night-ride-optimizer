@@ -42,35 +42,51 @@ def pts(u):
     return u / D.PT
 
 
-def policy_for(scen, rule, K=None, pending_price="original", curb_wait="possible_boarding"):
+def policy_for(scen, rule, K=None, pending_price="A", curb_wait="possible_boarding", lyft_window="evening"):
+    """Policy for a frozen level. lyft_window: "evening" (M2: the rule acts at every epoch) or "m0" (the M0 harness:
+    in L4 the rule acts only before the vans come on duty, the hand-checkable window)."""
     p = scen.params
     cfg = D.Config(pending_price=pending_price) if K is None else D.Config(K=K, pending_price=pending_price)
+    if lyft_window not in ("evening", "m0"):
+        raise ValueError(lyft_window)
     if p["level"] == "L4":
+        until = p["vans_on_duty_from_s"] if lyft_window == "m0" else float("inf")
         return E.Policy(rule=rule, lag_s=p["lyft_lag_s"], consent_p=p["consent_p"],
-                        rule_active_before_s=p["vans_on_duty_from_s"], dispatcher=cfg, curb_wait_planning=curb_wait)
+                        rule_active_before_s=until, dispatcher=cfg, curb_wait_planning=curb_wait)
+    if p["level"] == "L5":
+        # L5 pilot settings (team, 22 Oct; D-56): set here, never read from the frozen inputs (whose p_noshow 0.047 is
+        # deprecated, D-48). Lag 2 min and consent 1.0 are the spec's base values; presence p = 0.089 is provisional.
+        return E.Policy(rule=rule, lag_s=120, consent_p=1.0, p_absent=0.089, dispatcher=cfg, curb_wait_planning=curb_wait)
     if rule != "R0":
-        raise SystemExit("only L4 exercises Lyft rules in M0")
+        raise SystemExit("Lyft rules are configured only for L4 and L5")
     return E.Policy(rule="R0", dispatcher=cfg, curb_wait_planning=curb_wait)
 
 
-def run_name(level, rule, pending_price="original", curb_wait="possible_boarding"):
-    name = f"{level.replace('/', '_')}_{rule}"
-    if pending_price != "original":
+def rule_tag(rule):
+    """Shell-safe rule name for folders: R1(10) -> R1-10, R1u(10) -> R1u-10."""
+    return rule.replace("(", "-").replace(")", "")
+
+
+def run_name(level, rule, pending_price="A", curb_wait="possible_boarding", lyft_window="evening"):
+    name = f"{level.replace('/', '_')}_{rule_tag(rule)}"
+    if pending_price != "A":
         name += f"_pp-{pending_price}"
     if curb_wait != "possible_boarding":
         name += "_cw-noshow-certain"
+    if lyft_window == "m0" and rule != "R0":
+        name += "_m0-window"
     return name
 
 
-def run(level, rule="R0", K=None, out=None, pending_price="original", curb_wait="possible_boarding"):
+def run(level, rule="R0", K=None, out=None, pending_price="A", curb_wait="possible_boarding", lyft_window="evening"):
     scen = inputs.load(level)
     m = scen.params["travel_multiplier"]
     travel = inputs.Travel(m_v=m, m_L=m)
-    pol = policy_for(scen, rule, K, pending_price, curb_wait)
+    pol = policy_for(scen, rule, K, pending_price, curb_wait, lyft_window)
     t0 = time.perf_counter()
     eng = E.Engine(scen, travel, pol).run()
     wall = time.perf_counter() - t0
-    out = Path(out or OUT / run_name(level, rule, pending_price, curb_wait))
+    out = Path(out or OUT / run_name(level, rule, pending_price, curb_wait, lyft_window))
     out.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(eng.events).to_csv(out / "events.csv", index=False)
     with open(out / "epochs.jsonl", "w") as f:
@@ -85,6 +101,7 @@ def run(level, rule="R0", K=None, out=None, pending_price="original", curb_wait=
         "dispatcher": {"name": "C (restricted route-selection MILP, HiGHS)", **dataclasses.asdict(pol.dispatcher),
                        "cost_units_per_point": D.PT},
         "code": _git(), "python": platform.python_version(), "highspy": _highs_version(),
+        "lyft_window": lyft_window, "pending_price": pending_price, "curb_wait": curb_wait,
         "end_s": eng.end_s, "end_clock": clock(eng.end_s), "n_epochs": len(eng.epochs),
         "solver_status": dict(Counter(ep["solver"]["status"] for ep in eng.epochs)),
         "tie_status": dict(Counter(ep["solver"]["tie_status"] for ep in eng.epochs)),
@@ -313,10 +330,11 @@ def main():
     ap.add_argument("--rule", default="R0")
     ap.add_argument("--K", type=int, default=None)
     ap.add_argument("--out", default=None)
-    ap.add_argument("--pending-price", default="original", choices=["original", "A", "B"])
+    ap.add_argument("--pending-price", default="A", choices=["original", "A", "B"])
     ap.add_argument("--curb-wait", default="possible_boarding", choices=["possible_boarding", "noshow_certain"])
+    ap.add_argument("--lyft-window", default="evening", choices=["evening", "m0"])
     a = ap.parse_args()
-    eng, out = run(a.level, a.rule, a.K, a.out, a.pending_price, a.curb_wait)
+    eng, out = run(a.level, a.rule, a.K, a.out, a.pending_price, a.curb_wait, a.lyft_window)
     print(f"wrote {out}")
 
 

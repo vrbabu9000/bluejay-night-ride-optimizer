@@ -1,7 +1,7 @@
 """Lyft transfer rules (scenario_spec §6), evaluated once per epoch after the van solve.
 
-M0 scope: the rules are exercised only where the L4 answer key is hand-checkable, i.e. before the vans come on duty
-(the engine's `rule_active_before_s`). The general post-18:15 integration is deferred to M2.
+Since M2 the rules act at every epoch (run.policy_for(..., lyft_window="evening")); the M0 harness, in which they act
+only before the vans come on duty in L4 (the hand-checkable window), stays selectable with lyft_window="m0".
 
 Each rule reads only the board: request time, how long the request has been without an assigned van, and the
 predicted van pickup (the plan's ETA, or the tentative ETA of a pending request; None = no feasible van = infinite).
