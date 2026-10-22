@@ -15,10 +15,12 @@ At each epoch the dispatcher receives an Observation (public state only; no hidd
    W = curb arrival - request time; H = drop-off arrival - pickup arrival (includes the 30-s boarding dwell).
 3. MILP (set partitioning):  min sum c_vk y_vk + sum pi_r u_r
        sum_k y_vk = 1 for every van;  sum_{v,k: r in S_k} y_vk + u_r = 1 for every open request.
-   pi_r = q_r*phi(W_r^next) + M with W_r^next = next tick - t_r and
-       M = 1 + sum_v (max_k c_vk - min_k c_vk) + sum_r q_r*phi(W_r^next).
-   With this M every optimal solution leaves the fewest requests pending that the candidate set allows
-   (proof in D-52); among those it minimises cost. This is optimality over the candidate set only.
+   pi_r = b_r + M, where b_r >= 0 is the pending price of the selected formulation (pending_prices(): original,
+   A or B; for B, b depends on the chosen routes and is linearised with continuous z), and
+       M = 1 + sum_v (max_k c_vk - min_k c_vk) + sum_r bmax_r,   bmax_r = the largest b_r can take.
+   With this M every proven-optimal solution leaves the fewest requests pending that the candidate set allows
+   (proof in D-52; it needs only 0 <= b_r <= bmax_r); among those it minimises cost. This is optimality over the
+   candidate set only.
    Status per epoch: optimal (gap closed over the candidate set); feasible_unproven (node budget reached; the best
    incumbent found is executed and labelled, pending reasons are then not established); failed (no incumbent: the
    vans execute committed work only, logged, no heuristic is called); empty (nothing to decide). A HiGHS error,
@@ -55,6 +57,7 @@ PHI_SLOPES_120 = (2, 5, 10, 20, 40)              # 120 x slope per second (= 1, 
 @dataclass(frozen=True)
 class Config:
     K: int = 3                     # max new (uncommitted) pickups per candidate route (D-52)
+    pending_price: str = "original"        # "original" | "A" | "B" (D-53 experiment; see pending_prices())
     fix_existing_drop_order: bool = False   # True: existing riders keep the committed-only drop order (faster,
                                             # smaller candidate set; an explicit setting, never switched automatically)
     beta: float = 0.5              # points per passenger-minute riding
@@ -310,6 +313,65 @@ def candidates(obs, travel, cfg):
     return out, allowed_by_van
 
 
+def column_end(van, seq, travel, req):
+    """When and where a van is free after a candidate route (no waiting; 30-s dwell at every stop)."""
+    if not seq:
+        return van.free_s, van.loc
+    t, loc = van.free_s, van.loc
+    dest = {r.rid: r.d for r in van.riders}
+    for kind, rid in seq:
+        nxt = req[rid].o if kind == "P" else (dest[rid] if rid in dest else req[rid].d)
+        t = t + travel.van(loc, nxt) + DWELL_S
+        loc = nxt
+    return t, loc
+
+
+def pending_prices(obs, cols, travel, cfg, tn):
+    """The pending price b (in U, excluding M) under the selected formulation (D-53 experiment).
+
+    original  b_r = q_r * phi(tn - t_r): pickup at the next tick, wherever the vans are (optimistic, "teleport").
+    A         b_r = q_r * phi(max(tn, L_r) - t_r), L_r = min over vans of (free_v + T(loc_v, o_r)): the earliest
+              physically possible pickup. A lower bound on any service; still optimistic, because the van that
+              could arrive first may be busy with the work the plan gives it.
+    B         b_rj = q_r * phi(max(tn, e_j + T(l_j, o_r)) - t_r) for every column j, where (e_j, l_j) is when and
+              where van v_j is free after route j; the MILP charges the cheapest b_rj over the chosen columns.
+              For one pending rider alone this is a service the van could actually perform (after the route the van
+              is empty). It is neither a lower nor an upper bound: several pending riders may claim the same van's
+              end, and a later epoch may insert the rider earlier than the end of the route.
+    With no van on duty every formulation uses the original price (everything is pending anyway).
+    Returns kind, b (per request), bmax (per request, for the M bound), and the data each formulation used."""
+    kind = cfg.pending_price
+    req = {x.rid: x for x in obs.open}
+    ends = {}
+    for j, (v, S, c, seq) in enumerate(cols):
+        van = next(z for z in obs.vans if z.vid == v)
+        ends[j] = column_end(van, seq, travel, req)
+    out = {"kind": kind, "ends": {str(j): [e, l] for j, (e, l) in ends.items()}}   # str keys: same in memory and JSON
+    base = {x.rid: x.q * phi_u(max(0, tn - x.t)) for x in obs.open}
+    if not obs.vans or kind == "original":
+        out.update(b=base, bmax=dict(base))
+        if kind != "original":
+            out["kind"] = kind + "(no vans: original price)"
+        return out
+    if kind == "A":
+        L = {x.rid: min(v.free_s + travel.van(v.loc, x.o) for v in obs.vans) for x in obs.open}
+        b = {x.rid: x.q * phi_u(max(tn, L[x.rid]) - x.t) for x in obs.open}
+        out.update(b=b, bmax=dict(b), earliest=L)
+        return out
+    if kind == "B":
+        z, bmax, pickup = [], {}, {}
+        for i, x in enumerate(obs.open):
+            for j, (e, l) in ends.items():
+                a = max(tn, e + travel.van(l, x.o))
+                c = x.q * phi_u(a - x.t)
+                z.append((i, j, c))
+                pickup[(x.rid, j)] = a
+                bmax[x.rid] = max(bmax.get(x.rid, 0), c)
+        out.update(b={r: 0 for r in base}, bmax=bmax, z=z, pickup=pickup)
+        return out
+    raise ValueError(f"unknown pending_price {kind}")
+
+
 def next_tick(tau, tick_s):
     return (tau // tick_s + 1) * tick_s
 
@@ -323,20 +385,25 @@ def solve(obs, travel, cfg=Config()):
     rids = [x.rid for x in obs.open]
     vids = [v.vid for v in obs.vans]
     tn = next_tick(obs.tau, cfg.tick_s)
-    phi_next = {r: req[r].q * phi_u(max(0, tn - req[r].t)) for r in rids}
-    M = 1 + sum(max(c for _, c, _ in cands[v]) - min(c for _, c, _ in cands[v]) for v in vids) + sum(phi_next.values())
-    pi = {r: phi_next[r] + M for r in rids}
     cols = [(v, S, c, seq) for v in vids for (S, c, seq) in cands[v]]
-    res = _milp(cols, vids, rids, pi, cfg)
+    pp = pending_prices(obs, cols, travel, cfg, tn)
+    M = 1 + sum(max(c for _, c, _ in cands[v]) - min(c for _, c, _ in cands[v]) for v in vids) + sum(pp["bmax"].values())
+    pi = {r: (pp["b"][r] if pp["kind"] != "B" else 0) + M for r in rids}
+    zterms = pp.get("z", [])
+    t_m = _time.perf_counter()
+    res = _milp(cols, vids, rids, pi, cfg, zterms=zterms)
+    t_milp_first = _time.perf_counter() - t_m
     if res["status"] == "infeasible":                 # impossible: the committed-only routes are always feasible
         raise RuntimeError(f"epoch {obs.tau}: MILP reported infeasible; the model is wrong, not the instance")
     status, chosen, bound = res["status"], res["chosen"], res["bound"]
-    obj = None if chosen is None else _exact_obj(chosen, cols, rids, pi)
+    obj = None if chosen is None else _exact_obj(chosen, cols, rids, pi, zterms)
     ties = []
+    t_m = _time.perf_counter()
     if status == "optimal":
-        chosen, ties, tie_status = _canonical(cols, vids, rids, pi, cfg, chosen, obj)
+        chosen, ties, tie_status = _canonical(cols, vids, rids, pi, cfg, chosen, obj, zterms)
     else:
         tie_status = "not_checked"
+    t_ties = _time.perf_counter() - t_m
     t_total = _time.perf_counter() - t0
     if chosen is None:                                    # failed solve: committed work only, logged (no fallback)
         chosen = [next(i for i, col in enumerate(cols) if col[0] == v and not col[1]) for v in vids]
@@ -356,15 +423,32 @@ def solve(obs, travel, cfg=Config()):
             if kind == "P":
                 pred[rid] = a
     pinfo = {r: _pending_info(r, obs, cands, routes, req, travel, cfg, allowed, status == "optimal") for r in pending}
+    chosen_idx = {cols.index((v, rt.S, rt.cost_u, rt.seq)) for v, rt in routes.items()}
+    for r in pending:                                  # the price actually charged, and what it assumed
+        pinfo[r]["pending_price_u"] = _pend_cost(r, rids.index(r), chosen_idx, pi, zterms) - M
+        if pp["kind"] == "A":
+            pinfo[r]["earliest_pickup_s"] = pp["earliest"][r]
+        if pp["kind"] == "B":
+            j = min((c, j) for (i, j, c) in zterms if i == rids.index(r) and j in chosen_idx)[1]
+            pinfo[r]["priced_after_route_of"] = cols[j][0]
+            pinfo[r]["priced_pickup_s"] = pp["pickup"][(r, j)]
     log = {"status": status, "objective_u": obj, "bound_u": bound, "gap_u": res["gap"], "M_u": M,
-           "n_candidates": {v: len(cands[v]) for v in vids}, "n_columns": len(cols),
+           "pending_price": pp["kind"], "n_candidates": {v: len(cands[v]) for v in vids}, "n_columns": len(cols),
+           "n_z": len(zterms), "n_rows": res.get("n_rows"),
            "mip_nodes": res["nodes"], "tie_status": tie_status, "tied_optima": ties,
-           "wall_s": {"candidates": round(t_cand, 4), "total": round(t_total, 4)},
-           "next_tick_s": tn}
+           "wall_s": {"candidates": round(t_cand, 4), "milp": round(t_milp_first, 4), "ties": round(t_ties, 4),
+                      "total": round(t_total, 4)},
+           "next_tick_s": tn,
+           "pending_base_u": {r: pp["bmax"][r] if pp["kind"] == "B" else pp["b"][r] for r in rids}}
+    if pp["kind"] == "A":
+        log["earliest_pickup_s"] = pp["earliest"]
+    log["column_end"] = pp["ends"]
     return Plan(obs.tau, routes, pending, pinfo, pred, log), cands
 
 
-def _milp(cols, vids, rids, pi, cfg, extra_rows=()):
+def _milp(cols, vids, rids, pi, cfg, extra_rows=(), zterms=(), obj_cap=None):
+    """y: one binary per column; u: one binary per open request (pending); z (formulation B only): continuous
+    z_rj in [0, 1] with z_rj <= y_j and sum_j z_rj = u_r, so a pending r is priced after one chosen route."""
     h = highspy.Highs()
     h.setOptionValue("output_flag", False)
     for k, v in (("mip_rel_gap", cfg.mip_rel_gap), ("mip_abs_gap", cfg.mip_abs_gap), ("threads", cfg.threads),
@@ -372,23 +456,39 @@ def _milp(cols, vids, rids, pi, cfg, extra_rows=()):
                  ("time_limit", cfg.time_limit_s), ("presolve", "on")):
         h.setOptionValue(k, v)
     inf = highspy.kHighsInf
-    n_y, n_u = len(cols), len(rids)
-    costs = [float(c) for (_, _, c, _) in cols] + [float(pi[r]) for r in rids]
+    n_y, n_u, n_z = len(cols), len(rids), len(zterms)
+    costs = [float(c) for (_, _, c, _) in cols] + [float(pi[r]) for r in rids] + [float(c) for (_, _, c) in zterms]
     for j, c in enumerate(costs):
         h.addVar(0.0, 1.0)
         h.changeColCost(j, c)
-    h.changeColsIntegrality(n_y + n_u, np.arange(n_y + n_u, dtype=np.int32),
-                            np.full(n_y + n_u, highspy.HighsVarType.kInteger))
+    if n_y + n_u:
+        h.changeColsIntegrality(n_y + n_u, np.arange(n_y + n_u, dtype=np.int32),
+                                np.full(n_y + n_u, highspy.HighsVarType.kInteger))
+    n_rows = 0
     for v in vids:                                     # one route per van
         idx = [j for j, col in enumerate(cols) if col[0] == v]
         h.addRow(1.0, 1.0, len(idx), np.array(idx, dtype=np.int32), np.ones(len(idx)))
+        n_rows += 1
     for i, r in enumerate(rids):                       # each open request: one route, or pending
         idx = [j for j, col in enumerate(cols) if r in col[1]] + [n_y + i]
         h.addRow(1.0, 1.0, len(idx), np.array(idx, dtype=np.int32), np.ones(len(idx)))
+        n_rows += 1
+    if n_z:
+        by_r = {}
+        for k, (i, j, _) in enumerate(zterms):
+            h.addRow(-np.inf, 0.0, 2, np.array([n_y + n_u + k, j], dtype=np.int32), np.array([1.0, -1.0]))  # z <= y_j
+            by_r.setdefault(i, []).append(n_y + n_u + k)
+            n_rows += 1
+        for i in range(n_u):                           # sum_j z_rj = u_r
+            idx = by_r.get(i, []) + [n_y + i]
+            h.addRow(0.0, 0.0, len(idx), np.array(idx, dtype=np.int32), np.array([1.0] * (len(idx) - 1) + [-1.0]))
+            n_rows += 1
     for lo, hi, idx, vals in extra_rows:
         h.addRow(lo, hi, len(idx), np.array(idx, dtype=np.int32), np.array(vals, dtype=float))
+    if obj_cap is not None:
+        h.addRow(-np.inf, obj_cap, len(costs), np.arange(len(costs), dtype=np.int32), np.array(costs))
     if not cols and not rids:                          # nothing to decide (no van on duty, nothing open)
-        return {"status": "empty", "chosen": [], "obj": 0, "bound": 0.0, "gap": 0.0, "nodes": 0}
+        return {"status": "empty", "chosen": [], "obj": 0, "bound": 0.0, "gap": 0.0, "nodes": 0, "n_rows": 0}
     if h.run() == highspy.HighsStatus.kError:
         raise RuntimeError("HiGHS returned an error; the run stops rather than guessing a plan")
     ms = h.getModelStatus()
@@ -411,13 +511,23 @@ def _milp(cols, vids, rids, pi, cfg, extra_rows=()):
         obj = int(round(info.objective_function_value))
         bound = info.mip_dual_bound
         gap = info.mip_gap
-    return {"status": status, "chosen": chosen, "obj": obj, "bound": bound, "gap": gap, "nodes": info.mip_node_count}
+    return {"status": status, "chosen": chosen, "obj": obj, "bound": bound, "gap": gap, "nodes": info.mip_node_count,
+            "n_rows": n_rows}
 
 
-def _exact_obj(chosen, cols, rids, pi):
-    """Objective as an exact integer: chosen route costs plus pending prices (not the solver's float)."""
+def _pend_cost(r, i, chosen, pi, zterms):
+    """Exact pending charge of request r (index i) given the chosen columns: pi_r, plus for formulation B the
+    cheapest price after one of the chosen routes (the optimal z for fixed y)."""
+    extra = min((c for (k, j, c) in zterms if k == i and j in chosen), default=0) if zterms else 0
+    return pi[r] + extra
+
+
+def _exact_obj(chosen, cols, rids, pi, zterms=()):
+    """Objective as an exact integer: chosen route costs plus pending charges (not the solver's float)."""
     served = set().union(*[cols[j][1] for j in chosen]) if chosen else set()
-    return sum(cols[j][2] for j in chosen) + sum(pi[r] for r in rids if r not in served)
+    ch = set(chosen)
+    return sum(cols[j][2] for j in chosen) + sum(_pend_cost(r, i, ch, pi, zterms)
+                                                for i, r in enumerate(rids) if r not in served)
 
 
 def _vkey(vid):
@@ -436,23 +546,24 @@ def _assign_key(chosen, cols, rids):
     return tuple(_vkey(who.get(r, "~")) for r in rids)
 
 
-def _canonical(cols, vids, rids, pi, cfg, chosen, obj):
+def _canonical(cols, vids, rids, pi, cfg, chosen, obj, zterms=()):
     """Enumerate optima with equal objective (no-good cuts) and return the canonical one."""
     found, cuts = [chosen], []
     status = "unique"
+    last = chosen
     for _ in range(cfg.max_tie_solves):
-        last = found[-1]
         cuts.append((-np.inf, len(last) - 1.0, last, [1.0] * len(last)))
-        obj_row = (-np.inf, obj + 0.5, list(range(len(cols) + len(rids))),
-                   [float(c) for (_, _, c, _) in cols] + [float(pi[r]) for r in rids])
-        res = _milp(cols, vids, rids, pi, cfg, extra_rows=cuts + [obj_row])
+        res = _milp(cols, vids, rids, pi, cfg, extra_rows=cuts, zterms=zterms, obj_cap=obj + 0.5)
         if res["status"] == "feasible_unproven":
             status = "tie_enumeration_incomplete"
             break
-        if res["status"] != "optimal" or _exact_obj(res["chosen"], cols, rids, pi) != obj:
-            break
-        found.append(res["chosen"])
-        status = "tie"
+        if res["status"] != "optimal":
+            break                                      # no other solution within the objective cap
+        last = res["chosen"]
+        if _exact_obj(last, cols, rids, pi, zterms) == obj:
+            found.append(last)
+            status = "tie"
+        # else: admitted only by solver tolerance (worse in exact integers); it is cut and the search continues
     else:
         status = "tie_enumeration_truncated"
     keys = [(_assign_key(c, cols, rids), c) for c in found]

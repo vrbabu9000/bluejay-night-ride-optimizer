@@ -42,26 +42,35 @@ def pts(u):
     return u / D.PT
 
 
-def policy_for(scen, rule, K=None):
+def policy_for(scen, rule, K=None, pending_price="original", curb_wait="possible_boarding"):
     p = scen.params
-    cfg = D.Config() if K is None else D.Config(K=K)
+    cfg = D.Config(pending_price=pending_price) if K is None else D.Config(K=K, pending_price=pending_price)
     if p["level"] == "L4":
         return E.Policy(rule=rule, lag_s=p["lyft_lag_s"], consent_p=p["consent_p"],
-                        rule_active_before_s=p["vans_on_duty_from_s"], dispatcher=cfg)
+                        rule_active_before_s=p["vans_on_duty_from_s"], dispatcher=cfg, curb_wait_planning=curb_wait)
     if rule != "R0":
         raise SystemExit("only L4 exercises Lyft rules in M0")
-    return E.Policy(rule="R0", dispatcher=cfg)
+    return E.Policy(rule="R0", dispatcher=cfg, curb_wait_planning=curb_wait)
 
 
-def run(level, rule="R0", K=None, out=None):
+def run_name(level, rule, pending_price="original", curb_wait="possible_boarding"):
+    name = f"{level.replace('/', '_')}_{rule}"
+    if pending_price != "original":
+        name += f"_pp-{pending_price}"
+    if curb_wait != "possible_boarding":
+        name += "_cw-noshow-certain"
+    return name
+
+
+def run(level, rule="R0", K=None, out=None, pending_price="original", curb_wait="possible_boarding"):
     scen = inputs.load(level)
     m = scen.params["travel_multiplier"]
     travel = inputs.Travel(m_v=m, m_L=m)
-    pol = policy_for(scen, rule, K)
+    pol = policy_for(scen, rule, K, pending_price, curb_wait)
     t0 = time.perf_counter()
     eng = E.Engine(scen, travel, pol).run()
     wall = time.perf_counter() - t0
-    out = Path(out or OUT / f"{level.replace('/', '_')}_{rule}")
+    out = Path(out or OUT / run_name(level, rule, pending_price, curb_wait))
     out.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(eng.events).to_csv(out / "events.csv", index=False)
     with open(out / "epochs.jsonl", "w") as f:
@@ -152,71 +161,93 @@ def _mmss(s):
     return f"{int(s) // 60}:{int(s) % 60:02d}"
 
 
+def pending_charge(kind, rid, js, ep, eng, travel):
+    """Pending price (U, excluding M) of request rid under formulation kind, if the chosen columns are js.
+    Recomputed from the epoch record, so a plan can be priced under any formulation (worked comparisons)."""
+    r, tn = eng.req[rid], ep["solver"]["next_tick_s"]
+    if kind == "original" or not ep["vans"]:
+        return r.q * D.phi_u(max(0, tn - r.t))
+    if kind == "A":
+        L = min(v["free_s"] + travel.van(v["loc"], r.o) for v in ep["vans"])
+        return r.q * D.phi_u(max(tn, L) - r.t)
+    if kind == "B":
+        ends = ep["solver"]["column_end"]
+        return min(r.q * D.phi_u(max(tn, ends[str(j)][0] + travel.van(ends[str(j)][1], r.o)) - r.t) for j in js)
+    raise ValueError(kind)
+
+
+def enumerate_plans(ep, eng, travel, kind=None):
+    """Every compatible combination of candidate routes (one per van), priced under formulation kind (default: the
+    epoch's own). Sorted as the MILP ranks them: fewest pending requests, then total points, then the canonical key.
+    Independent of the MILP."""
+    kind = kind or ep["solver"]["pending_price"]
+    kind = kind.split("(")[0]
+    vids = [v["van"] for v in ep["vans"]]
+    off, n = {}, 0
+    for v in vids:
+        off[v] = n
+        n += len(ep["candidates"][v])
+    out = []
+    for combo in itertools.product(*[list(enumerate(ep["candidates"][v])) for v in vids]):
+        used = [r for _, c in combo for r in c["S"]]
+        if len(used) != len(set(used)):
+            continue
+        js = [off[v] + k for v, (k, _) in zip(vids, combo)]
+        cs = [c for _, c in combo]
+        pend = [o["rid"] for o in ep["open"] if o["rid"] not in used]
+        pp = sum(pending_charge(kind, r, js, ep, eng, travel) for r in pend)
+        total = sum(c["cost_u"] for c in cs) + pp
+        key = tuple(next((v for v, c in zip(vids, cs) if r in c["S"]), "~") for r in sorted(o["rid"] for o in ep["open"]))
+        out.append({"n_pending": len(pend), "total_u": total, "key": key, "combo": cs, "pending": pend,
+                    "pending_u": pp, "routes_u": total - pp})
+    out.sort(key=lambda z: (z["n_pending"], z["total_u"], z["key"]))
+    return vids, out
+
+
 def worked_example(eng, travel, n_show=3):
     """The first epoch with >= 2 vans and >= 3 open requests: the best joint plans, found by direct enumeration of
     every pair of candidate routes with disjoint requests (independent of the MILP), compared with the MILP."""
     ep = next((e for e in eng.epochs if len(e["vans"]) >= 2 and len(e["open"]) >= 3), None)
     if ep is None:
         return "## Worked comparison\n\nNo epoch with two vans and three or more open requests.\n"
-    vids = [v["van"] for v in ep["vans"]]
-    q = {o["rid"]: o["q"] for o in ep["open"]}
-    tn = ep["solver"]["next_tick_s"]
-    t_of = {o["rid"]: o["t_s"] for o in ep["open"]}
-    pend_u = {r: q[r] * D.phi_u(max(0, tn - t_of[r])) for r in q}
-    M = ep["solver"]["M_u"]
-    plans = []
-    for combo in itertools.product(*[ep["candidates"][v] for v in vids]):
-        used = [r for c in combo for r in c["S"]]
-        if len(used) != len(set(used)):
-            continue
-        pend = [r for r in q if r not in used]
-        obj = sum(c["cost_u"] for c in combo) + sum(pend_u[r] + M for r in pend)
-        key = tuple(next((v for v, c in zip(vids, combo) if r in c["S"]), "~") for r in sorted(q))
-        plans.append((obj, key, combo, pend))
-    plans.sort(key=lambda z: (z[0], z[1]))
+    vids, plans = enumerate_plans(ep, eng, travel)
     best = plans[0]
+    M = ep["solver"]["M_u"]
+    best_obj = best["total_u"] + M * best["n_pending"]
     milp = ep["solver"]["objective_u"]
-    L = [f"## Worked comparison: epoch {clock(ep['tau_s'])}", "",
+    kind = ep["solver"]["pending_price"]
+    what = {"original": "party × φ(wait at the next tick)",
+            "A": "party × φ(wait at the earliest physically possible pickup)",
+            "B": "party × φ(wait if picked up right after the cheapest chosen route)"}.get(kind.split("(")[0], kind)
+    L = [f"## Worked comparison: epoch {clock(ep['tau_s'])} (pending price: {kind})", "",
          f"{len(ep['open'])} requests are open; {len(vids)} vans. Every pair of candidate routes that share no request "
-         f"was enumerated directly ({len(plans):,} joint plans). The best enumerated objective is {pts(best[0]):.6f} "
-         f"points; the MILP reported {pts(milp):.6f} ({'equal' if best[0] == milp else 'DIFFERENT'}).", "",
+         f"was enumerated directly ({len(plans):,} joint plans). The best enumerated objective is {pts(best_obj):.6f} "
+         f"points; the MILP reported {pts(milp):.6f} ({'equal' if best_obj == milp else 'DIFFERENT'}).", "",
          "Open requests (waited so far): " + ", ".join(f"{o['rid']} (party {o['q']}, {_mmss(o['waited_s'])})"
                                                       for o in ep["open"]) + ".", "",
          "Each plan below serves as many requests as possible; then the points decide. Points: waiting = "
-         "Σ party × φ(wait); riding = 0.5 × Σ party × ride minutes; driving = 0.1 × km; pending = party × "
-         "φ(wait at the next tick) + M per request left pending.", ""]
+         "Σ party × φ(wait); riding = 0.5 × Σ party × ride minutes; driving = 0.1 × km; pending = " + what +
+         " + M per request left pending.", ""]
     L += ["| Plan | Routes | Pending | Waiting | Riding | Driving | Pending price (excl. M) | Total (excl. M) |",
           "|---|---|---|---|---|---|---|---|"]
-    for i, (obj, key, combo, pend) in enumerate(plans[:n_show]):
-        w = sum(c["parts_u"]["wait"] for c in combo)
-        r = sum(c["parts_u"]["ride"] for c in combo)
-        k = sum(c["parts_u"]["km"] for c in combo)
-        p = sum(pend_u[x] for x in pend)
-        routes = "<br>".join(f"{v}: {' '.join(c['seq']) or '(nothing new)'}" for v, c in zip(vids, combo))
-        L.append(f"| {i + 1}{' (chosen)' if i == 0 else ''} | {routes} | {', '.join(pend) or '-'} | {pts(w):.2f} | "
-                 f"{pts(r):.2f} | {pts(k):.2f} | {pts(p):.2f} | {pts(obj - M * len(pend)):.2f} |")
+    for i, pl in enumerate(plans[:n_show]):
+        cs = pl["combo"]
+        w = sum(c["parts_u"]["wait"] for c in cs)
+        r = sum(c["parts_u"]["ride"] for c in cs)
+        k = sum(c["parts_u"]["km"] for c in cs)
+        routes = "<br>".join(f"{v}: {' '.join(c['seq']) or '(nothing new)'}" for v, c in zip(vids, cs))
+        L.append(f"| {i + 1}{' (chosen)' if i == 0 else ''} | {routes} | {', '.join(pl['pending']) or '-'} | {pts(w):.2f} | "
+                 f"{pts(r):.2f} | {pts(k):.2f} | {pts(pl['pending_u']):.2f} | {pts(pl['total_u']):.2f} |")
     L += ["", "Ride points include riders already on board; waiting points include a committed pickup. "
           "Plans with the same number of pending requests are compared on the total. This is optimality over the "
           "candidate set at this epoch only, not over every possible route or the whole evening.", ""]
     return "\n".join(L)
 
 
-def _plans(ep):
-    vids = [v["van"] for v in ep["vans"]]
-    q = {o["rid"]: o["q"] for o in ep["open"]}
-    t_of = {o["rid"]: o["t_s"] for o in ep["open"]}
-    pend_u = {r: q[r] * D.phi_u(max(0, ep["solver"]["next_tick_s"] - t_of[r])) for r in q}
-    out = []
-    for combo in itertools.product(*[ep["candidates"][v] for v in vids]):
-        used = [r for c in combo for r in c["S"]]
-        if len(used) != len(set(used)):
-            continue
-        pend = [r for r in q if r not in used]
-        obj = sum(c["cost_u"] for c in combo) + sum(pend_u[r] + ep["solver"]["M_u"] for r in pend)
-        key = tuple(next((v for v, c in zip(vids, combo) if r in c["S"]), "~") for r in sorted(q))
-        out.append((obj, key, combo, pend, sum(pend_u[r] for r in pend)))
-    out.sort(key=lambda z: (z[0], z[1]))
-    return vids, out
+def _plans(ep, eng, travel):
+    vids, plans = enumerate_plans(ep, eng, travel)
+    return vids, [(pl["total_u"] + ep["solver"]["M_u"] * pl["n_pending"], pl["key"], pl["combo"], pl["pending"],
+                   pl["pending_u"]) for pl in plans]
 
 
 def small_example(eng, travel):
@@ -225,7 +256,7 @@ def small_example(eng, travel):
     for i, ep in enumerate(eng.epochs):
         if len(ep["vans"]) != 2 or not 2 <= len(ep["open"]) <= 3:
             continue
-        vids, plans = _plans(ep)
+        vids, plans = _plans(ep, eng, travel)
         if len(plans) < 2 or plans[0][1] == plans[1][1] or len(plans[0][3]) != len(plans[1][3]):
             continue
         obs = eng.observations[i]
@@ -250,10 +281,11 @@ def small_example(eng, travel):
             van = next(x for x in obs.vans if x.vid == v)
             seq = tuple((s.split(":")[0], s.split(":")[1]) for s in c["seq"])
             ev = D.evaluate(van, seq, {k: req[k] for k in c["S"]}, travel, cfg, None)
-            if van.committed and van.committed[1] == "P":
-                rid, _, a = van.committed
+            if van.committed and van.committed[1] in ("P", "P_curb_wait"):
+                rid, kind0, a = van.committed
                 r0 = eng.req[rid]
-                L.append(f"| {v} | already driving to pick up {rid} | {clock(a)} | {_mmss(a - r0.t)} | "
+                what = "already driving to pick up" if kind0 == "P" else "waiting at the curb (timer running) for"
+                L.append(f"| {v} | {what} {rid} | {clock(a)} | {_mmss(a - r0.t)} | "
                          f"{pts(van.committed_wait_u):.2f} | | |")
             for (kind, rid), a in zip(seq, ev["arrivals"]):
                 if kind == "P":
@@ -281,8 +313,10 @@ def main():
     ap.add_argument("--rule", default="R0")
     ap.add_argument("--K", type=int, default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--pending-price", default="original", choices=["original", "A", "B"])
+    ap.add_argument("--curb-wait", default="possible_boarding", choices=["possible_boarding", "noshow_certain"])
     a = ap.parse_args()
-    eng, out = run(a.level, a.rule, a.K, a.out)
+    eng, out = run(a.level, a.rule, a.K, a.out, a.pending_price, a.curb_wait)
     print(f"wrote {out}")
 
 

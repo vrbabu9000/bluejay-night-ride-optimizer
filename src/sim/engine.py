@@ -37,6 +37,11 @@ class Policy:
     consent_p: float = 1.0
     p_absent: float = 0.089          # PROVISIONAL (D-48); L1-L4 outcomes are identical for any 0 < p <= 0.99
     rule_active_before_s: float = math.inf   # M0 harness: rules act only before this time (L4: 900)
+    # Planning view of an absent rider's 180-s curb wait (D-54). "possible_boarding": the pickup stays committed and
+    # the planner assumes the rider may board when the timer expires (dwell, seat and drop-off obligation kept) until
+    # the no-show actually expires. "noshow_certain": the M1 view (planner treats the no-show as already certain).
+    # Planning only: the simulator never boards an absent rider.
+    curb_wait_planning: str = "possible_boarding"
     dispatcher: D.Config = field(default_factory=D.Config)
 
 
@@ -130,6 +135,9 @@ class Engine:
             if trigger and not self.done():
                 self.cls = C_EPOCH
                 self._epoch(sorted(trigger))
+            if all(st.state in TERMINAL for st in self.rs.values()):
+                for v in self.vans.values():               # nothing left to serve: plans (e.g. a possible-boarding
+                    v.plan = []                            # drop-off after a final no-show) are void
             self.cls = C_DEPART
             self._departures()
             while self.heap and self.heap[0][0] == s:      # 0-s legs started by this second's departures
@@ -276,6 +284,14 @@ class Engine:
             elif v.status == "service":
                 free = v.service_end_s
                 committed = (v.current[1], v.current[0], v.current[2]) if v.current else ()
+                if v.absent_wait and self.pol.curb_wait_planning == "possible_boarding":
+                    rid = v.current[1]                     # timer running: not present yet, not yet a no-show
+                    r, expiry = self.req[rid], v.service_end_s
+                    riders = sorted(riders + [self._rider(rid, expiry)], key=lambda x: x.rid)
+                    free, cwait = expiry + D.DWELL_S, r.q * D.phi_u(expiry - r.t)
+                    committed = (rid, "P_curb_wait", v.current[2])
+                elif self.pol.curb_wait_planning not in ("possible_boarding", "noshow_certain"):
+                    raise ValueError(self.pol.curb_wait_planning)
             vans.append(D.VanState(vid, v.capacity, loc, free, tuple(riders), committed, cwait))
         open_ = tuple(D.OpenRequest(r.rid, r.t, r.o, r.d, r.q) for r in sorted(self.req.values(), key=lambda r: r.rid)
                       if self.rs[r.rid].state == "pending_van")
