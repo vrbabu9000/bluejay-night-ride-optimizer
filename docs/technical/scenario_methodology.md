@@ -1,6 +1,6 @@
-# Scenario-design methodology and build contract (v1.5, 23 Oct 2026)
+# Scenario-design methodology and build contract (v1.6, 23 Oct 2026)
 
-**What this is.** This document explains how the simulated Night Ride evenings are built from April 2026's aggregate dashboard, what each design choice rests on, and what has to be built next. It is the methodology material planned in Phase 3 plan v4. It reflects the consolidation review of 21 Oct 2026 (decisions D-45 to D-51) and, in v1.1, what the first simulator milestone actually built and verified on 22 Oct (D-51 update, D-52, D-53); v1.2 adds the D-53 decision experiment and the curb-wait convention D-54; v1.3 adds the approval of A and M2; v1.4 adds the research pivot from the proposal (§1a), the L5 pilot and 30-night batch with a descriptive trade-off analysis (§7a), and how the results relate to Pareto and leader–follower framings (§7b). v1.5 is a narrow factual update: the Pushback list no longer says that no rule comparison has run or that D-53 is unsettled, and the §1a reason for holding the dispatcher fixed is stated as a scope choice. v1.0–v1.4 are archived in `archive/`. The methodology PDF (`methodology_pdf/`) still reflects v1.4 on these three points; its rebuild is deferred.
+**What this is.** This document explains how the simulated Night Ride evenings are built from April 2026's aggregate dashboard, what each design choice rests on, and what has to be built next. It is the methodology material planned in Phase 3 plan v4. It reflects the consolidation review of 21 Oct 2026 (decisions D-45 to D-51) and, in v1.1, what the first simulator milestone actually built and verified on 22 Oct (D-51 update, D-52, D-53); v1.2 adds the D-53 decision experiment and the curb-wait convention D-54; v1.3 adds the approval of A and M2; v1.4 adds the research pivot from the proposal (§1a), the L5 pilot and 30-night batch with a descriptive trade-off analysis (§7a), and how the results relate to Pareto and leader–follower framings (§7b). v1.5 is a narrow factual update: the Pushback list no longer says that no rule comparison has run or that D-53 is unsettled, and the §1a reason for holding the dispatcher fixed is stated as a scope choice. v1.6 adds four narrow corrections from the midterm technical review: the patience interpretation of the L5 losses after transfer (§7a), how the 15-minute service measure interacts with transfer timing (§7a, §7b), the leader–follower wording (§7b), and a recorded spec–code difference on the off-duty trigger (§7b limitations). It makes no new modelling decision. v1.0–v1.5 are archived in `archive/`; the methodology PDF (`methodology_pdf/`) is rebuilt for v1.6.
 
 **How to read it.** The core (§1–§9) is meant to be read straight through. The appendices hold the arithmetic, the full reconciliation register and the document map.
 
@@ -273,11 +273,14 @@ Report: `outputs/sim/m2_L4_report.md`, containing the table, one epoch from van 
 
 **Mechanisms (verified event behaviour; magnitudes depend on the assumptions).**
 1. **A transfer does not stop the patience clock.** The lag and the Lyft delay come on top of the time already waited. Under R1(10), 95 of 196 transferred riders cancelled before their Lyft arrived; under R2(15) and R3(2), about a third did.
+   - **Interpretation (corrected in v1.6).** A transfer does not end waiting; riders may still cancel before Lyft arrives. Riders moved by R2(15) and R3(2) had waited less when transferred (median 0 s, against 629 s under R1(10) and 932 s under R1(15)). Under the placeholder patience, where giving up becomes likelier with time waited, that is consistent with their lower share lost after transfer. A conditional calculation on those same riders and delays gives 44–47% against 29–30%, matching the observed shares. It is a possible contributing mechanism, not an isolated cause; the rules also differ in which riders they move.
+   - Under constant-hazard patience, elapsed waiting alone does not change the probability of surviving an equal additional waiting period. That does not establish that the cancellation gap between entire policies disappears, because a different patience model would also change who is transferred, when, and who survives in the vans. Whether the policy gap survives other patience shapes is untested.
 2. **Assignment is not pickup.** R1u(10) fires only when a request has had no van in the plan for 10 minutes.
    - On L4 it never fired after the vans came on duty (C assigned every waiting request within about 4 minutes).
    - In L5 it fired 8 times on 6 of 30 nights, all for requests made during the burst (18:21–18:28; transfers at 18:35–18:38).
 3. **Guardrail excesses come between epochs.** There were 36 excess events across the 180 runs, from 16 distinct requests on 10 nights; the same request repeats under rules that made the same decisions. No plan ever created a violation. The attribution check finds that each coincided with a van no-show on the same van while the rider was aboard, with an excess of at most 150 s per no-show plus a 13-s matrix tolerance. This is consistent with the no-show wait causing the delay; it is not a proof. None was unexplained.
 4. **Denominators.** Wait percentiles cover only requests picked up: on average 16.1 of 28 under R0 and 20.2 under R2(15). We therefore also report the share of *all* requests reached by a vehicle (curb arrival, not boarding) within 15 minutes.
+5. **The 15-minute measure interacts with transfer timing (added in v1.6).** A request moved under R1(10) has already waited at least 10 min, then faces the 2-min lag and a Lyft delay with median 8 min, so it reaches the curb within 15 min only if the delay is under about 3 min (roughly 2%); under R1(15), never. The waiting-time rules can therefore gain on this measure only by freeing vans, while R2(15) uses the same 15-min threshold as the measure. Measures without a threshold give the same ordering (requests picked up: 20.2–20.4 under R2/R3 against 16.1–17.2; the 90th-percentile wait below). Reporting at 10 and 20 min (spec §4, targets row) has not yet been run.
 
 **Descriptive measures** (averages of nightly values, with the SD across nights; the full table is `outputs/sim/batch_L5_v1/summary.md`):
 
@@ -296,7 +299,7 @@ These are simulated outcomes of a designed rehearsal under provisional assumptio
 - Lyft use B = bookings per night (smaller is better).
 
 Rule P dominates Q if S_P ≥ S_Q and B_P ≤ B_Q, with one strict. The calculation, from saved outputs only (`src/sim/tradeoff.py` → `outputs/sim/batch_L5_v1/tradeoff.md`), gives:
-- **On the 30-night means:** R0, R1(15), R1(10), R2(15) and R3(2) are nondominated among the six tested rules. R1u(10) is dominated by R0, narrowly (S 0.476 vs 0.477, with more Lyft use). The same five remain nondominated with van-km as a third objective.
+- **On the 30-night means:** R0, R1(15), R1(10), R2(15) and R3(2) are nondominated among the six tested rules. R1u(10) is dominated by R0, narrowly (S 0.476 vs 0.477, about one request in 840, with more Lyft use); no noise margin is applied (D-50), so in practice it is a near tie that uses slightly more Lyft. R0 is nondominated through zero Lyft use alone. The same five remain nondominated with van-km as a third objective.
 - **Night by night:** R2(15) and R3(2) reach more than R0 on all 30 nights; R1(10) on 19, but fewer on 6.
 
 Three trade-offs are kept separate:
@@ -304,16 +307,19 @@ Three trade-offs are kept separate:
 2. The empirical trade-off between transfer rules (this analysis).
 3. The decision criteria for choosing a rule (D-50, not approved).
 
-Nondominated among six tested rules is neither a frontier of all policies nor a recommendation. Still to come: paired intervals once D-50 is decided, threshold sweeps to trace curves, calibrated behaviour, and five vans.
+Nondominated among six tested rules is neither a frontier of all policies nor a recommendation. Because the service measure favours early transfer (§7a, mechanism 5), another measure or decision criterion could change the assessment. Still to come: paired intervals once D-50 is decided, threshold sweeps to trace curves, calibrated behaviour, and five vans.
 
-**Leader–follower (a possible extension, not implemented).** A natural reading has a leader, the policy designer choosing rule parameters θ, and a follower, the routing optimizer responding to the requests left after transfers. As a bilevel program:
+**Leader–follower (a possible extension, not implemented).** One possible extension is to optimize transfer policy while anticipating how the routing dispatcher responds. A bilevel formulation is a modelling choice: a threshold could also be tuned by simulation-based search with the dispatcher as a black box. One reading has a leader, the policy designer choosing rule parameters θ, and a follower, the routing optimizer responding to the requests left after transfers. As a bilevel program:
 
   min over θ of E[L(θ, y) + λ·B(θ)]  subject to  y ∈ argmin over y′ ∈ Y(θ) of f(y′; θ)
 
-What we implement is a sequential policy simulation: per epoch, plan → the rule reads the plan → transfers → one re-plan, with six fixed rules compared by replaying nights. A solved bilevel model would need three things we don't have:
-- an upper-level optimization over θ;
-- the follower's optimal response imposed as constraints over the evening (ours is per epoch, over restricted candidates);
-- a treatment of the expectation over nights.
+What we implement is a sequential policy simulation: per epoch, plan → the rule reads the plan → transfers → one re-plan, with six fixed rules compared by replaying nights. A finite exhaustive search over a defined set of θ values, with the follower defined as our deterministic per-epoch restricted MILP and its tie rule, would identify the best option within that finite set for the stated objective averaged over the sampled nights; it would not establish optimality over continuous thresholds, over all policies, or for the true expectation. To make the bilevel formulation precise we would still need to define (corrected in v1.6):
+- the leader's decision space (rule family; discrete or continuous θ; bounds);
+- the follower: a sequence of per-epoch restricted MILPs whose state depends on earlier epochs and random outcomes, or one whole-evening problem, with its information and timing;
+- how non-unique follower optima are treated (optimistic or pessimistic; ours uses a fixed canonical tie rule, D-52, which is neither);
+- the expectation (a scenario distribution, or a sample average over N nights);
+- the loss L and the weight λ (D-50 open);
+- any upper-level constraints, such as a Lyft budget or a service floor.
 
 Any single-level reduction would need specific assumptions and justification, and we claim none. Riders (fixed patience rules) and Lyft (a delay distribution) are not modelled as optimizing players. Terminology follows von Stackelberg (1934), Colson, Marcotte & Savard (2007) and Dempe (2002).
 
@@ -333,6 +339,7 @@ Any single-level reduction would need specific assumptions and justification, an
 - Guardrail excesses can still arise between epochs (after a no-show wait, or where the travel matrix breaks the triangle inequality by up to 12.7 s). None occurred in the L1–L4 runs. In the L5 batch, 36 excess events occurred (16 distinct requests on 10 nights), each attributed by the check to a van no-show on the same van during the ride (§7a); none was unexplained.
 - During an absent rider's curb wait the planner now keeps the pickup committed and plans for possible boarding at expiry (D-54, adopted 22 Oct; planning only, not Hopkins policy).
 - Shift ends (tapering, L7) are not implemented; the rule's wording is open (spec §17.6).
+- **Off-duty trigger: spec and code differ (open, recorded in v1.6).** Spec §17.4 and D-46(3) list a van going off duty as an epoch trigger. The simulator (`src/sim/engine.py`, the off-duty handler) only logs the off-duty time (as deferred while any request is unresolved) and opens no epoch; it never takes a van off duty, so in effect vans stay on duty until the run ends, consistent with the closing rule (D-36, §17.6). The simulator is unchanged; whether the difference affected any L1–L5 decision has not been checked. To be settled with the shift-end rule before L7.
 
 ---
 
@@ -381,7 +388,7 @@ Then read `outputs/sim/batch_L5_v1/summary.md` and `tradeoff.md`.
 1. ~~D-53~~: A approved provisionally (22 Oct).
 1a. ~~L5 policy settings~~: approved for the pilot (D-56).
 1b. **D-50: decision criteria** (primary metric, margins, power target) before paired intervals are computed.
-1c. **Midterm timing** (18½ min + about 10 min of questions) awaits the course's confirmation.
+1c. ~~Midterm timing~~: confirmed as a 30-minute slot; the presentation is planned at about 27 minutes (midterm package v0.4).
 2. ~~Curb-wait convention~~: settled by D-54 (22 Oct).
 3. **Review of the provisional D-52 settings** (K = 3, Ψ, solver budget, tie rule) and of the proposed conventions D-46, D-47(2), D-48, D-50.
 4. **Later, not now:** accepting the dashboard status mapping that pins p ≈ 8.9% (Appendix C), and the calibration targets.

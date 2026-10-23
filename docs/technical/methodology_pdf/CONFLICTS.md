@@ -18,6 +18,7 @@ Found while preparing `BlueJay_Scenario_Methodology.pdf` (21–22 Oct 2026). **T
 | G1 | Can a `committed` rider cancel? | spec §17.3 patience checks omitted `committed` | **Resolved**: yes (the L3 key relies on it); Fig. 8 now shows the arrow and its caption says so | spec v0.5 §17.3 class 60 |
 | G2 | Pickup instant | spec §6 vs §17.5 vs D-39 | **Resolved**: pickup = curb arrival of the boarding vehicle; the 30-s dwell follows and is part of the ride | spec v0.5 §17.5 |
 | G3 | L4 rule set | "five rules" not named | **Resolved**: R0 plus R1(10), R1(15), R1u(10), R2(15), R3(2); 22 transfers (3/3/8/8, 4 XL) and 4 declines summed across rule runs | methodology v1.1 §7 |
+| C10 | Off-duty trigger (found 23 Oct 2026) | spec §17.4 and D-46(3) list "a van going off duty" as an epoch trigger; `src/sim/engine.py` (off-duty handler) logs the time and opens no epoch, and under the closing rule the van stays on duty while accepted work remains | **Open, recorded** (simulator unchanged; effect on L1–L5 decisions not checked; to settle with the shift-end rule C5 before L7) | methodology v1.6 §7b limitations; PDF §4 "Shifts and closing" and Appendix C |
 | G4 | K = 3 candidate rule | first given in a coordinator message | **Resolved**: D-52 and its amendment (all of a van's stops reordered freely) | `decision_log.md` |
 
 ## Residues noticed in the final check (wording only)
@@ -58,3 +59,14 @@ Residues (wording only; the PDF follows D-55):
 
 Note: since A became the default, `outputs/sim/L4_R0/` is the A run. PDF Table 13 (the original-price 18:15 plan) is therefore re-derived from `outputs/sim/L4_R0_M1_reference/`, and Table 14 from `outputs/sim/d53_experiment/`. Tables 15–16 were re-derived from the six M2 runs and the R2(15) epoch log; all match the reports.
 - *Coordinator, 22 Oct:* the `lyft.py` wording above is now corrected in `scenario_methodology.md` §7 (and in the code docstring). The PDF needed no change because it already follows D-55.
+
+## L5 pilot and batch round (22 Oct 2026)
+No conflict on substance between methodology v1.4, spec v0.8 and D-56/D-57. All L5 numbers in the PDF were re-derived from `outputs/sim/batch_L5_v1/` (read only) and match.
+
+Residues (wording only):
+- **Reproducibility count.** Methodology v1.4 §7a says "8 of 8 sampled reruns were byte-identical"; D-57 lists a documented sample of **6** re-runs, and `reproducibility.json` has 6 re-runs plus 2 comparisons of the r00 batch runs with the earlier pilot outputs. The PDF says "six sampled runs re-ran byte-identically, and the two r00 batch runs equal the earlier pilot outputs".
+- **Guardrail limitation bullet.** Methodology v1.4 §7 "Limitations" still says of between-epoch guardrail excesses "none occurred in these runs", while §7a reports 36 on L5 (all attributed). The PDF says none occurred on L1–L4 and the 36 on L5 were all attributed.
+- **References.** Methodology v1.4 §7b cites von Stackelberg (1934), Colson, Marcotte & Savard (2007) and Dempe (2002) by author and year only. The PDF adds standard bibliographic details, marked with a dagger and a note asking the team to check them against its library.
+- Carried over: methodology §7 "What was built" still lists `lyft.py` as M0-scope only.
+
+**Final sync (22 Oct 2026): all four residues above are settled.** Methodology v1.4 now says 6 reruns byte-identical to the batch outputs plus the two r00 batch runs byte-identical to the pilot outputs; its limitations bullet says no excess on L1–L4 and 36 excess events on L5; the 36 are events across 180 runs from 16 distinct requests on 10 nights (verified from the run manifests); the three bilevel references are verified by the coordinator (Colson et al. 2007 doi 10.1007/s10479-007-0176-2; Dempe 2002 doi 10.1007/b101970; von Stackelberg 1934), and the PDF's dagger note was removed. The carried-over `lyft.py` wording residue is also settled (methodology §7 now says the rules act at every epoch since M2).
