@@ -16,6 +16,8 @@
 >
 > **Status of the assumptions:** each AS-xx's status and recommended default are in `research_review.md` §5.
 >
+> **21 Oct note:** parties of 5 are treated as Lyft-eligible through a larger vehicle (Lyft XL), a user-supplied operational correction (decision D-33). The 2018 "5+ always get a van" evidence below is kept as dated history; it refers to standard 4-seat Lyft cars.
+>
 > **Scope (accepted 12 Oct):** Homewood only, with East Baltimore excluded; door-to-door, so stop consolidation (§5, §10 item 2) is **out of scope**.
 
 ~~Version 1.0, 2 Oct 2026.~~  This is a research document for Team FourSight. It describes how the service works, so that the simulator can be modelled on it. It is **not** the scenario definition, which is on hold until the team agrees on this document.
@@ -45,7 +47,7 @@ Every claim carries an evidence grade:
 3. **The objective trades off wait, ride time and miles.** The weights are not public. TransLoc says the wait-time penalty can grow faster than linearly (VENDOR). Hopkins states a **"safety first" policy**: a van with spare seats is often sent to pick up waiting riders before it drops off the riders on board (JHU). That is consistent with wait being weighted heavily against ride time.
 4. **Hopkins publishes service targets, and they are soft.** For Homewood: pickup within 15 minutes of the request and rides no longer than 20 minutes, with up to 20 minutes for pickup at busy times. For East Baltimore: averages of 12 minutes for wait and ride, with goals of at most 20 and 25 minutes (JHU 2026). April's P90 wait (about 17–21 min) and P90 ride (about 24 min) exceed the Homewood targets (DATA), so they are **targets, not hard limits**.
 5. **Lyft overflow is a human dispatcher's decision.** In peak hours a dispatcher may move a still-pending van ride to Lyft and book the Lyft for the rider (JHU). The rider needs no Lyft app and is told by text message.
-   - Criteria named in 2018: group size (5 or more always gets a van, since a Lyft seats 4), location and wait time (PRESS).
+   - Criteria named in 2018: group size (5 or more always gets a van, since a Lyft seats 4), location and wait time (PRESS). `[21 Oct 2026: user-supplied operational correction (decision D-33): parties of 5 can use Lyft via a larger vehicle such as Lyft XL; the 2018 statement refers to standard 4-seat Lyft cars]`
    - In 2018 the dispatcher asked whether the rider would accept a Lyft (JHU).
    - Students describe the rule as "a Lyft if the van doesn't arrive within 15 minutes" (PRESS 2026).
 6. **In the dashboard, a Lyft transfer most likely shows up as a "Canceled" van ride.**
@@ -132,7 +134,7 @@ stateDiagram-v2
     Requested --> Denied: refused (≈0 per day at Homewood in April)
     Pending --> Assigned: engine assigns a van + ETA (may change at each re-plan)
     Assigned --> Pending: re-plan moves the ride (internal)
-    Pending --> TransferredToLyft: dispatcher moves it (peak, party ≤ 4)
+    Pending --> TransferredToLyft: dispatcher moves it (peak; party ≤ 4 standard, 5 via XL per D-33)
     Assigned --> TransferredToLyft: dispatcher moves it
     Pending --> Canceled: rider cancels
     Assigned --> Canceled: rider cancels
@@ -204,7 +206,7 @@ The questions it answered are ours: how many rides per vehicle, what happens if 
 |---|---|---|
 | Fall 2017 | Ridership about 80% above earlier years: nearly **10,000 riders a month** | JHU (Hub, 2018) |
 | Jan 2018 | Fleet expanded to **12 vans**, new drivers, a larger dispatch team, improved TransLoc app; service 5:30 pm–3:45 am. **Lyft added on Friday and Saturday nights.** Wait goal: **10 minutes**. A dispatcher may ask whether the rider will take a Lyft instead; the Lyft waits up to 5 minutes | JHU (Hub) |
-| Feb 2018 | Dispatcher chooses between Lyft and a van: **5 or more riders always get a van** (a Lyft seats 4, a van **14**); for 4 or fewer, location and wait time decide | PRESS (News-Letter, quoting the Director of Transportation Services) |
+| Feb 2018 | `[21 Oct 2026: user-supplied operational correction (decision D-33): parties of 5 can use Lyft via a larger vehicle such as Lyft XL; the 2018 statement refers to standard 4-seat Lyft cars]` Dispatcher chooses between Lyft and a van: **5 or more riders always get a van** (a Lyft seats 4, a van **14**); for 4 or fewer, location and wait time decide | PRESS (News-Letter, quoting the Director of Transportation Services) |
 | Aug 2019 | Evening fixed routes restructured (Homewood Route, more frequent Brody shuttle); **Night Ride extended to the Peabody Institute** (6 pm–3:45 am); app notifications become push messages; riders sent to Lyft still get texts | JHU (Hub) |
 | Aug–Sep 2022 | East Baltimore Blue Jay Shuttle launched (5–9 am and 5:30 pm–midnight, with Lyft). Homewood Night Ride radius **reduced** (it had served the Inner Harbor). **Peabody re-merged into the Homewood Night Ride area** (Sep 18). Students reported longer waits; the university cited technical problems from growth | PRESS (News-Letter 2022), JHU |
 | 2023 (archived page) | Rules as in 4.2: 3-minute van wait, group of 5 or fewer, "safety first", dispatcher Lyft transfers at peak, 3-minute Lyft wait. In term time, the Peabody area is roughly 20th St (north), Guilford Ave / South St (east), Pratt St (south), Howard St (west) | JHU |
@@ -336,7 +338,7 @@ If the variant changes results materially, we report it as a finding.
 | **Rider** | Their own request and ETA | Book; cancel; be present or not | Books with a party of 1–5 inside the area. May cancel while waiting, more likely as the ETA or wait grows (T3, Penn). May not show (about 5%). May rebook (UNKNOWN) |
 | **Scheduling engine** (TransLoc) | All open rides and all vans (positions, loads) | Assign rides and order stops; re-plan on events and every 2 min | Minimises weighted wait, ride and miles; a convex wait penalty; reassignment allowed until pickup; capacity and precedence are hard constraints |
 | **Driver** | Next stop, wait timer | Drive, wait 3 min, mark no-show | Follows the plan. Variant: response delay or declining |
-| **Dispatcher** | The whole board, ETAs, call-ins | Book phone rides; **transfer pending rides to Lyft** | Rule-based stand-in: in peak hours, transfer a pending ride (party ≤4) whose expected wait is above a threshold, after a reaction lag. Possibly limited by dispatcher capacity |
+| **Dispatcher** | The whole board, ETAs, call-ins | Book phone rides; **transfer pending rides to Lyft** | Rule-based stand-in: in peak hours, transfer a pending ride (party ≤4; parties of 5 via Lyft XL since the 21 Oct correction, D-33) whose expected wait is above a threshold, after a reaction lag. Possibly limited by dispatcher capacity |
 | **Lyft** | The transferred trip only | Lyft's own matching | Picks up after a Lyft wait, then drives direct (no pooling). Counted separately |
 | **Service rules** | — | — | Hours 18:00–02:00 (finish the backlog); area; group ≤5; 3-min wait; soft targets 15/20 min |
 
@@ -385,7 +387,7 @@ Each line says what we don't know, what we assume, why, and how we'll test sensi
 | **AS-03** | Engine objective | Weights for wait, ride and miles; their shape | Lexicographic or weighted: convex wait penalty > ride time > miles (safety first) | VENDOR, JHU | Wait-heavy vs ride-heavy weights; linear vs convex wait | H |
 | **AS-04** | Engine method | Today's algorithm | A good heuristic (insertion + local search) standing in for TransLoc's annealing | VENDOR 2016 | Our exact MILP (C) as an upper reference | M |
 | **AS-05** | Service targets | Hard limits or soft targets | **Soft:** 15-min pickup, 20-min ride (Homewood), used in the score and as reporting thresholds, not as hard constraints | JHU, DATA (April P90s exceed them) | Hard caps (as in D-04, 20/25) as a variant | H |
-| **AS-06** | Lyft trigger | Threshold, timing and who qualifies | A pending ride with party ≤4 whose expected wait is over **15 min** is transferred after a **dispatcher lag**, during peak hours only | JHU, PRESS | Threshold 10 / 15 / 20 min; lag 0 / 2 / 5 min; consent probability 1.0 / 0.8; "peak" = whole night vs Fri–Sat vs when waits are high | H |
+| **AS-06** | Lyft trigger | Threshold, timing and who qualifies | A pending ride with party ≤4 (≤5 via Lyft XL since 21 Oct, D-33) whose expected wait is over **15 min** is transferred after a **dispatcher lag**, during peak hours only | JHU, PRESS | Threshold 10 / 15 / 20 min; lag 0 / 2 / 5 min; consent probability 1.0 / 0.8; "peak" = whole night vs Fri–Sat vs when waits are high | H |
 | **AS-07** | Dispatcher capacity | How many transfers per hour dispatchers can handle | Unlimited (no queue) | — | Cap of k transfers per 10 min | M |
 | **AS-08** | Lyft service | Lyft wait and ride | Lyft pickup within 5–10 min (draw); direct ride at OSRM time × multiplier; unlimited Lyft supply | PRESS (target ≤15 min after request) | Lyft wait 5 / 10 / 15 min | L–M |
 | **AS-09** | Rider cancellation | Patience distribution | Patience drawn once per request; hazard rises with the ETA shown and with time waited | DATA T3, Penn | Calibrated so that rider cancellations (not Lyft) ≈ 2/3 of "Canceled" | H |

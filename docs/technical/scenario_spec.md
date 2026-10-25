@@ -1,259 +1,448 @@
-# Scenario specification v0.1 (DRAFT, 12 Oct 2026)
+# Scenario specification v0.7 (22 Oct 2026)
 
-**Status:** draft for team agreement (Phase 3 step 3B). **No scenario data may be generated from it until the team approves it in writing**, and the decisions in §14 are settled.
+**Built 20 Oct:** L1–L5 are generated in `data/scenarios/v2/` (34 scenarios; hashes in `FROZEN_v2.json`), with hand-check sheets for L1–L4 (`handcheck.csv` + `HANDCHECK.md`). L6–L7 wait for calibration.
 
-**What it supersedes, once approved:** the v1 scenario contract (`scenario_contract.md`, paused) and the v1 pre-registration (`preregistration.md`, paused). Both are kept unchanged for the record.
+**Status:** the specification is **approved by the team** (decisions D-27–D-32, decision log, 20 Oct). v0.3 (21 Oct) adds the corrections in §16:
+- Lyft XL for parties of 5 (D-33);
+- the dispersed-geography variant (D-34);
+- the exact volume formula with hourly rounding (D-35, provisional).
 
-**It builds on:**
-- `research_review.md` (scope, assumptions);
-- `model_design.md` (mathematics, players, metrics);
-- `compute_feasibility.md`.
+v0.4 (21 Oct, documentation consolidation; §18):
+- financial modelling removed (D-45);
+- **simulator build rules added as §17** (D-46–D-48);
+- stale counts, pairing and evidence wording corrected (D-49).
+
+v0.7 (22 Oct): M2 integration conventions and the approval of pending price A (§17.5, §17.8, §17.9, §21).
+
+v0.6 (22 Oct): curb-wait planning convention (D-54) and the selectable pending-price formulations of the D-53 experiment (§17.9, §20).
+
+v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–M1 implementation); §17 gains the conventions the implementation needed (§17.9); stale or ambiguous items found while writing the explanatory PDF are corrected (§19).
+
+**Authoritative documents for implementation:**
+- **this file is the build contract** (inputs, states, events, outcomes, §17);
+- `model_design.md` gives the mathematics, as corrected by D-47;
+- `scenario_methodology.md` explains *why* each design choice was made;
+- where they disagree, the decision log wins, then this file.
+
+The report-ready reasoning for each scenario-design choice is in the decision log, section "Scenario design trail".
+- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5–v0.6 (22 Oct) are archived in `archive/`.
+- It supersedes, for new work, the paused v1 scenario contract and v1 pre-registration. Both are kept unchanged.
+
+---
+
+## 0. In plain words: what a scenario is and how one is made
+**A scenario is one simulated night (or evening window) of Night Ride.** It is a list of ride requests: when each comes in, where it starts and ends, and how many riders it carries. Add which vans are on duty and when, plus each rider's hidden traits (how patient they are, whether they'll be at the curb). It is the *same night* replayed for every policy we compare. Only the policy changes, so any difference in results is caused by the policy.
+
+**How long it lasts:**
+- **evening window, 18:00–21:00:** the busiest three hours, and the main experiments;
+- **full night, 18:00–02:00:** the confirmatory runs;
+- small validation levels: 20–60 minutes.
+
+In every case the simulation keeps running after the last request until every rider is resolved (dropped off, cancelled or no-show).
+
+**What happens inside a night (the events):**
+1. A request arrives.
+2. The van dispatcher re-plans: on that event, and every 2 minutes.
+3. A van drives to its next stop and arrives.
+4. The rider boards, or after 3 minutes is marked a no-show.
+5. Riders are dropped off.
+6. A waiting rider runs out of patience and cancels.
+7. The Lyft rule moves a waiting rider to Lyft. After the dispatcher's lag a Lyft is called; it arrives, picks up and drops off.
+8. Vans go off duty as the night tapers (later cases only; the first demonstration keeps all five vans on duty, D-36).
+9. Requests stop at the end of the window (21:00 for the evening window, 02:00 for the full night), and the backlog is finished.
+
+**How the base scenario is built (once the team says go):**
+1. **Fleet:** 5 vans (14 seats each), on duty from 18:00 to 21:00 and then until the backlog is finished (D-36). A sixth van and April-shaped tapering are later cases.
+2. **Demand volume:** the number of requests is set so each van faces the same load as April, about **11 requests per van-hour** on average and ~13 at the 6 pm peak.
+   - With 5 vans on duty for all three hours: **64 / 50 / 54 = 168 requests** for 18:00–21:00 (D-36). This is a **derived, provisional workload**, not measured April demand.
+   - The sixth-van comparison uses the **same** 168 requests (D-37). Full-night counts are not derived yet.
+   - This "load ratio" is then fine-tuned in calibration.
+3. **Timing:** requests per hour follow April's hourly shape (highest at 6 pm); within an hour they arrive at random times.
+4. **Where:** each request's pickup and drop-off are drawn from the 188 April hotspot points, using the demand model that reproduces April's map totals. **Homewood and Peabody are both included.** Pickups are door-to-door at the snapped curb point, never at a forced stop.
+5. **Party size:** 1–4 riders, sometimes 5. A party of 5 can use Lyft through a larger vehicle (Lyft XL) and stays together (D-33).
+6. **Hidden rider traits,** drawn once per request: patience, no-show chance, whether they'd accept a Lyft, how long a Lyft would take to arrive.
+7. **Save everything** with its fingerprints (seeds, data versions), so the night can be rebuilt byte for byte.
+
+**One base, a few named patterns.** The *recipe* has a base version and a few deliberately stressed versions (§3.4):
+- **burst:** a bulk of requests in a short time;
+- **far-trip:** more long trips between Homewood and Peabody/downtown;
+- **high load:** +30% requests.
+
+Each recipe is turned into **30 different nights** using 30 seed numbers.
+
+**How the random seed works.** A seed is a starting number for the random generator. The same recipe with the same seed always produces exactly the same night. Each ingredient has its **own** random stream: times, places, party sizes, patience, no-shows, Lyft delays. Changing one ingredient never reshuffles the others. When we compare Lyft rules, **every rule gets the identical 30 nights, with identical riders and identical hidden traits**; this is called "common random numbers". The only thing that differs is the rule.
+
+**One Lyft rule at a time (team decision).** For each night we run every Lyft rule separately, with everything else held constant. We then explain *why* the best rule won on that night (§9.3):
+- when it transferred riders;
+- whom it transferred;
+- what that freed up for the riders left on the vans;
+- how many Lyft bookings (standard and XL) it used. No money is modelled (D-45).
 
 ---
 
 ## 1. Three things kept apart
-| Kind | Examples | Who produces it | Rule |
+| Kind | Examples | Produced by | Rule |
 |---|---|---|---|
-| **Scenario inputs** | Request times, origins, destinations, party sizes; vehicle availability; **latent rider and Lyft randomness** (patience, no-show, consent, Lyft delay, ETA noise) | The scenario generator | Policy-independent. Identical across every policy compared on the same night |
-| **Policies** | Van dispatcher (T, G, …), objective settings (φ, β, guardrail), cadence and commit rule, **Lyft transfer rule** and its parameters | A policy config file | The only thing that differs between paired arms |
-| **Outcomes** | Actual waits, pickups, drop-offs, cancellations, no-shows, transfers, Lyft completions, van-km | The simulator | **Never pre-assigned.** A latent draw (e.g. patience) becomes an outcome only through the simulated events |
+| **Scenario inputs** | Request times, origins, destinations, party sizes; vehicle availability; latent rider and Lyft randomness | The scenario generator | Policy-independent; identical for every policy on the same night |
+| **Policies** | Van dispatcher, objective settings, cadence and commit rule, **Lyft transfer rule** | A policy config file | The only thing that differs between paired arms |
+| **Outcomes** | Actual waits, cancellations, no-shows, transfers, Lyft completions, van-km | The simulator | Never pre-assigned. Latent traits turn into outcomes only through simulated events |
 
-**Latent draws are traits, not outcomes.** A rider's patience is drawn in advance. Whether they cancel depends on how long *this* policy makes them wait.
-
----
-
-## 2. Scope and geography
-- **Service:** Homewood Night Ride only; East Baltimore is excluded. Curb-to-curb inside the service area; both trip ends inside it.
-- **Boundary: decision D-A (§14).** Recommended: Homewood + Peabody area, as April's dashboard was operated. That area holds ~20% of origins and destinations, and ~34% of model trips touch it. Alternative: Homewood core only.
-- **Locations:** the 188 digitized hotspot points (`locations_v1.csv`). They are **demand-generation points** that stand for nearby addresses, **not stops**. Vans stop at each point's snapped road position (`locations_snap_v2.csv`). Documented exception: `p04_b037` at 95 m.
-- **Travel times:** **proposed switch to `tt_locations_v2.csv`** (local OSRM v6.0.0, Maryland extract md5 `ff90439c…`, matrix sha256 `b24c0bc6…`), recorded in a `MANIFEST.json`. Decision D-C.
-  - Van time = matrix seconds × m_v; Lyft time = matrix seconds × m_L.
-  - The multipliers are calibrated: m ∈ [1.0, 1.5], base 1.2 (ASSUMED).
-- **Units:** integer **seconds** internally, with t = 0 at 18:00. Minutes are used only in reports.
-
----
+## 2. Scope and geography (decided)
+- **Service:** Homewood Night Ride **including the Peabody area** (D-27), as April was operated. East Baltimore is excluded (D-23). Curb-to-curb; both trip ends inside the area.
+- **Locations:** the 188 hotspot points (`locations_v1.csv`), used as demand-generation points that stand for nearby addresses, **not stops** (D-24). Vans stop at the snapped road point (`locations_snap_v2.csv`; one documented exception, `p04_b037`, 95 m).
+- **Travel:** `tt_locations_v2.csv` (local OSRM v6.0.0; Maryland extract md5 `ff90439c…`; matrix sha256 `b24c0bc6…`), recorded in `MANIFEST.json` (D-31).
+  - Van time = matrix seconds × m_v; Lyft time = matrix seconds × m_L. m ∈ [1.0, 1.5], base 1.2 (ASSUMED), calibrated.
+- **Units:** integer seconds from 18:00.
 
 ## 3. Scenario inputs
 
-### 3.1 Demand (requests, not completed rides)
-- **Volume.** April's request population per day ≈ Completed 803 + Canceled 795 + No-show 79 ≈ **1,680**.
-  - This counts every request, including those that become Lyft transfers. Duplicates and rebookings are inside "Canceled", unknown in size.
-  - **Base** = 1,680 requests per night. **Variant** = 1,500 (assuming ~10% duplicates).
-- **Timing.** Requests are proportional to the completed-rides-by-hour shape, read as **request hour** (AS-25).
-  - This is ASSUMED: cancellations may concentrate at peaks, which would tilt the real request profile further toward early evening.
-  - Within an hour, arrivals are Poisson, with fixed n per scenario for clean pairing.
-- **Bursts (core factor).** A burst variant concentrates 40% of an hour's requests in 10 minutes (ASSUMED), placed at a fixed hour.
-- **Geography.** O–D pairs come from the gravity × IPF table (`demand.py`, β = 0.1/min base; D-18), restricted to the chosen boundary.
-  - **Spatial-imbalance variant:** the campus-outbound tilt (D-19).
-- **Party size.** P(1, 2, 3, 4) = .72/.19/.06/.03 (mean 1.40). **Parties of 5 appear with a small probability** (variant 1%, ASSUMED), because they are the Lyft-ineligible group.
+### 3.1 Fleet (decided, D-30)
+- **5 or 6 vans on duty at 18:00, 14 seats each.** This is the scenario's **fleet level** and can be set per scenario (a factor in §9).
+- **Why fewer vans than Hopkins runs.** We study a *scaled* Homewood system: demand is scaled to the fleet so that the load per van matches April (§3.2), rather than simulating ~20+ vans and ~1,700 requests.
+- **Taper:** each van gets an availability window. The number on duty follows April's shape, scaled to the 18:00 level:
+  - **5-van level:** ≈ 5, 5, 4.5, 3.5, 3, 3, 2, 2 vans through the hours 18:00–01:00;
+  - **6-van level:** ≈ 6, 6, 5.5, 4, 3.5, 3.5, 2.5, 2.
+  - Fractions are realised by staggered shift ends.
+- **Shift end:** the exact rule is **open** (§17.6); it matters only for tapering cases (L7) and is not implemented. Riders on board are always finished. Breaks are deferred.
+- **Start position:** the depot (D-17).
+- **Known limitation of scaling down:** fewer requests per square mile means fewer pooling chances than the real system. Results are stated "at the scaled system's density". A larger-fleet check is deferred.
 
-### 3.2 Vehicle availability over the night
-This is **an input (supply), distinct from rides per van-hour, which is an outcome.**
-- **Profile.** One availability window [start, end] per van. The *shape* follows the April "All services" taper (27.6 → 4.5 vans by clock hour). The *level* is scaled by f.
-  - **f is uncertain: 0.65–1.0** (about 18–27.6 vans at 6 pm), because the chart may mix services. It is calibrated (§12) and kept as a factor.
-- **Shift ends.** No new pickups after the van's end, beyond a grace period; it finishes riders already on board. Breaks are deferred.
-- **Start positions:** the depot (D-17) or hotspots. Capacity 10–14 (base 14; AS-15).
+### 3.2 Demand volume and timing
+- **Load ratio ρ_h = requests per available van in hour h.** It is matched to April **hour by hour** (D-35, provisional):
 
-### 3.3 Latent per-request draws (seeded, policy-independent)
-| Draw | Distribution (ASSUMED until calibration) | Used when |
+  ρ_h = (C_h / 30) × (R / C) ÷ V_h
+
+  - C_h = completed rides in clock hour h over 30 days (p09);
+  - R / C = 50,297 recorded requests (Completed + Canceled + No-show, with Denied read as 0) ÷ 24,095 completed = 2.087 (p07);
+  - V_h = average "All services" vehicles in hour h (p06).
+
+  This gives **ρ = 12.85, 10.10, 10.71** for 18:00, 19:00 and 20:00. ρ is the **calibration knob** for volume (§12).
+- **Requests per hour:** N_h = ρ_h × v_h, where v_h is the scenario's vans in hour h. Hourly values are rounded by the **largest-remainder rule**: round the total first, floor each hour, then give the leftover units to the hours with the largest fractions.
+  - With April-shaped availability (5, 4.95, 4.46 vans): **64 / 50 / 48 = 162**.
+  - With constant 5 vans: **64 / 50 / 54 = 168**.
+  - ~~Constant vs tapering availability is not decided~~ **Decided 21 Oct (D-36):** the first demonstration uses **constant five vans, 64 / 50 / 54 = 168** (provisional; a derived workload, not measured April demand). Tapering (162) is a later case.
+  - **Sixth van (D-37):** the benefit of one more van is measured on the **same** requests. Scaling demand with the fleet is a separate experiment.
+- **Illustrative sensitivity range:** ~150–260 requests for 18:00–21:00 (D-49, replacing "~145–205"). This is **not a confidence interval**. If Homewood had 20–35% fewer vehicles than the "All services" count, the load per van, and so the count, would rise to ≈ 210–260; if ~10% of recorded requests were rebookings it would fall to ≈ 150.
+- **29 days, not 30:** the vehicle chart averages over 29 days, so ρ moves by about ±3% depending on how the missing day is treated (D-49).
+- **Hourly shape:** requests are proportional to April's completed-rides-by-hour shape, read as request hour (P-12). ASSUMED: cancellations may concentrate at peaks, tilting the true request profile earlier.
+- **Within an hour:** a fixed count per hour, at uniformly random times, which gives clean pairing.
+
+### 3.3 Geography, party size, latent draws
+- **O–D pairs:** from the gravity × IPF table (`demand.py`, distance-decay β_geo = 0.1 per minute of drive; D-18) over Homewood + Peabody. β_geo is unrelated to the ride-cost weight β = 0.5 in the objective (§4).
+- **Geography representation:** the **reference** places each request at its map-cluster point (188 points). The **dispersed variant** `dispersed_v1` (D-34) spreads the 19 coarse city-view clusters over 6 road satellites each (400 m disk, snapped ≤ 75 m), with the same request times, cluster-level O–D, parties and traits. Files: `locations_dispersed_v1.csv`, `tt_locations_dispersed_v1.csv`, `data/scenarios/v2_dispersed/`.
+- **Party size:** P(1, 2, 3, 4, 5) = .73/.18/.055/.025/.01 (sums to 1; mean 1.405). This is an **assumed** distribution chosen near April's **derived** 1.386 passengers per completed booking; the two are different quantities. The average-April shape is the base (D-38); a weekend shape (mean 1.49) is a sensitivity case. The base mean is 1.40, and 1% are parties of 5 (ASSUMED); they are **potential** XL demand: only those actually transferred need a Lyft XL (D-33). A van can take a party of five only when five seats are free.
+- **Latent per-request draws** (seeded, policy-independent; ASSUMED until calibration):
+
+| Draw | Distribution | Used when |
 |---|---|---|
-| `patience_s` | Base: a rising abandonment hazard (e.g. Weibull, shape > 1), calibrated so rider cancellations ≈ 2/3 of "Canceled" | The rider is still unpicked when patience runs out (with the van or after a transfer) |
-| `noshow_u` | Uniform(0, 1); the rider no-shows if below p_ns = 0.047 | The van arrives |
-| `consent_u` | Uniform(0, 1); the rider accepts a Lyft if below p_c (base 1.0) | A transfer is decided |
-| `lyft_delay_s` | Lognormal, median 8 min, P90 ~15 min (ASSUMED); scarcity variant | A transfer is placed |
-| `lyft_noshow_u` | Uniform(0, 1); Lyft no-show below p_lns (base = p_ns) | The Lyft arrives |
-| `eta_noise` | Per-request multiplier on the displayed ETA (variant) | Only if patience depends on the shown ETA |
+| `patience_s` | Personal deadline (D-39): Weibull, shape 1.5, median 18 min, a labelled placeholder. Scale calibrated later so rider cancellations fall within a **provisional 50–75%** of the dashboard "Canceled" share (a sensitivity range, not an interval established by the data) | The rider is still unpicked when it runs out (with the van or after a transfer) |
+| `noshow_u` | **Shared presence draw** U_r (D-41, simplified by D-48): absent iff U_r < p at the first vehicle arrival. **One p for every mode** (van, standard Lyft, XL), **conditional on arrival** and provisional: ≈ 8.9% under the dashboard status mapping (D-48), not the 4.7%-of-all-requests share. **Errata:** the frozen `scenario.json` label "DERIVED rate 4.7%" and the `p_noshow: 0.047` params are all-request shares; the simulator must not read them | An active vehicle (van or Lyft) reaches the curb |
+| `consent_u` | U(0,1) < p_c (base 1.0) → accepts Lyft | A transfer is decided |
+| `lyft_delay_s` | Lognormal, median 8 min, P90 ~15 min; scarcity variant. Used for standard and XL alike in the base (ASSUMED; an XL-specific delay is a sensitivity variant) | A transfer is placed |
+| `lyft_noshow_u` | Generated in the frozen L1–L5 inputs but **unused** under the shared-presence convention (D-41); kept for compatibility | — |
+| `eta_noise` | Multiplier on the displayed ETA (variant) | Patience-depends-on-ETA variant only |
 
-**Every draw is made for every request,** whether it is used or not. That way every policy sees identical riders: these are **common random numbers**.
+All draws are made for every request, used or not.
 
----
+### 3.4 Demand patterns (the named variants of the recipe)
+| Pattern | What changes | Why it matters for Lyft rules |
+|---|---|---|
+| **Base** | §3.2–3.3 as stated | Reference |
+| **Burst** ("bulk requests") | 40% of the 18:00–19:00 requests fall inside one 10-minute block (the same block for all seeds, e.g. 18:20–18:30) | A sudden queue: do rules that act early beat rules that wait? |
+| **Far-trip** | The probability of trips with an end in the Peabody/downtown zones is doubled (re-normalised); everything else is unchanged | Long, isolated trips tie up vans, and are the natural Lyft candidates |
+| **High load** | ρ × 1.3 | Sustained overload: the resource side of transferring |
+
+Patterns change only demand. Fleet, policies and latent-draw *rules* are untouched. Each pattern has its own demand streams (the pattern is in the seed key), so replicate numbers are shared but the nights are **different**: comparisons **between** patterns are **not paired** (D-49). Rule comparisons **within** a pattern are paired.
 
 ## 4. Policies (configuration, not data)
-| Setting | Base | Variants |
+| Setting | Base (decided D-29 unless noted) | Variants |
 |---|---|---|
-| Dispatcher | **T** (TransLoc-like heuristic) | T− (no reassignment / 300 s), G (greedy); C and H on L1–L4 only |
-| Cadence Δ | 120 s + events | 60 / 300 s (sensitivity only) |
+| Dispatcher | **C**, restricted route-selection MILP (HiGHS) with the candidate rule of D-52: **provisionally selected** (D-51), conditional on the M5 benchmark; not a reproduction of Hopkins' dispatcher | T (insertion + local search) as a later robustness variant or development contingency, **never a runtime fallback**; G greedy; H on L1 only |
+| Cadence Δ | 120 s + events | 60 / 300 s (sensitivity) |
 | Commit rule | Next stop frozen; at the curb | ETA ≤ 5 min |
-| Wait penalty φ | Piecewise linear, slopes 1 / 2.5 / 5 / 10 / 20 per min at breaks 5/10/15/20 | Gentler, steeper |
-| Ride weight β; distance γ | 0.5; 0.1 min/km | β 0.25 / 1; lexicographic variant |
-| Ride guardrail | max(25 min, 2·direct + 5 min), elastic | 20 (hard target), 35 |
+| Wait penalty φ | Piecewise linear, slopes 1/2.5/5/10/20 per min, breaks at 5/10/15/20 | Gentler / steeper |
+| Ride weight β; distance γ | 0.5; 0.1 min/km | β 0.25 / 1; lexicographic |
+| Ride guardrail | max(25 min, 2·direct + 5 min); no candidate may create or increase a violation; an unavoidable one is logged and penalised by Ψ (D-47) | 20 hard / 35 |
+| Targets | 15 min pickup, 20 min ride, busy-time 20 min: **reporting thresholds**, taken from the page wording captured around April 2026 (not proof of operating policy). The live page read on 21 Oct 2026 states 20 / 25 / 25; kept distinct (D-49) | Also report at 10 and 20 min |
 | **Lyft rule** | **The factor under study** (§6) | — |
 | Dispatcher lag ℓ | 2 min | 0 / 5 |
-| Dispatcher capacity | Unlimited | k = 3 per 10 min |
+| Dispatcher capacity | Unlimited | 3 per 10 min |
 
----
-
-## 5. Outcomes (produced by the simulator; schema in §10)
-Every request has **exactly one terminal state**:
+## 5. Outcomes (simulator output; schema in §10)
+**Terminal states,** exactly one per request:
 - `van_completed`;
 - `lyft_completed`;
 - `cancel_pending_van`;
 - `cancel_after_transfer`;
 - `noshow_van`;
 - `noshow_lyft`;
+- `lyft_failed` (sensitivity only; base probability f = 0, D-43);
 - `unresolved_close` (must be 0).
 
-**A Lyft transfer is an event, not a terminal state.** Wait is always **actual pickup (either mode) − request time**.
+**Rules that apply to every rule and mode:**
+- A transfer is an event, not a completion.
+- **Wait = actual pickup (either mode) − request time.**
+- For calibration only, a dashboard view is derived: "Completed" = van-completed; "Canceled" = rider cancellations + transfers (variant without transfers).
 
-**Derived, for calibration only:** a dashboard view, where "Completed" = van-completed and "Canceled" = rider cancellations + transfers. A variant leaves transfers out of "Canceled".
-
----
-
-## 6. Lyft transfer strategies (compact set)
+## 6. Lyft transfer rules (all kept, run one at a time; D-28)
 **Common to all rules:**
-- **eligibility:** party ≤ 4, pending (not onboard, not committed);
-- consent;
+- eligibility: still pending (not onboard, not committed). Parties of 1–4 go by **standard Lyft**, parties of 5 by **Lyft XL**, kept together (D-33). XL bookings are counted separately in the resource measures; XL availability and delay are unknown, so no extra wait is assumed in the base, and no prices are modelled (D-45);
+- consent (base p_c = 1: a decision is a booking request; there is no separate offer stage, D-45);
 - dispatcher lag ℓ;
-- **Lyft pickup time** = decision time + ℓ + `lyft_delay_s`;
+- Lyft pickup = decision + ℓ + `lyft_delay_s`;
 - the rider's patience keeps running.
 
 The rule is evaluated after every dispatcher solve, at time τ.
 
-| Rule | Fires when | Clock origin | Information needed | Notes |
-|---|---|---|---|---|
-| **R0 Never** | — | — | — | Reference only; not the status quo |
-| **R1(θ) Elapsed wait** | τ − t_r ≥ θ | The **request time** | The request time | θ ∈ {10, 15}. "Waited 15 min, then transfer". Total wait ≥ θ + ℓ + Lyft delay |
-| **R1u(θ) Elapsed unassigned** | Time continuously **without an assigned van** ≥ θ | The **moment it became unassigned** (initially t_r) | Assignment status | Closest documented form (East Baltimore FAQ: "within ten minutes without a van assigned"); HYPOTHESIS for Homewood. θ = 10 |
-| **R2(θ) Predicted total wait** | P̂_r(τ) − t_r > θ, where P̂_r is the plan's predicted pickup time (∞ if unassigned) | The **request time**; the test looks **forward** | Plan ETAs | Acts as soon as the plan predicts a breach, possibly at request time. θ = 15. Sensitive to ETA churn |
-| **R3(m) Van vs Lyft** | P̂_r(τ) > τ + ℓ + L̄ + m, where L̄ is the dispatcher's typical Lyft delay (median 8 min) | **Now** | Plan ETAs, a typical Lyft delay, the lag | Transfers when a Lyft would plausibly arrive earlier by margin m (m = 2 min) |
-| **R4 Congestion-gated** (optional) | R2 or R3, applied only when the congestion index (pending requests ÷ available vans, or the median predicted wait) > κ | — | Board totals | Represents "peak service hours". Include only if R2/R3 transfer heavily off-peak |
+| Rule | Fires when | Clock origin | Information |
+|---|---|---|---|
+| **R0 Never** | — | — | — (reference, not the status quo) |
+| **R1(θ) Elapsed wait** | τ − t_r ≥ θ; θ ∈ {10, 15} | Request time | Request time |
+| **R1u(10) Elapsed unassigned** | Continuously without an assigned van ≥ 10 min | When it became unassigned | Assignment status |
+| **R2(15) Predicted total wait** | Plan's predicted pickup − request time > 15 min | Request time (looks forward) | Plan ETAs |
+| **R3(2) Van vs Lyft** | Predicted van pickup > τ + ℓ + 8 min + 2 min | Now | Plan ETAs, typical Lyft delay, lag |
+| **R4 Congestion-gated** (optional) | R2 or R3 only when pending ÷ available vans > κ | — | Board totals |
 
-**"Waiting 15 minutes before transferring" (R1) differs from "acting when total predicted van wait exceeds 15 minutes" (R2).**
-- R1 always lets the rider wait θ first.
-- R2 can transfer at minute 1.
-- Both count waiting from the original request time.
-
----
+R1 always lets the rider wait θ first. R2 can transfer at minute 1. Both count waiting from the original request.
 
 ## 7. Fair comparison rules
-1. **Paired nights:** every policy runs on the identical scenario file (requests + latent draws + availability).
-2. **One factor at a time:** when comparing Lyft rules, the dispatcher, objective, cadence and commit rule are held fixed (base T). Dispatcher and objective appear only as **supporting** dimensions (SQ1/SQ3).
-3. **Common random numbers:** latent draws are per request, from named seed streams (§11). No policy can change which draw a rider gets.
-4. **No post-hoc tuning:** thresholds and settings are fixed in the pre-registration (to be re-written from this spec) before any comparison run.
-5. **Report frontiers,** not single winners: rider outcome vs Lyft trips (and van-km).
+1. **Paired nights:** every rule runs on the identical scenario file.
+2. **One factor at a time:** when comparing Lyft rules, the dispatcher, objective, cadence, commit rule, fleet and pattern are held fixed.
+3. **Common random numbers:** latent draws are per request, from named streams.
+4. **No post-hoc tuning:** thresholds are fixed in pre-registration v2 before any comparison run.
+5. **Frontiers,** not single winners: rider outcome vs Lyft bookings (and van-km).
 
----
-
-## 8. The level ladder (validation first, then the research question)
-**Cancellations and no-shows enter separately.**
-- A no-show happens **at the curb**: the van waits 3 min, then a re-plan.
-- A cancellation happens **while pending**: it removes a request from plans and from the Lyft rule.
-- Mixing them would hide which accounting is wrong.
-
-| Level | Size | Adds | Purpose | Tests Lyft? |
+## 8. The level ladder (reminder: L1–L4 check correctness; L5 is a dress rehearsal; L6–L7 answer the question)
+| Level | Size and length | Adds | Purpose | Lyft? |
 |---|---|---|---|---|
-| **L1** | 2 vans, 16 requests | Automatic re-planning dispatcher; deterministic times; no cancellations, no-shows or Lyft. Arrivals spaced (≤ 2 open at a time) | **Hand-checkable**: every pickup and drop-off time is computed by hand (spreadsheet) **and** by the exact solver; T, G and C must agree, or the difference must be explained | No |
-| **L2** | 2 vans, 16 | No-shows: 2 designated requests (deterministic) | The 3-min wait, the no-show event, re-plan, accounting | No |
-| **L3** | 2 vans, 16 | Rider cancellations: designated patience values so that 2–3 requests cancel | The pending-state cancel path; dispatcher reaction | No |
-| **L4** | 2 vans, 16, compressed into 20 min | Lyft rules R0/R1/R2/R3 with a deterministic lag and Lyft delay | **Lyft mechanics**: the clock is not reset, transfer ≠ completion, eligibility (one party of 5), consent; hand-traceable differences between rules | **Mechanics** |
-| **L5** | 2 vans, 24–32, with a burst | Stochastic latent draws (patience, Lyft delay, no-show), lag, 30 paired seeds | Pilot of the full pipeline: pairing, metrics, frontiers. Small, so **not** a basis for conclusions | Pilot |
-| **L6** | Homewood peak window 18:00–21:00; availability scaled by f; calibrated demand | Everything; driver-response and capacity variants as sensitivity | **Main Lyft-policy experiments** (starts empty at 18:00, the first hour of service) | **Yes** |
-| **L7** | Full night 18:00–02:00 with the taper and the post-02:00 backlog | Everything | **Confirmatory** subset; shift ends and the night's tail | **Yes** |
+| **L1** | 2 vans, 16 requests, ~150 min (built 20 Oct): each request arrives only when **both vans are idle**, so one request is open at a time | Re-planning dispatcher; fixed travel times; no cancellations, no-shows or Lyft | **Checked by hand:** every pickup and drop-off time computed in a spreadsheet and by the exact solver | No |
+| **L2** | Same 16 requests | 2 designated no-shows | The 3-min curb wait, no-show handling, re-plan, accounting | No |
+| **L3** | Same 16 requests | Designated patience values so 2–3 riders cancel | The cancel-while-waiting path | No |
+| **L4** | 2 vans, 16 requests packed into ~20 min; **vans come on duty at 18:15**, so every rule's earlier decisions are traceable by hand | Lyft rules R0, R1(10), R1(15), R1u(10), R2(15), R3(2) with a fixed lag and Lyft delay; one party of 5 | **Lyft bookkeeping, checked by hand:** the clock is not reset, transfer ≠ completion, eligibility, consent | Mechanics |
+| **L5** | 2 vans, 28 requests in 60 min, ≥ 40% in a burst at 18:20–18:30 (built 20 Oct) | Random latent draws, lag, 30 paired seeds | **Dress rehearsal** of the pipeline (pairing, metrics, explanations); too small for conclusions | Pilot |
+| **L6** | 5 vans constant, 18:00–21:00 + backlog (168 requests, D-36); sixth van on the same requests (D-37) | Everything; base + 3 patterns | **Main Lyft-rule experiments** | **Yes** |
+| **L7** | 5–6 vans, 18:00–02:00 + backlog (counts not yet derived) | Everything, with the night's taper and shift ends | **Confirmatory** | **Yes** |
 
 **Expected results, stated in advance:**
-- **L1–L4 are correctness levels.** Algorithm differences are expected to be ~0 at L1–L4 (low load).
-- **L5 is a pipeline pilot.** Credible policy conclusions come only from L6–L7.
+- L1–L4 should show ~no algorithm differences, because the load is low.
+- Conclusions come only from L6–L7.
 
----
+## 9. Experiment design
+### 9.1 Primary (L6)
+**One Lyft rule at a time** within each condition:
+- **Lyft rule (6):** R0, R1(10), R1(15), R1u(10), R2(15), R3(2);
+- **pattern (4):** base, burst, far-trip, high load;
+- **fleet level (2):** 5, 6 vans.
 
-## 9. Compact experiment matrix (replacing the paused 330-scenario grid)
-**Primary (L6), varying only the Lyft rule and the conditions:**
-- **Lyft rule (6):** R0, R1(15), R1u(10), R2(15), R3(2), plus R1(10) as a threshold check;
-- **demand condition (3):** base; high (+30%); burst;
-- **fleet level (2):** f_low and f_high from the calibrated range.
+That is 6 × 4 × 2 = **48 cells × 30 paired nights = 1,440 three-hour runs.** The runtime must be measured by benchmark B3 before launch.
 
-That is 6 × 3 × 2 = **36 cells × 30 paired seeds = 1,080 three-hour runs**. Runtime is estimated in `compute_feasibility.md`, to be measured by benchmark B3 before this is fixed.
+### 9.2 Confirmatory (L7) and robustness
+- **Confirmatory (L7):** 6 rules × base pattern × {5, 6} vans × 30 nights = 360 full nights.
+- **Robustness (L6, base pattern, 5 vans, rules R0/R1(15)/R2(15)/R3, one factor at a time, 30 nights each):**
+  - dispatcher C (base) vs T, if T is built, and G (robustness of the ranking; D-51);
+  - Lyft delay median 5 / 8 / 12 min, plus scarcity;
+  - lag 0 / 2 / 5;
+  - consent 1.0 / 0.8;
+  - dispatcher capacity;
+  - patience low / mid / high (from the identified set);
+  - objective wait-heavy / base / ride-heavy;
+  - travel multiplier 1.0 / 1.2 / 1.5.
 
-**Confirmatory (L7):** 6 rules × base demand × mid fleet level × 30 seeds = 180 full nights.
+### 9.3 Explaining why a rule won (per condition)
+For each condition, the best rule is the best point on the frontier, relative to R0 and the others. **Explanation metrics, all paired on the same nights:**
+1. **Transfer timing:** minutes from request to the transfer decision; how many were transferred, and at which minute of the night.
+2. **Who was transferred:** party size, trip length, zone (Homewood vs Peabody), and the van ETA they were spared.
+3. **Wait split:** the wait of transferred riders (their own Lyft delay included) vs riders who stayed on vans.
+4. **Spill-over:** how much the riders who stayed with the vans gained, because transfers freed van time (wait and cancellation change for non-transferred riders vs R0).
+5. **Cancellations avoided** and no-shows (van vs Lyft).
+6. **Resource use:** Lyft bookings and completed Lyft trips (standard and XL separately), Lyft km, van-km and empty km, reported beside the rider-outcome change. No money is modelled (D-45).
+7. **Traced nights:** for 2–3 representative nights, an event timeline of the decisive transfers (e.g. "at 18:24 R2 moved 6 riders whose predicted wait was 22 min; the vans then reached the 18:25–18:35 burst 7 min earlier").
 
-**Robustness blocks** (L6, base condition, rules R0/R1(15)/R2(15)/R3, one factor at a time, 30 seeds):
-- **dispatcher:** T, T−, G (SQ1);
-- **Lyft delay:** median 5 / 8 / 12 min, plus a scarcity variant;
-- **dispatcher lag:** 0 / 2 / 5; consent 1.0 / 0.8; capacity unlimited / 3 per 10 min;
-- **patience:** low / mid / high, taken from the identified calibration set;
-- **objective:** wait-heavy / base / ride-heavy (SQ3);
-- **travel multiplier:** 1.0 / 1.2 / 1.5;
-- **boundary**, if D-A chooses "factor";
-- **targets:** report at 10 min and 15 min.
-
-**Algorithm references:** L1–L4 with G, T, C (and H on L1).
-
-**Seeds:** 30 per cell. A power check on L5/L6 pilot variance decides whether 30 is enough, before the main runs.
-
----
-
-## 10. File schemas (to be generated only after approval)
-`data/scenarios/v2/<level>/<cell>/r<NN>/`:
-
-| File | Columns / fields | Units |
+## 10. File schemas (generated only on go-ahead)
+`data/scenarios/v2/<level>/<pattern>_<fleet>/r<NN>/`:
+| File | Contents | Units |
 |---|---|---|
-| `requests.csv` | request_id, t_request_s, o_loc, d_loc, o_zone, d_zone, party, direct_s (v2 matrix, unscaled) | s |
+| `requests.csv` | request_id, t_request_s, o_loc, d_loc, o_zone, d_zone, party, direct_s | s |
 | `latent.csv` | request_id, patience_s, noshow_u, consent_u, lyft_delay_s, lyft_noshow_u, eta_noise | s / unitless |
 | `availability.csv` | van_id, start_loc, capacity, avail_start_s, avail_end_s | s, seats |
-| `scenario.json` | level, cell, params (all, with evidence labels), seeds (master seed + named spawn keys), `MANIFEST.json` hash (pbf md5, image digests, matrix and snap sha256, platform), generator code version, content hash | — |
-| `policy.json` (separate, per arm) | dispatcher, objective settings, cadence, commit rule, Lyft rule + parameters | — |
-| Simulator outputs (Phase 4): `events.csv`, `outcomes.csv`, `run_manifest.json` | per-event log; per-request terminal state, times, mode, transfer time, ETA churn; environment and solve statistics | s |
-
----
+| `scenario.json` | level, pattern, fleet level, all params with evidence labels, seeds (master + named spawn keys), `MANIFEST.json` hash, generator version, content hash | — |
+| `policy.json` (per arm) | Dispatcher, objective, cadence, commit, Lyft rule + parameters | — |
+| Phase 4 outputs | `events.csv`, `outcomes.csv`, `run_manifest.json` | s |
 
 ## 11. Seeds
-- `SeedSequence(master_seed, spawn_key=(level_id, cell_id, replicate, component_id))`.
-- **Named components:** count, times, od, party, availability, patience, noshow, consent, lyft_delay, lyft_noshow, eta_noise, solver.
-- **Adding a component must never shift the others.**
-- Factors that should not change the riders (fleet level, Lyft rule, dispatcher) **share the demand and latent streams**. The demand condition (base / high / burst) changes the demand streams by design.
-
----
+- `SeedSequence(master_seed, spawn_key=(level_id, pattern_id, replicate, component_id))`.
+- **Named components:** count, times, od, party, availability, patience, noshow, consent, lyft_delay, lyft_noshow, eta_noise, solver, spread (12; dispersed variant only). The site layout uses key (0, 0, 0, 13).
+- **Not in the key:** the fleet level, the Lyft rule and the dispatcher. So 5- and 6-van runs and every rule see the same riders; the 6-van case simply has more requests, drawn as an extension of the same streams. *[Superseded 21 Oct by D-37: for measuring the benefit of a sixth van, the requests are held fixed; this constant-workload extension is kept for a separate, later experiment.]*
+- **Patterns differ by design** but share replicate numbers.
 
 ## 12. Validation and calibration
-**Validation (each level, before moving on):**
-- **L1:** exact agreement with the hand schedule, to the second.
-- **Accounting identity:** requests = Σ terminal states; no request in two states; transfers ≤ eligible requests.
-- **Constraints:** every plan is audited for capacity, precedence, commitments, shift ends and guardrail violations, which are logged.
-- **Determinism:** the same inputs give an identical output hash; 1 worker vs 4 workers give identical results.
-- **Clock:** a transferred rider's wait equals the Lyft pickup time minus the request time (checked on L4 by hand).
+**Validation:**
+- L1 hand schedule exact to the second;
+- the accounting identity;
+- plan audits (capacity, precedence, commitments, shift ends, guardrail violations logged);
+- determinism (same inputs → same output hash; 1 vs 4 workers);
+- L4 hand check that a transferred rider's wait equals Lyft pickup − request time.
 
-**Calibration (L7, base settings, before any policy comparison):**
-- **Targets (loose bands, not exact fits):**
-  - completed rides per night ≈ 803 (±10%);
-  - "Canceled" share 0.31–0.68 by day, ~0.47 pooled;
-  - Lyft rider share 10–46% by day, ~24.5% pooled;
-  - no-show ~4.7%;
+**Calibration (L7, base pattern, before any comparison):**
+- **Bands:**
+  - completed share of requests ≈ 48%;
+  - "Canceled" ≈ 47% pooled (31–68% by day);
+  - Lyft rider share ≈ 24.5% (10–46%);
+  - no-show ≈ 4.7% **of all requests** (≈ 8.9% per van arrival under the status mapping; D-48);
   - completed-ride wait median ~10–13 min and P90 ~17–21 min;
   - ride P90 ~24 min;
-  - the hourly shape of completed rides.
-- **Knobs:** fleet level f, the patience scale, the travel multiplier, the base Lyft rule threshold (the "status-quo" rule).
+  - completed rides per van-hour ≈ 5.1 (6.2 at 6 pm).
+- **Knobs:** load ratio ρ, patience scale, travel multiplier, and the "status-quo" rule threshold.
 - **Limits:**
-  - waits and rides are survivor-biased (completed only);
-  - the wait–cancellation link is correlational;
-  - the vehicle counts are mixed-service;
-  - there is no hourly Lyft or cancellation data.
+  - survivor-biased waits;
+  - correlational cancellation link;
+  - mixed-service vehicle counts;
+  - no hourly Lyft data;
+  - scaled-down density.
 
-  Several knob combinations will pass. **Keep the set that passes (the identified set)**, and re-run the main comparison across its extremes. A single "calibrated point" is not claimed.
+  **Keep the identified set** (all knob settings that pass), not one point.
 
----
+## 13. Pre-registration
+`preregistration_v2.md` (draft, written from this spec) fixes the rules, thresholds, metrics, hypotheses and seeds before any comparison run.
 
-## 13. What changes from v1 (paused)
-| v1 | v2 (proposed) | Why |
+## 14. Decisions (all settled 20 Oct)
+| ID | Decision | Outcome |
 |---|---|---|
-| 5 vans / 30 requests, one hour | L1–L7 ladder; L6 peak window and L7 full night | Mechanisms first; credible conclusions need Homewood scale |
-| 4 seats (D-22) | 10–14, base 14 | 2018 evidence |
-| Hard 20/25 limits (D-04) | Homewood 15/20 as reporting thresholds; elastic guardrail | 20/25 are East Baltimore's figures; the targets are soft and moved in 2024 |
-| No Lyft; no driver response | Lyft rule as the primary factor; driver response as sensitivity | Research question |
-| Patience median 12 min, exponential | Rising hazard, calibrated to ~2/3 of "Canceled" | The placeholder explained all cancellations |
-| Demand matrix v1 (demo server) | v2 (local, pinned) | Reproducibility |
-| 11 cells × 30 grid | 36 primary cells + robustness blocks | Focus on the Lyft question |
+| D-A | Boundary | Homewood + Peabody (D-27) |
+| D-B | Scope and question | Accepted (D-23–D-26) |
+| D-C | Travel matrix v2 + MANIFEST | Accepted (D-31) |
+| D-D | Objective | Accepted (D-29) |
+| D-E | Lyft rules | All kept; run one at a time (D-28) |
+| D-F | Fleet | 5–6 vans, 14 seats, a per-scenario factor; demand scaled to the fleet (D-30) |
+| D-G | Ladder L1–L7 | Accepted (D-32) |
 
----
-
-## 14. Decisions needed before generating data
-| ID | Decision | Recommendation |
+## 15. Changes from v0.1
+| v0.1 | v0.2 | Why |
 |---|---|---|
-| **D-A** | Boundary: Homewood + Peabody, core only, or a factor | **Homewood + Peabody** (as April was operated) |
-| **D-B** | Accept the scope and question: Homewood only, door-to-door, Lyft rules as the primary factor with the dispatcher fixed at T | Accept |
-| **D-C** | Switch the travel matrix to v2 (local) and adopt MANIFEST/matrix-as-canonical | Accept |
-| **D-D** | Objective: weighted with convex φ and an elastic guardrail (lexicographic as a variant) | Accept |
-| **D-E** | Lyft rule set R0–R3 (R4 optional) and their parameters | Accept, or trim |
-| **D-F** | Fleet as a calibrated range f ∈ [0.65, 1.0], not a fixed 22 | Accept |
-| **D-G** | Ladder L1–L7 with no-shows and cancellations separate | Accept |
+| Fleet as a calibrated fraction f ∈ [0.65, 1.0] of ~27.6 vans | **5–6 vans, 14 seats**, demand scaled to April's load per van; ρ is the calibration knob | Team decision: size the problem to what we solve |
+| Demand 1,680 requests per night | ~160–200 (18:00–21:00) / ~300–365 (night) *[superseded: 168 at constant 5 vans, D-36]* | Proportional to the fleet |
+| Patterns: base / high / burst | Base / **burst / far-trip** / high | Team question about bulk and far-away requests |
+| Primary matrix 36 cells | 48 cells (4 patterns × 2 fleet levels × 6 rules) | As above |
+| No explanation metrics | §9.3 explanation metrics and traced nights | Team wants to explain why a rule won |
+| Boundary open | Homewood + Peabody | D-27 |
 
-Smaller parameter values (slopes, β, lag, Lyft delay) are proposals. They are fixed in the re-written pre-registration after these decisions.
+## 16. Changes from v0.2 (21 Oct 2026)
+| v0.2 | v0.3 | Why |
+|---|---|---|
+| A party of 5 cannot use Lyft (from the 2018 rule "5+ riders always get a van", which referred to standard 4-seat Lyft cars) | Parties of 5 are Lyft-eligible via Lyft XL, kept together; XL counted separately | D-33: user-supplied operational correction, accepted as a modelling instruction (not independently verified Hopkins policy) |
+| Load ratio "~11 on average" | Hour-by-hour formula ρ_h × v_h, largest-remainder rounding; 162 (taper) / 168 (constant), both provisional | D-35: makes the count follow whatever availability is chosen, and avoids using the night average |
+| Point-based geography only | Reference kept; dispersed variant `dispersed_v1` added | D-34: coarse city clusters stacked many requests on one spot |
+| "Scenario data are not generated yet" | Removed (L1–L5 were generated on 20 Oct) | Stale line |
+
+## 17. Simulator build rules (build contract; D-46–D-48, D-52; implemented for L1–L4 in Phase 4 M0–M1, 22 Oct)
+These rules are what the Phase 4 simulator must implement. They are written so that two people building it independently would produce the same event log for the same inputs.
+
+### 17.1 Time and travel
+- **Clock:** integer seconds from 18:00. Every event time is an integer.
+- **Travel:** one base table t₀(i,j), the matrix seconds. Van time = t₀ × m_v, Lyft ride time = t₀ × m_L, each multiplier applied **exactly once**, then rounded to whole seconds with the **same rule as the generator** (Python `round`, half-to-even, `generator_v2.T()`), so the L1–L4 answer keys reproduce exactly (D-47). `direct_s` in `requests.csv` is t₀ and is used only for reporting; the ride guardrail uses t₀(o,d) × m_v.
+- **Base values:** m_v = m_L = 1.2 (ASSUMED; calibrated). L1–L4 answer keys use m = 1.0 as written in their `scenario.json`.
+
+### 17.2 Request states
+`pending_van` → (`committed` → `onboard` → `van_completed`) or `noshow_van` or `cancel_pending_van`, or → `xfer_hold` (transfer decided, booking lag running) → `lyft_booked` → `lyft_completed` / `noshow_lyft` / `cancel_after_transfer` / `lyft_failed`.
+- **Committed:** a van has departed toward the rider's pickup. Commitment happens at **departure** (D-46).
+- **Audit invariant:** no request is ever in a van route **and** in a Lyft state at the same time.
+
+### 17.3 Same-second event order (D-46)
+When several events share a second, they run in this class order:
+
+| Order | Class | Notes |
+|---|---|---|
+| 10 | Drop-offs (van and Lyft) | Frees seats first |
+| 20 | Curb arrivals (van and Lyft) | **Ends the patience clock** (arrival wins a same-second tie with the deadline); the presence test is made here |
+| 30 | Service ends | Boarding dwell ends; no-show expiry after the 180-s curb wait |
+| 40 | Van on duty / off duty | |
+| 50 | New requests | |
+| 60 | Patience checks | A rider still `pending_van`, `committed` (van driving to the curb, not yet arrived), `xfer_hold` or `lyft_booked` whose deadline has passed cancels |
+| 70 | Lyft bookings | `xfer_hold` → `lyft_booked` at decision + ℓ |
+| 80 | **Epoch** | Van solve → evaluate the Lyft rule once → apply transfers → re-solve once if any transfer |
+| 90 | Departures | Vans leave toward their next stop; commitment |
+
+Ties inside a class are broken by request ID, then van ID.
+
+### 17.4 Epochs and solver timing
+- **One epoch per distinct second** that has a trigger. Triggers: a new request, a cancellation or no-show **of a request in van planning**, a transfer (handled inside the epoch by the re-solve), a van going on or off duty, and the 120-s tick anchored at t = 0. Lyft-side events (booking, Lyft arrival, Lyft no-show, Lyft drop-off) do not trigger an epoch, because they cannot change a van plan (D-52).
+- **Zero simulated latency.** A plan computed at τ takes effect at τ. The solver is limited by deterministic node or iteration budgets; wall time is logged as a diagnostic and never changes a plan (D-46).
+- **Pending requests** (served by no route in the current plan) keep a **tentative ETA**: the cheapest feasible insertion, computed outside the solver. Lyft rules that read ETAs read this value; the log records why the request is pending (competition or candidate cap) (D-47).
+
+### 17.5 Transfers and the Lyft service (D-43, D-45, D-46)
+- **Consent.** In the base p_c = 1, so every decision is a booking request and there is no offer stage. Where p_c < 1 (L4 uses 0.9; the consent sensitivity uses 0.8), a rule's decision is an **offer**: a rider accepts iff `consent_u` < p_c (so `consent_u` ≥ p_c declines; consistent with §3.3), stays with the vans, is never offered again, and the decline is counted (D-45).
+- A (consented) transfer decision at τ removes the request from van planning **at τ**, atomically, and puts it in `xfer_hold`.
+- At τ + ℓ the booking is placed (`lyft_booked`). If the rider's deadline falls inside the lag, the result is `cancel_after_transfer` and **no booking** is counted.
+- Lyft arrival = booking + `lyft_delay_s`. Presence uses the same draw U_r and the same p as for the van (D-48). Present → boarding dwell s = 30 s (the same as for vans, as in the L4 answer key) → direct ride of t₀(o,d) × m_L → `lyft_completed` at drop-off. Absent → `noshow_lyft` after the 180-s wait.
+- Parties of 1–4 book standard Lyft, parties of 5 book XL. Every count is kept separately for standard and XL.
+- **Pickup instant (both modes):** pickup time = the curb arrival of the vehicle the rider boards; the 30-s boarding dwell follows. So wait W = curb arrival − request time and ride H = drop-off arrival − curb arrival (H includes the boarding dwell). This is the convention of the L1–L4 answer keys. For riders who do not board, the curb arrival is still recorded separately (`curb_arrival_s`), and no wait-to-pickup is reported for them.
+- No automatic rebooking after a Lyft no-show or failure (simplification, D-43).
+
+### 17.6 Shifts and closing
+- **Closing rule:** after the arrival window, vans stay on duty until every accepted request is resolved (D-36). For L5 the frozen `avail_end_s` = 3600 is read as the end of the arrival window, not a shift end.
+- **Shift-end rule (open; L7 only; not implemented):** g = 0. The documents differ on whether a new pickup must *start* before the van's end (this section, v0.4) or its *drop-off* must end before it (`model_design.md` §3.3). To be settled before L7 is built. Riders already on board are always finished.
+- `unresolved_close` must be 0 at the end of every run.
+
+### 17.7 Inputs the simulator must not read
+- `p_noshow` in `scenario.json` params and the "DERIVED rate 4.7%" label (errata, D-48); p comes from the behaviour configuration.
+- `lyft_noshow_u` (unused, D-41).
+- `eta_noise` except in the ETA-dependent patience variant.
+
+### 17.8 Required logs
+- **Event log:** every event with time, class, request, van, old and new state.
+- **Epoch log:** trigger, open requests, candidates per van, solver status and gap, the chosen plan, pending requests with their reason and tentative ETA, and Lyft rule decisions with the quantity the rule read. When a rule is active: the **plan the rule read** (routes, plan ETAs, and for each pending request its pending price and tentative ETA), what the rule read for each eligible request, its transfers and declines, and whether a re-solve followed (D-55).
+- **Plan audit** after every epoch: capacity, precedence, commitments, shift ends, guardrail (no new or increased violation), and the transfer invariant.
+- **Run manifest:** input hashes (`FROZEN_*.json`), policy file, code version, solver version and settings.
+
+### 17.9 Conventions fixed by the M0–M1 implementation (D-52)
+- **Moving vans:** a van is re-routable only at a stop; once it departs toward a stop it completes that leg.
+- **Cancelled pickup:** if the rider cancels while the van is driving, the van still reaches the curb, finds no rider and is free at once (no dwell).
+- **No-show:** recorded 180 s after curb arrival; the van then leaves without dwell. The simulator never boards an absent rider.
+- **Curb-wait planning (D-54):** while the timer runs, the pickup stays committed and the planner assumes, for planning only, that the rider may board at expiry (30-s dwell, seat, drop-off obligation with the guardrail counted from expiry). The planner sees this state as `P_curb_wait` ("not present yet, timer running"), distinct from a terminal no-show; the obligation is removed when the no-show expires (an epoch trigger). Once every request is resolved, remaining plans are void. The M1 view (no-show treated as certain during the timer) is selectable only to reproduce M1.
+- **Planning a committed pickup:** the dispatcher plans as if the rider boards (it cannot see the presence draw).
+- **0-s legs** (consecutive stops at the same point): the arrival is processed in the same second, after that second's departures; this is the one exception to the class order of §17.3.
+- **Ties inside a class:** by key, so request IDs (R…) sort before van IDs (V…).
+- **Pending price (D-53):** `A` (earliest physically possible pickup) is the **default, approved provisionally** on 22 Oct; `original` (next tick, the D-29 price) reproduces M1 and `B` (after a chosen route) the D-53 experiment. M = 1 + Σ_v (max_k c_vk − min_k c_vk) + Σ_r bmax_r for every formulation.
+- **Dispatcher C:** candidates, units, pending price and its M bound, solver settings, status handling (no fallback) and tie-breaking are as recorded in D-52 and its amendment; the code is `src/sim/dispatch.py`.
+- **Lyft window:** in M2 and later the rule acts at every epoch (`lyft_window="evening"`). The M0 harness (`"m0"`: in L4 the rules act only before 900 s, the hand-checkable window) stays selectable to reproduce M0.
+- **What a rule reads (D-55):** the plan ETA for a request assigned in the plan it reads; for a pending request, the **tentative ETA** (cheapest feasible insertion into the chosen routes, computed outside the MILP, ignoring the cap); none if no van can feasibly take it (treated as infinite). The tentative ETA is distinct from A's pending price; neither is a promised pickup time.
+- **Rule pass:** once per epoch, on the first solve; accepted transfers and declines are applied, then one re-solve; the rule is not re-evaluated on the re-solved plan in the same second.
+- **R1u clock:** a request's "unassigned since" time is updated from the plan the rule read and again from the re-solved plan.
+
+## 21. Changes from v0.6 (22 Oct 2026)
+| v0.6 | v0.7 | Why |
+|---|---|---|
+| Pending price default "original" | Default A (approved provisionally); original and B kept as options | D-53 approval |
+| Lyft rules only in the M0 window | Rules act all evening; M0 window selectable | D-55 |
+| What a rule reads, rule pass and R1u clock implicit | Stated | D-55 (integration review) |
+| Consent boundary worded two ways | Accept iff consent_u < p_c | Integration review |
+| Epoch log without the plan the rule read | Logged, with the re-solve flag | D-55 |
+
+## 20. Changes from v0.5 (22 Oct 2026)
+| v0.5 | v0.6 | Why |
+|---|---|---|
+| During an absent rider's curb wait the planner saw the no-show as certain | Pickup stays committed; possible boarding at expiry for planning only | D-54 |
+| One pending price | Three selectable formulations; default unchanged until the team decides | D-53 update 2 |
+| Plans could outlive the last resolved request | Void once every request is resolved | D-54 (defect found) |
+
+## 19. Changes from v0.4 (22 Oct 2026)
+| v0.4 | v0.5 | Why |
+|---|---|---|
+| Dispatcher T as base; algorithm undecided | C provisionally held fixed; T a later robustness variant, never a runtime fallback | D-51 update |
+| Patience checks omitted `committed` riders | Included (a rider can cancel while the van drives to the curb, as in the L3 key) | PDF review gap G1 |
+| Triggers included every cancellation and no-show | Only those of requests in van planning; Lyft-side events never trigger | D-52; PDF review C9 |
+| "Pickup" instant not stated | Curb arrival of the boarding vehicle; dwell follows | PDF review gap G2 |
+| Shift-end rule stated two ways | Marked open (L7 only) | PDF review C5 |
+| No implementation conventions | §17.9 | D-52 |
+
+## 18. Changes from v0.3 (21 Oct 2026)
+| v0.3 | v0.4 | Why |
+|---|---|---|
+| Lyft "cost" wording; §9.3 "cost per minute of P90 reduction" | Operational counts only; "resource use" | D-45 |
+| §0 counts 162 / ~304 (taper) and 6-van scaling | 168 at constant 5 vans; sixth van on the same requests | D-36, D-37 (left stale in v0.3) |
+| "30 seeds shared across patterns" | Cross-pattern comparisons are not paired | D-49 |
+| Range ~145–205 | ~150–260, depending mainly on the fleet denominator; 29-day note | D-49 |
+| Mode-specific no-show thresholds; frozen 0.047 unflagged | One p for all modes; errata for 0.047 | D-48 |
+| No `lyft_failed` in the terminal list | Added (sensitivity only) | D-43 |
+| Targets without dates | April-era wording vs live 21 Oct reading kept distinct | D-49 |
+| No build rules | §17 build contract | D-46–D-48 |
