@@ -1,6 +1,6 @@
 # Phase 4, Simulator and dispatcher: plan (v2, 10 Nov 2026)
 
-**Status:** in progress. M0–M3 done and verified. **M4 (first-hour slice) and M5 are planned below and wait on two team decisions (D-59, D-60, proposed 10 Nov).** No L6 scenario has been generated and no greedy dispatcher has been built.
+**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; M5 next** (greedy G, then M5a).
 
 **Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.9 §17 (build contract) and `docs/technical/model_design.md` v0.6 (G is defined in §6.1); decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.7 §8.
 
@@ -19,8 +19,8 @@
 | M1.5 | D-53 decision experiment (original / A / B pending price) and curb-wait convention D-54 | **Done 22 Oct**; A approved provisionally |
 | M2 | Lyft rules all evening with C on L4 | **Done 22 Oct** (D-55) |
 | M3 | L5, 30 nights × 6 rules: pairing, metrics, bootstrap CIs, pilot variance | **Done**: batch 22 Oct (D-56, D-57); D-50 approved and paired-interval rehearsal 10 Nov (D-58) |
-| M4 | L6 builder, 64 / 50 / 54 (new scenario generation) | **Planned** (below); needs D-59 |
-| M5 | First hour, 5 vans, 64 requests: (a) compute benchmark of C; (b) C vs greedy G | **Planned** (below); needs D-60 |
+| M4 | L6 builder, 64 / 50 / 54 (new scenario generation) | **Done 10 Nov** (D-59; `research_notes/m4_l6_build_2026-11-10.md`) |
+| M5 | First hour, 5 vans, 64 requests: (a) compute benchmark of C; (b) C vs greedy G | **Planned** (below); D-60 approved 10 Nov |
 | M6 | Full 168-request, five-van demonstration | Not started; after M5, if time allows before the preview |
 | M7 | Experiment grid | Not started; no Lyft-rule comparison before then. Expected after the 26 Nov preview |
 
@@ -44,7 +44,7 @@ Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L
 | M5b | "On the same first-hour nights, C vs G differ by X (95% CI) in the share not reached within 20 min, and the gap moves (or not) with fleet, load and re-plan interval" | Whole-evening results; the real TransLoc dispatcher; that C is optimal over the night (per-epoch optimality ≠ whole-night optimality) |
 
 ### M4: the L6 builder (first-hour slice used by M5)
-**Decision needed: D-59 (proposed).** The spec reserves new scenario generation for a team go-ahead.
+**D-59 approved (team, 10 Nov).** The spec reserves new scenario generation for a team go-ahead.
 
 **What is built.** One builder, `build_l6(pattern, replicate)` in `src/scenario/generator_v2.py`, following spec §3 and §10–11 exactly:
 - fleet: 5 vans, 14 seats, at the depot, on duty from 18:00 to the end of the backlog (D-36); the 6-van case adds one van at the depot and **reuses the same requests** (D-37);
@@ -71,7 +71,7 @@ Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L
 
 **Blind rule:** M5a reports **compute only**. Rider outcomes from these runs are not looked at or tabulated until M5b's criteria are frozen. That keeps any change made after M5a (K, cadence, budget) independent of which dispatcher looks better.
 
-**Gate (proposed thresholds, part of D-60):**
+**Gate (thresholds approved with D-60):**
 - **STOP and report** if any plan audit fails, a repeat run differs, or more than 5% of epochs end at the node limit.
 - **STOP and decide the night count** if the median C first-hour night takes more than 15 min of wall time, because the M5b grid has six C cells. The count is then set from compute alone and recorded before M5b runs.
 - Otherwise, M5b runs with 30 nights.
@@ -79,7 +79,7 @@ Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L
 **Reference point:** L5 nights (2 vans, 28 requests an hour) took a median of 16 s, P90 71 s and max 253 s per night. The five-van first hour has ~2.3× the open requests, so candidate counts per van (subsets of ≤ 3) rise steeply. That is why M5a comes first.
 
 ### M5b: C vs greedy G
-**Decision needed: D-60 (proposed):** adds G and this comparison to M5, with the pre-registered criteria below.
+**D-60 approved (team, 10 Nov):** adds G and this comparison to M5, with the pre-registered criteria below.
 
 **G, as defined in model_design §6.1:** insert each new request, on arrival, at its cheapest feasible position (pickup and drop-off) in some van's current route, using the **same** route-cost function, guardrail and capacity rules as C; **never reassign**. A request with no feasible insertion stays pending and is retried at each later epoch. G keeps its own assignment state inside the dispatcher wrapper; the engine, observation and Lyft module are unchanged. G returns the same `Plan` object as C (routes, predicted pickups), so the time-based Lyft rule works identically for both.
 
