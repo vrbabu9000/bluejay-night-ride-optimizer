@@ -26,11 +26,11 @@ def load(rule):
             "manifest": json.loads((d / "run_manifest.json").read_text())}
 
 
-def checks(run, scen, travel, p_absent):
+def checks(run, scen, travel, p_absent, level=LEVEL):
     o, ev, eps = run["out"], run["events"], run["epochs"]
     h = scen.hidden
     res = {}
-    res["inputs match FROZEN_v2.json"] = run["manifest"]["content_hash"] == inputs.frozen_hashes()[LEVEL]
+    res["inputs match FROZEN_v2.json"] = run["manifest"]["content_hash"] == inputs.frozen_hashes()[level]
     res["one terminal outcome per request"] = len(o) == len(scen.requests) and o.outcome.isin(E.TERMINAL).all()
     res["backlog resolved after arrivals end (last request ≤ 3600 s)"] = bool(o.t_request_s.max() < 3600 and
                                                                              run["manifest"]["end_s"] >= o[["drop_s", "cancel_s", "noshow_s"]].max().max())
@@ -66,11 +66,34 @@ def checks(run, scen, travel, p_absent):
     committed = ev[(ev.event == "state") & (ev.state_to == "committed")]
     res["every committed pickup served by its van or ended by cancellation/no-show"] = all(
         (o.set_index("request_id").loc[r.request, "van"] == r.van) for _, r in committed.iterrows())
-    g = {r.rid: D.guardrail_s(travel.van(r.o, r.d), D.Config()) for r in scen.requests}
-    vc = o[o.outcome == "van_completed"]
-    res["no van ride over the guardrail"] = all(x.ride_s <= g[x.request_id] for _, x in vc.iterrows())
+    ex = guardrail_excesses(run, scen, travel)
+    res["no unexplained van ride over the guardrail (excesses only from no-show waits, D-47/D-52)"] = \
+        all(e["attributed"] for e in ex)
     res["every epoch proven optimal over its candidate set"] = all(e["solver"]["status"] in ("optimal", "empty") for e in eps)
     return res
+
+
+NOSHOW_EXTRA_S = 180 - D.DWELL_S        # a no-show wait holds the van 150 s longer than the planned boarding dwell
+MATRIX_TOL_S = 13                       # largest triangle-inequality gap of the travel matrix (D-53 review)
+
+
+def guardrail_excesses(run, scen, travel):
+    """Van rides longer than the guardrail, each attributed or not. Plans never create or increase a violation (the
+    plan audit checks that every epoch); an excess can only arise between epochs from an unplanned event. Here it is
+    attributed when the same van recorded van no-shows while the rider was aboard and the excess is at most
+    150 s per such no-show (+ the 13-s matrix tolerance)."""
+    o, ev = run["out"], run["events"]
+    g = {r.rid: D.guardrail_s(travel.van(r.o, r.d), D.Config()) for r in scen.requests}
+    ns = ev[(ev.event == "state") & (ev.state_to == "noshow_van")]
+    out = []
+    for _, x in o[o.outcome == "van_completed"].iterrows():
+        excess = x.ride_s - g[x.request_id]
+        if excess <= 0:
+            continue
+        k = int(((ns.van == x.van) & (ns.t_s > x.pickup_s) & (ns.t_s < x.drop_s)).sum())
+        out.append({"request": x.request_id, "van": x.van, "excess_s": int(excess), "noshows_during_ride": k,
+                    "attributed": k > 0 and excess <= k * NOSHOW_EXTRA_S + MATRIX_TOL_S})
+    return out
 
 
 def reproduce(rule, scen, travel):

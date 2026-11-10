@@ -1,6 +1,6 @@
 # Pre-registration v2 (DRAFT, revised 22 Oct 2026)
 
-**Status:** a draft written from `scenario_spec.md` v0.2 and revised to match spec v0.4 (21 Oct; D-45, D-49–D-51; the 20 Oct draft is archived in `archive/`). It is **frozen when the first L6 comparison run starts.**
+**Status:** decision criteria approved 10 Nov 2026 (D-50 approval); otherwise a draft written from `scenario_spec.md` v0.2 and revised to match spec v0.4 (21 Oct; D-45, D-49–D-51; the 20 Oct draft is archived in `archive/`). It is **frozen when the first L6 comparison run starts.**
 - Changes before then are allowed, and are logged at the bottom.
 - Changes after then are dated amendments, with the original text kept.
 - v1 (`preregistration.md`) is paused and unchanged.
@@ -21,8 +21,8 @@ The study is about **policy**, not algorithm.
 - **Nights:** 30 paired nights per condition. The same nights are used for every rule. Nights are **not** paired across patterns (each pattern has its own demand streams, D-49).
 
 ## 3. Metrics
-**Primary (D-50).** One rider-outcome measure that counts **every** request, paired against R0 and reported against Lyft bookings per night (resource use), as a frontier:
-- the **share of requests not reached by a vehicle (van or Lyft) within 15 min** of the request. A rider who cancelled, or who was never reached, counts as not reached. "Reached" means a **curb arrival**; it is named as such so the wait-to-boarding metrics are not redefined.
+**Primary (D-50, approved 10 Nov 2026).** One rider-outcome measure that counts **every** request, paired against R0 and reported against Lyft bookings per night (resource use), as a frontier:
+- the **share of requests not reached by a vehicle (van or Lyft) within 20 min** of the request (the target on the live JHU page). The same share at **15 min** (the April-era target) is a sensitivity check. A rider who cancelled, or who was never reached, counts as not reached. "Reached" means a **curb arrival**; it is named as such so the wait-to-boarding metrics are not redefined.
 
 **Secondary (D-50; replacing "co-primary" in the 21 Oct draft, which contradicted D-50):** passenger-weighted **P90 wait** from request to actual pickup in either mode, among riders picked up. It leaves out riders who cancelled, so a rule that loses its longest waiters to cancellation can look better; it is always read beside the primary measure.
 
@@ -44,8 +44,11 @@ The study is about **policy**, not algorithm.
   - **A is non-inferior to B** if the **upper** 95% bound of D is below +δ;
   - **A is better than B** if the upper bound is below 0.
   - *A confidence interval that contains 0 does **not** show "not worse"; it shows only that the data cannot tell (D-50, replacing the 20 Oct wording).*
-- **Rule A dominates rule B on a condition** if A is non-inferior on both outcome measures **and** uses fewer Lyft bookings (upper bound of the booking difference below 0), **or** A is better on an outcome and non-inferior on bookings. Otherwise both lie on the frontier, and the trade-off is reported.
-- **Power check:** run a pilot on seeds **outside** the main 30 (L5/L6 variance). If the expected CI half-width at 30 nights exceeds **0.7 δ** (≈ 80% power for a true difference of δ), use 60 nights for every cell.
+- **Rule A dominates rule B on a condition** (D-50 amendment 1, 10 Nov 2026) if A is **non-inferior on all three measures** (the primary share, passenger P90 wait, and Lyft bookings **per 100 requests**, each with its margin) **and better on at least one** (upper bound of A − B below 0). Otherwise both lie on the frontier, and the trade-off is reported.
+- **Bookings margin δ_B = 2 bookings per 100 requests** (team, 10 Nov 2026), mirroring the 2-pp service margin so that no price is put on a Lyft ride (D-45). 1 per 100 was also run on the L5 rehearsal; that did not change any dominance result. *(Replaces the 21 Oct two-clause rule, which had no bookings margin and let a rule that was clearly worse on one outcome dominate.)*
+- **Power check:** a 10-night **L6** pilot on seeds **outside** the main 30, R0 vs R3(2). If the expected CI half-width at 30 nights exceeds **0.7 δ** (≈ 80% power for a true difference of δ), use 60 nights for every cell. If 60 nights still miss it, the pair is reported as *underpowered at δ*; no further nights are added.
+- **Multiplicity:** H1–H3 are the only confirmatory tests and use **98.3%** intervals (Bonferroni over three). All other comparisons use 95% intervals and are exploratory.
+- **No single score:** service and resource use are not combined with a weight; the frontier and the dominance rule are reported.
 - **Confirmatory hypotheses, stated in advance:**
   - **H1.** Rules that act on predictions (R2, R3) beat R1(15) on P90 wait in the burst pattern, at a higher Lyft use.
   - **H2.** Under far-trip, the benefit of any transfer rule over R0 is larger than under base. *(The two patterns use different nights, so this is an **unpaired** comparison of two paired effects; its CI is wider.)*
@@ -67,3 +70,6 @@ The main comparison is re-run at the extremes of the identified set.
 - 2026-10-20: draft created from scenario_spec v0.2.
 - 2026-10-22: dispatcher C provisional (D-51); P90 wait made secondary, consistent with D-50; H4 restated for C vs T; D-53 open before freeze.
 - 2026-10-21: no money (D-45); primary metric counts every request; non-inferiority margins replace "CI includes 0"; power at half-width ≤ 0.7 δ with pilot seeds outside the main 30; H2 marked unpaired; sixth van on the same requests; dispatcher algorithm open (D-51) (D-49, D-50).
+- 2026-11-10: D-50 approved by the team. Primary measure moved from 15 to 20 min (15 min kept as sensitivity); margins unchanged; L6 pilot for power with a 60-night cap; Bonferroni 98.3% for H1–H3; no single score.
+- 2026-11-10: dominance rule replaced by one Pareto-with-margins rule (D-50 amendment 1); bookings counted per 100 requests; δ_B = 1 or 2, to be fixed before the freeze.
+- 2026-11-10: bookings margin fixed at δ_B = 2 per 100 requests.

@@ -2,7 +2,7 @@
 
 A readable explanation of how a simulated Night Ride evening is built, what the simulator must do, and how the van dispatcher scores plans. It is an **explanatory companion** to `scenario_methodology.md`, `scenario_spec.md` (§17), `model_design.md` and `decision_log.md`. It adds no rule, number or decision; where the sources disagree it lists the point in `CONFLICTS.md` instead of resolving it.
 
-**Status:** companion for `scenario_methodology.md` **v1.6** (23 Oct 2026). Section 7 reports the verified M0–M2 status and the M3 batch; its tables are re-derived from saved outputs (`SOURCES.md`).
+**Status:** companion for `scenario_methodology.md` **v1.7** (10 Nov 2026). Section 7 reports the verified M0–M3 status, the approved decision criteria and the L5 paired-interval rehearsal; its tables are re-derived from saved outputs (`SOURCES.md`).
 
 **Archive:** superseded builds are kept in `archive/` as `BlueJay_Scenario_Methodology_methodology-v{X}_{date}.pdf`, named after the methodology version they reflect (the same convention as `docs/technical/archive/`).
 
