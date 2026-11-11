@@ -26,11 +26,12 @@ def load(rule):
             "manifest": json.loads((d / "run_manifest.json").read_text())}
 
 
-def checks(run, scen, travel, p_absent, level=LEVEL):
+def checks(run, scen, travel, p_absent, level=LEVEL, frozen=None):
+    """frozen: the hash map to check against (default FROZEN_v2.json; L6 runs pass FROZEN_v2_L6.json, M5)."""
     o, ev, eps = run["out"], run["events"], run["epochs"]
     h = scen.hidden
     res = {}
-    res["inputs match FROZEN_v2.json"] = run["manifest"]["content_hash"] == inputs.frozen_hashes()[level]
+    res["inputs match FROZEN_v2.json"] = run["manifest"]["content_hash"] == (frozen or inputs.frozen_hashes())[level]
     res["one terminal outcome per request"] = len(o) == len(scen.requests) and o.outcome.isin(E.TERMINAL).all()
     res["backlog resolved after arrivals end (last request ≤ 3600 s)"] = bool(o.t_request_s.max() < 3600 and
                                                                              run["manifest"]["end_s"] >= o[["drop_s", "cancel_s", "noshow_s"]].max().max())
@@ -69,7 +70,10 @@ def checks(run, scen, travel, p_absent, level=LEVEL):
     ex = guardrail_excesses(run, scen, travel)
     res["no unexplained van ride over the guardrail (excesses only from no-show waits, D-47/D-52)"] = \
         all(e["attributed"] for e in ex)
-    res["every epoch proven optimal over its candidate set"] = all(e["solver"]["status"] in ("optimal", "empty") for e in eps)
+    # C: proven optimal over its candidate set; G (D-60) has no optimality claim, its status is "greedy"
+    res["every epoch proven optimal over its candidate set"] = all(
+        e["solver"]["status"] in (("greedy", "empty") if e["solver"].get("algorithm") == "G" else ("optimal", "empty"))
+        for e in eps)
     return res
 
 

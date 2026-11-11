@@ -1,6 +1,6 @@
 # Phase 4, Simulator and dispatcher: plan (v2, 10 Nov 2026)
 
-**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; M5 next** (greedy G, then M5a).
+**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; G built and reviewed 10 Nov; M5a passed 10 Nov (M5b with 30 nights); next: freeze the M5b preregistration.**
 
 **Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.9 §17 (build contract) and `docs/technical/model_design.md` v0.6 (G is defined in §6.1); decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.7 §8.
 
@@ -83,6 +83,8 @@ Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L
 
 **G, as defined in model_design §6.1:** insert each new request, on arrival, at its cheapest feasible position (pickup and drop-off) in some van's current route, using the **same** route-cost function, guardrail and capacity rules as C; **never reassign**. A request with no feasible insertion stays pending and is retried at each later epoch. G keeps its own assignment state inside the dispatcher wrapper; the engine, observation and Lyft module are unchanged. G returns the same `Plan` object as C (routes, predicted pickups), so the time-based Lyft rule works identically for both.
 
+**Built and reviewed 10 Nov** (`research_notes/m5_greedy_build_2026-11-10.md`). Designed differences from C, stated in advance: G has no K cap; an insertion may not push an aboard rider above max(guardrail, their ride in G's current plan), where C's reference is its committed-only route; G refuses R2/R3 (no ETA for pending requests).
+
 **Fairness:** same nights, same latent draws, same objective terms used to score insertions, same capacity and guardrail, same event engine. The one designed difference is the algorithm, and with it reassignment. The comparison therefore measures *re-optimizing all open work with the MILP* against *myopic insertion that never revisits a decision*. That is the contrast the instructor asked about.
 
 **Cells (first-hour slice, 30 paired nights each unless the M5a gate says otherwise):**
@@ -120,8 +122,8 @@ Cell 4 holds G fixed because G acts on arrival; its re-plan interval changes not
 |---|---|---|
 | 10–11 Nov | Team reviews D-59 and D-60 | Approvals logged |
 | 11–12 Nov | M4: builder, 60 nights, checks, frozen hashes | Checks 1–5 pass |
-| 12–14 Nov | G built and tested; M5 runner | Tests pass; an independent review of G's insertion |
-| 14–15 Nov | M5a: 3 nights × 2 repeats | Compute gate |
+| ~~12–14 Nov~~ **10 Nov** | G built and tested (done); M5 runner (next) | Tests pass; independent review done, one defect fixed |
+| ~~14–15 Nov~~ **10 Nov** | M5a: 3 nights × 2 repeats (done; `research_notes/m5a_compute_2026-11-10.md`) | Compute gate: passed (median night 3.6 min, 0 node-limit epochs, repeats identical) |
 | 15 Nov | Freeze `m5_preregistration` | Dated before the first M5b run |
 | 15–19 Nov | M5b runs (overnight batches) | Per-run checks; resumable |
 | 19–21 Nov | Analysis, figure, docs update | Independent check of the numbers |

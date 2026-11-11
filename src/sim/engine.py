@@ -43,6 +43,10 @@ class Policy:
     # Planning only: the simulator never boards an absent rider.
     curb_wait_planning: str = "possible_boarding"
     dispatcher: D.Config = field(default_factory=D.Config)
+    # Van dispatcher algorithm (D-60): "C" = restricted route-selection MILP (dispatch.solve, the default and the
+    # held-fixed dispatcher, D-51); "G" = greedy insertion that never reassigns (greedy.py; the M5b floor). Both read
+    # the same Observation and return the same Plan; `dispatcher` holds the shared cost and guardrail settings.
+    algorithm: str = "C"
 
 
 @dataclass
@@ -87,6 +91,15 @@ class Engine:
         self.events, self.epochs = [], []
         self.observations = []                             # in memory only (for the narrative); not written
         self.now, self.cls = None, None
+        if policy.algorithm == "C":
+            self._solve = lambda obs: D.solve(obs, self.travel, self.pol.dispatcher)
+        elif policy.algorithm == "G":
+            from .greedy import Greedy
+            if L.RULES[policy.rule] is not None and L.RULES[policy.rule][0] in ("predicted", "van_vs_lyft"):
+                raise ValueError(f"G gives pending requests no ETA, so rule {policy.rule} is not meaningful with G")
+            self._solve = Greedy(travel, policy.dispatcher).solve
+        else:
+            raise ValueError(f"unknown dispatcher algorithm {policy.algorithm!r}")
         for r in scen.requests:
             self._push(r.t, C_REQUEST, "request", r.rid)
             self._push(r.t + self._hidden[r.rid].patience_s, C_PATIENCE, "patience", r.rid)
@@ -304,7 +317,7 @@ class Engine:
     # ---------- epoch ----------
     def _epoch(self, triggers):
         obs = self.observation()
-        plan, cands = D.solve(obs, self.travel, self.pol.dispatcher)
+        plan, cands = self._solve(obs)
         transfers, declines, rule_reads, plan_read = [], [], {}, None
         if self.pol.rule != "R0" and self.now < self.pol.rule_active_before_s:
             plan_read = self._plan_summary(plan)
@@ -336,7 +349,7 @@ class Engine:
                 self._push(self.now + self.pol.lag_s, C_BOOK, "book", rid)
             if transfers:
                 obs = self.observation()
-                plan, cands = D.solve(obs, self.travel, self.pol.dispatcher)
+                plan, cands = self._solve(obs)
         self._update_assignment(plan)
         audit = self._audit(obs, plan)
         for vid, v in self.vans.items():
