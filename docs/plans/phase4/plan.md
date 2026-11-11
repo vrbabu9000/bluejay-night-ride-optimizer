@@ -1,6 +1,6 @@
 # Phase 4, Simulator and dispatcher: plan (v2, 10 Nov 2026)
 
-**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; G built and reviewed 10 Nov; M5a passed 10 Nov (M5b with 30 nights); next: freeze the M5b preregistration.**
+**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; G built and reviewed 10 Nov; M5a passed 10 Nov (M5b with 30 nights); high-load probe 11 Nov (≈ 2–4 h per night); D-61 run order and stopping rule approved 11 Nov; M5b preregistration drafted, next: team freezes it, then M5b group A.**
 
 **Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.9 §17 (build contract) and `docs/technical/model_design.md` v0.6 (G is defined in §6.1); decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.7 §8.
 
@@ -124,8 +124,8 @@ Cell 4 holds G fixed because G acts on arrival; its re-plan interval changes not
 | 11–12 Nov | M4: builder, 60 nights, checks, frozen hashes | Checks 1–5 pass |
 | ~~12–14 Nov~~ **10 Nov** | G built and tested (done); M5 runner (next) | Tests pass; independent review done, one defect fixed |
 | ~~14–15 Nov~~ **10 Nov** | M5a: 3 nights × 2 repeats (done; `research_notes/m5a_compute_2026-11-10.md`) | Compute gate: passed (median night 3.6 min, 0 node-limit epochs, repeats identical) |
-| 15 Nov | Freeze `m5_preregistration` | Dated before the first M5b run |
-| 15–19 Nov | M5b runs (overnight batches) | Per-run checks; resumable |
+| 15 Nov | Freeze `m5_preregistration` (drafted 11 Nov, with D-61) | Dated before the first M5b run; the runner refuses M5b until it reads FROZEN |
+| 15–19 Nov | M5b runs: group A (cells 1, 2, 5, 4) then group B (cell 3, ≤ 2 workers), fixed order (D-61) | Per-run checks; pause on failure; preview cutoff 19 Nov 12:00 ET, final cutoff 28 Nov 12:00 ET |
 | 19–21 Nov | Analysis, figure, docs update | Independent check of the numbers |
 | 22–25 Nov | Preview package to the instructor | — |
 | After 26 Nov | M6 (full evening), then M7 | — |

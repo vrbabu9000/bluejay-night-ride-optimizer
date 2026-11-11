@@ -61,11 +61,56 @@ class Cell:
     tick_s: int = 120
 
 
+def _c(pattern, fleet, alg, rule="R0", tick=120):
+    return Cell(f"{pattern}{fleet}_{alg}_{rule_tag(rule)}_t{tick}", pattern, fleet, alg, rule, tick)
+
+
+NIGHTS30 = [f"r{i:02d}" for i in range(30)]
+# M5b comparisons (preregistration §2): (label, C-side run cell, G-side run cell). Cell 4 reuses cell 1's G.
+COMPARISONS = [
+    ("1 base, 5 vans, R0 (primary)", _c("base", 5, "C"), _c("base", 5, "G")),
+    ("2 base, 6 vans, R0", _c("base", 6, "C"), _c("base", 6, "G")),
+    ("5 base, 5 vans, R1(10)", _c("base", 5, "C", "R1(10)"), _c("base", 5, "G", "R1(10)")),
+    ("4a base, 5 vans, R0, C re-plan 60 s", _c("base", 5, "C", tick=60), _c("base", 5, "G")),
+    ("4b base, 5 vans, R0, C re-plan 300 s", _c("base", 5, "C", tick=300), _c("base", 5, "G")),
+    ("3 high load, 5 vans, R0", _c("high", 5, "C"), _c("high", 5, "G")),
+]
+
+
+def _ordered(comps):
+    """Run order (D-61): comparison by comparison; within one, night by night with both arms together; a run
+    already listed (cell 1's G, reused by cell 4) is not repeated."""
+    seen, out = set(), []
+    for _, c, g in comps:
+        for n in NIGHTS30:
+            for cell in (c, g):
+                if (cell, n) not in seen:
+                    seen.add((cell, n))
+                    out.append((cell, n))
+    return out
+
+
 STAGES = {
-    "m5a": {"cells": [Cell("base5_C_R0_t120", "base", 5, "C")], "nights": ["r00", "r01", "r02"], "reps": 2},
+    "m5a": {"runs": [(Cell("base5_C_R0_t120", "base", 5, "C"), n) for n in ("r00", "r01", "r02")], "reps": 2},
     # Compute-only probe of the high-load cell before M5b is scheduled (after M5a; same blind rule: no outcome read)
-    "probe_high": {"cells": [Cell("high5_C_R0_t120", "high", 5, "C")], "nights": ["r00", "r01", "r02"], "reps": 1},
+    "probe_high": {"runs": [(Cell("high5_C_R0_t120", "high", 5, "C"), n) for n in ("r00", "r01", "r02")], "reps": 1},
+    # M5b (D-60, D-61): group A = cells 1, 2, 5, 4; group B = cell 3 (at most 2 workers: up to 5 GB per night)
+    "m5b_A": {"runs": _ordered(COMPARISONS[:5]), "reps": 1, "folder": "m5b"},
+    "m5b_B": {"runs": _ordered(COMPARISONS[5:]), "reps": 1, "folder": "m5b", "max_workers": 2},
 }
+M5B_CUTOFFS = {"preview": "2026-11-19T12:00:00-05:00", "final": "2026-11-28T12:00:00-05:00"}
+
+
+def folder(stage):
+    return STAGES.get(stage, {}).get("folder", stage)
+
+
+def prereg_frozen():
+    return PREREG.exists() and "**Status: FROZEN" in PREREG.read_text()
+
+
+def prereg_sha():
+    return hashlib.sha256(PREREG.read_bytes()).hexdigest()
 
 
 def code_fingerprint():
@@ -108,7 +153,7 @@ def first_hour(cell, night):
 
 
 def run_dir(stage, cell, night, rep):
-    return M5 / stage / cell.name / night / f"rep{rep}"
+    return M5 / folder(stage) / cell.name / night / f"rep{rep}"
 
 
 def _write_epochs(path, epochs):
@@ -149,7 +194,10 @@ def run_one(args):
            "content_hash": scen.content_hash, "matrix_sha256": travel.matrix_sha256, "code_fingerprint": fp,
            "config": config(cell), "end_s": eng.end_s, "wall_s": round(wall, 2), "peak_rss_mb": round(peak_mb, 1),
            "python": sys.version.split()[0], "highspy": highspy.__version__ if hasattr(highspy, "__version__") else None,
-           "events_sha256": hashlib.sha256((tmp / "events.csv").read_bytes()).hexdigest()}
+           "events_sha256": hashlib.sha256((tmp / "events.csv").read_bytes()).hexdigest(),
+           "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    if folder(stage) == "m5b":
+        man["prereg_sha256"] = prereg_sha()
     run = {"out": pd.read_csv(tmp / "outcomes.csv"), "events": pd.read_csv(tmp / "events.csv"), "epochs": eng.epochs,
            "manifest": man}
     ck = checks(run, scen, travel, eng.pol.p_absent, key, frozen=json.loads(FROZEN_L6.read_text()))
@@ -170,23 +218,42 @@ def done(stage, cell, night, rep, fp):
     if man["code_fingerprint"] != fp or man["config"] != json.loads(json.dumps(config(cell), default=str)):
         raise SystemExit(f"{stage} {cell.name} {night} rep{rep}: existing run has a different code fingerprint or "
                          "configuration; refusing to mix versions (move the folder aside to start again)")
+    if folder(stage) == "m5b" and man.get("prereg_sha256") != prereg_sha():
+        raise SystemExit(f"{cell.name} {night}: run was made under a different preregistration file; refusing to mix")
     return True                                         # complete, whatever its check status (reported, not re-run)
 
 
 def cmd_run(stage, workers):
-    if stage != "m5a" and not PREREG.exists():
-        raise SystemExit(f"{stage}: the M5b criteria must be frozen in {PREREG.name} before the first run (D-60)")
+    if folder(stage) == "m5b" and not prereg_frozen():
+        raise SystemExit(f"{stage}: the M5b criteria must be frozen in {PREREG.name} (a '**Status: FROZEN <date>**' "
+                         "line) before the first run (D-60)")
     st, fp = STAGES[stage], code_fingerprint()
-    (M5 / stage).mkdir(parents=True, exist_ok=True)
-    todo = [(stage, c, n, k, fp) for k in range(1, st["reps"] + 1) for c in st["cells"] for n in st["nights"]
-            if not done(stage, c, n, k, fp)]
-    print(f"code fingerprint {fp[:12]}; {len(todo)} runs to do", flush=True)
-    log = open(M5 / stage / "run_log.jsonl", "a")
+    workers = min(workers, st.get("max_workers", workers))
+    (M5 / folder(stage)).mkdir(parents=True, exist_ok=True)
+    todo = [(stage, c, n, k, fp) for k in range(1, st["reps"] + 1) for c, n in st["runs"] if not done(stage, c, n, k, fp)]
+    print(f"code fingerprint {fp[:12]}; {len(todo)} runs to do; {workers} workers", flush=True)
+    log = open(M5 / folder(stage) / "run_log.jsonl", "a")
+    failed = False
     with Pool(workers, maxtasksperchild=1) as pool:             # fresh process per night: clean peak-memory figure
-        for res in pool.imap_unordered(run_one, todo):
-            res["t"] = time.strftime("%H:%M:%S")
+        it, pending = iter(todo), []
+        for _ in range(workers):                                # launched strictly in the listed order (D-61)
+            a = next(it, None)
+            if a:
+                pending.append(pool.apply_async(run_one, (a,)))
+        while pending:
+            while not any(p.ready() for p in pending):
+                time.sleep(1)
+            res = pending.pop(next(i for i, p in enumerate(pending) if p.ready())).get()
+            res["t"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             log.write(json.dumps(res) + "\n"); log.flush()
             print(res, flush=True)
+            if res["status"] != "ok":
+                failed = True                                   # pause: no new launches; in-flight runs finish
+            if not failed:
+                a = next(it, None)
+                if a:
+                    pending.append(pool.apply_async(run_one, (a,)))
+    print("PAUSED after a failure: find the cause before resuming" if failed else f"{stage} complete", flush=True)
 
 
 # ---------- M5a: compute report (no outcomes) ----------
@@ -201,10 +268,10 @@ def _q(a, p):
 
 def cmd_compute():
     st = STAGES["m5a"]
-    cell = st["cells"][0]
+    cell = st["runs"][0][0]
     cfg = D.Config()
     nights, rows, ep_rows = [], [], []
-    for n in st["nights"]:
+    for n in [n for _, n in st["runs"]]:
         reps = {}
         for k in range(1, st["reps"] + 1):
             d = run_dir("m5a", cell, n, k)
@@ -328,7 +395,7 @@ def cmd_kcheck(workers, n):
     """Re-run night r00 (rep 1 settings) to recover its observations, then solve the sampled epochs with K = 3 and
     K = 4 from the same observation. Reports whether K = 4 would plan differently (more requests served, or a cheaper
     plan); it reads no rider outcome."""
-    cell = STAGES["m5a"]["cells"][0]
+    cell = STAGES["m5a"]["runs"][0][0]
     scen, key = first_hour(cell, "r00")
     m = scen.params["travel_multiplier"]
     eng = E.Engine(scen, inputs.Travel(m, m), policy(cell)).run()
@@ -363,10 +430,113 @@ def _kcheck_lines(kc):
     return L
 
 
+# ---------- M5b: preregistered analysis (preregistration §3-§4) ----------
+BOOT_N, BOOT_SEED, MARGIN_PP = 10_000, 20261110, 2.0
+SECONDARY = [("wait_pax_p90_min", "P90 passenger wait, min"), ("ride_p90_min", "P90 van ride time, min"),
+             ("van_km_per_ride", "Van-km per van-completed ride"), ("cancellations", "Cancellations per night")]
+
+
+def night_measures(d):
+    """Per-night measures of one finished run (batch.metrics definitions, over all requests in the slice)."""
+    from .batch import metrics
+    out, ev = pd.read_csv(d / "outcomes.csv"), pd.read_csv(d / "events.csv")
+    m = inputs.Travel(1.2, 1.2)
+    met = metrics(out, ev, _epochs(d), m)
+    vc = out[out.outcome == "van_completed"]
+    return {"not_reached_20_pp": 100 * (1 - met["reached_20_share"]), "wait_pax_p90_min": met["wait_pax_p90_min"],
+            "ride_p90_min": _q((vc.ride_s / 60).to_numpy(), .9),
+            "van_km_per_ride": met["van_km"] / met["van_completed"] if met["van_completed"] else float("nan"),
+            "cancellations": met["cancel_pending_van"] + met["cancel_after_transfer"],
+            "lyft_per_100": 100 * (met["bookings_standard"] + met["bookings_xl"]) / met["n_requests"]}
+
+
+def usable_prefix(cells, cutoff, root=None):
+    """Longest unbroken run r00..rk where every run of the comparison finished by the cutoff with status ok."""
+    cut = pd.Timestamp(cutoff)
+    nights = []
+    for n in NIGHTS30:
+        ok = True
+        for cell in cells:
+            f = (root or M5 / "m5b") / cell.name / n / "rep1" / "manifest.json"
+            if not f.exists():
+                ok = False; break
+            man = json.loads(f.read_text())
+            if man["status"] != "ok" or pd.Timestamp(man["finished_at"]) > cut:
+                ok = False; break
+        if not ok:
+            break
+        nights.append(n)
+    return nights
+
+
+def paired_bootstrap(d, n=BOOT_N, seed=BOOT_SEED):
+    """Mean of paired per-night differences and its 95% percentile bootstrap interval (resampling nights)."""
+    d = np.asarray(d, dtype=float)
+    d = d[~np.isnan(d)]
+    if len(d) == 0:
+        return float("nan"), float("nan"), float("nan"), 0
+    rng = np.random.default_rng(seed)
+    means = d[rng.integers(0, len(d), size=(n, len(d)))].mean(axis=1)
+    return float(d.mean()), float(np.quantile(means, .025)), float(np.quantile(means, .975)), len(d)
+
+
+def verdict(lo, hi, margin=MARGIN_PP):
+    """Preregistration §4 (D-50 margin). "C better" and "equivalent" can both hold (interval below 0 and inside
+    ±2 pp); the reading then says both. "G better" (interval wholly above 0) is reported as found."""
+    better = hi < 0
+    equiv = lo >= -margin and hi <= margin
+    if better and equiv:
+        return "C better (and within ±2 pp)"
+    if better:
+        return "C better"
+    if equiv:
+        return "practically equivalent"
+    if lo > 0:
+        return "G better"
+    return "inconclusive at this scale"
+
+
+def cmd_compare(which):
+    cutoff = M5B_CUTOFFS[which]
+    root = M5 / "m5b"
+    L = [f"# M5b comparison: C vs G, first-hour L6 slice ({which} analysis)", "",
+         f"Generated {time.strftime('%Y-%m-%d %H:%M %Z')}. Cutoff {cutoff}. Preregistration "
+         f"`{PREREG.name}` (sha256 {prereg_sha()[:12]}). Paired per-night differences C − G; 95% percentile bootstrap, "
+         f"{BOOT_N:,} resamples of nights, seed {BOOT_SEED}. Nights used per cell: the unbroken run r00…rk with both "
+         "arms finished by the cutoff and passing checks (D-61).", "",
+         "| Cell | Nights | Not reached within 20 min, C − G (pp) | 95% CI | Reading |", "|---|---|---|---|---|"]
+    sec, per = [], []
+    for label, c, g in COMPARISONS:
+        nights = usable_prefix((c, g), cutoff, root)
+        mc = [night_measures(root / c.name / n / "rep1") for n in nights]
+        mg = [night_measures(root / g.name / n / "rep1") for n in nights]
+        for n, a, b in zip(nights, mc, mg):
+            per.append({"cell": label, "night": n, **{f"C_{k}": v for k, v in a.items()}, **{f"G_{k}": v for k, v in b.items()}})
+        d = [a["not_reached_20_pp"] - b["not_reached_20_pp"] for a, b in zip(mc, mg)]
+        mean, lo, hi, k = paired_bootstrap(d)
+        if k >= 5:
+            reading = verdict(lo, hi) if label.startswith("1 ") else "descriptive (secondary cell)"
+            ci = f"[{lo:+.2f}, {hi:+.2f}]"
+        else:
+            reading, ci = "fewer than 5 nights: point estimate only", "—"
+        L.append(f"| {label} | {len(nights)} | {mean:+.2f} | {ci} | {reading} |")
+        for key, name in SECONDARY + ([("lyft_per_100", "Lyft bookings per 100 requests")] if "R1(10)" in label else []):
+            mm, l2, h2, k2 = paired_bootstrap([a[key] - b[key] for a, b in zip(mc, mg)])
+            sec.append(f"| {label} | {name} | {k2} | {mm:+.2f} | " + (f"[{l2:+.2f}, {h2:+.2f}]" if k2 >= 5 else "—") + " |")
+    L += ["", "Primary decision applies to cell 1 only: C better if the upper bound < 0; practically equivalent if the "
+          "interval lies within ±2 pp; G better if the lower bound > 0; otherwise inconclusive at this scale.", "",
+          "## Secondary measures (exploratory; mean per-night C − G, 95% bootstrap CI)", "",
+          "| Cell | Measure | Nights | C − G | 95% CI |", "|---|---|---|---|---|"] + sec
+    pd.DataFrame(per).to_csv(root / f"comparison_{which}_per_night.csv", index=False)
+    (root / f"comparison_{which}.md").write_text("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=list(STAGES))
-    ap.add_argument("cmd", choices=["run", "compute", "kcheck"])
+    ap.add_argument("stage", choices=list(STAGES) + ["m5b"])
+    ap.add_argument("cmd", choices=["run", "compute", "kcheck", "compare"])
+    ap.add_argument("--analysis", choices=list(M5B_CUTOFFS), default="preview")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--sample", type=int, default=8)
     a = ap.parse_args()
@@ -374,6 +544,8 @@ def main():
         cmd_run(a.stage, a.workers)
     elif a.cmd == "compute":
         cmd_compute()
+    elif a.cmd == "compare":
+        cmd_compare(a.analysis)
     else:
         cmd_kcheck(a.workers, a.sample)
 
