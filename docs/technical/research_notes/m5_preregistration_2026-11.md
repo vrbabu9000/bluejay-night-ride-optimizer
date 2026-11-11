@@ -1,6 +1,6 @@
 # M5b preregistration: C vs greedy G on the first-hour L6 slice
 
-**Status: DRAFT (not frozen).** The runner refuses M5b until the line above reads `**Status: FROZEN <date>**`. Once frozen, this file is not edited. Every M5b manifest records its SHA-256, and a resume refuses runs made under a different version.
+**Status: FROZEN 2026-11-11** (frozen on the user's instruction, "Freeze and run A", before the first M5b run). The runner refuses M5b unless this line reads FROZEN. Once frozen, this file is not edited. Every M5b manifest records its SHA-256, and a resume refuses runs made under a different version.
 
 **Decisions:** D-60 (scope and criteria, approved 10 Nov), D-61 (run order and stopping rule, approved 11 Nov).
 **Plan:** `docs/plans/phase4/plan.md` v2, M5b. **Compute basis:** `m5a_compute_2026-11-10.md` and its 11 Nov addendum.
