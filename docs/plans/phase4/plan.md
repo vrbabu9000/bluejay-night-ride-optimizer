@@ -1,6 +1,6 @@
 # Phase 4, Simulator and dispatcher: plan (v2, 10 Nov 2026)
 
-**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; G built and reviewed 10 Nov; M5a passed 10 Nov (M5b with 30 nights); high-load probe 11 Nov (≈ 2–4 h per night); D-61 run order and stopping rule approved 11 Nov; M5b preregistration frozen 11 Nov; group A running; next: group B (cell 3).**
+**Status:** in progress. M0–M3 done and verified. **D-59 and D-60 approved 10 Nov. M4 done 10 Nov; G built and reviewed 10 Nov; M5a passed 10 Nov (M5b with 30 nights); high-load probe 11 Nov (≈ 2–4 h per night); D-61 run order and stopping rule approved 11 Nov; M5b preregistration frozen 11 Nov; all 300 M5b runs done 15 Nov (299 pass; r26 C check failure handled by D-62); next: preview analysis after the 19 Nov 12:00 ET cutoff.**
 
 **Authority.** This plan only sequences the work. What to build is in `docs/technical/scenario_spec.md` v0.9 §17 (build contract) and `docs/technical/model_design.md` v0.6 (G is defined in §6.1); decisions are in `docs/technical/decision_log.md`; the milestone list and its reasons are in `docs/technical/scenario_methodology.md` v1.7 §8.
 
