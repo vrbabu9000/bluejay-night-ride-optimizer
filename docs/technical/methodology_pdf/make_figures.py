@@ -389,8 +389,43 @@ def fig_transfer():
     save(fig, "f8_transfer")
 
 
+# ---------------------------------------------------------------- F9 L5 trade-off (read-only from saved outputs)
+TRADEOFF_CSV = (Path(__file__).resolve().parents[3] / "outputs" / "sim" / "batch_L5_v1"
+                / "tradeoff_rule_summary.csv")
+
+
+def fig_tradeoff():
+    import csv
+    if not TRADEOFF_CSV.exists():
+        print("skipping f9_tradeoff: missing", TRADEOFF_CSV)
+        return
+    rows = list(csv.DictReader(open(TRADEOFF_CSV)))
+    fig, ax = plt.subplots(figsize=(TEXTW * 0.78, 3.3))
+    offsets = {"R0": (-0.25, 0.016), "R1(10)": (0.35, 0.004), "R1(15)": (0.35, 0.006),
+               "R1u(10)": (0.45, -0.018), "R2(15)": (-0.35, 0.0), "R3(2)": (0.35, 0.0)}
+    for r in rows:
+        name = r[""]
+        x = float(r["lyft_bookings_mean"])
+        y = float(r["reached_15_share_mean"])
+        nd = r["nondominated_on_means_2obj"] == "True"
+        ax.plot(x, y, "o", ms=7, mec=C_POL[1], mfc=C_POL[1] if nd else "white", mew=1.4, zorder=3)
+        dx, dy = offsets.get(name, (0.35, 0.0))
+        ax.text(x + dx, y + dy, name, fontsize=9, va="center", ha="left" if dx > 0 else "right", color=INK)
+    ax.set_xlim(-1.4, 12)
+    ax.set_ylim(0.40, 0.80)
+    ax.set_xlabel("Lyft bookings per night (mean of 30 nights)")
+    ax.set_ylabel("share of all requests reached\nwithin 15 min (mean)")
+    ax.yaxis.grid(True, color=GRID, lw=0.6)
+    ax.xaxis.grid(True, color=GRID, lw=0.6)
+    ax.set_axisbelow(True)
+    ax.plot([], [], "o", ms=7, mec=C_POL[1], mfc=C_POL[1], label="not dominated by another tested rule")
+    ax.plot([], [], "o", ms=7, mec=C_POL[1], mfc="white", mew=1.4, label="dominated (by R0)")
+    ax.legend(loc="lower right", frameon=False, fontsize=8.5)
+    save(fig, "f9_tradeoff")
+
+
 if __name__ == "__main__":
     for f in (fig_system, fig_volume, fig_noshow, fig_assumed, fig_phi, fig_example,
-              fig_lifecycle, fig_transfer):
+              fig_lifecycle, fig_transfer, fig_tradeoff):
         f()
     print("figures written to", OUT)

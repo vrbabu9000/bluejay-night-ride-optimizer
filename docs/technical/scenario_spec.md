@@ -1,4 +1,4 @@
-# Scenario specification v0.7 (22 Oct 2026)
+# Scenario specification v0.9 (10 Nov 2026)
 
 **Built 20 Oct:** L1–L5 are generated in `data/scenarios/v2/` (34 scenarios; hashes in `FROZEN_v2.json`), with hand-check sheets for L1–L4 (`handcheck.csv` + `HANDCHECK.md`). L6–L7 wait for calibration.
 
@@ -11,6 +11,10 @@ v0.4 (21 Oct, documentation consolidation; §18):
 - financial modelling removed (D-45);
 - **simulator build rules added as §17** (D-46–D-48);
 - stale counts, pairing and evidence wording corrected (D-49).
+
+v0.9 (10 Nov): the decision criteria are approved (D-50 approval and amendments 1–2). The primary rider measure uses the 20-min threshold (the Targets row in §4 and §13); no simulator rule changes.
+
+v0.8 (22 Oct): L5 pilot settings in the run configuration, tie-search labelling and guardrail-excess attribution (§17.9, §22).
 
 v0.7 (22 Oct): M2 integration conventions and the approval of pending price A (§17.5, §17.8, §17.9, §21).
 
@@ -25,7 +29,7 @@ v0.5 (22 Oct): reconciled with D-51 (C provisionally held fixed) and D-52 (M0–
 - where they disagree, the decision log wins, then this file.
 
 The report-ready reasoning for each scenario-design choice is in the decision log, section "Scenario design trail".
-- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5–v0.6 (22 Oct) are archived in `archive/`.
+- v0.1 (12 Oct), v0.2 (20 Oct), v0.3 and v0.4 (21 Oct) and v0.5–v0.8 (22 Oct) are archived in `archive/`.
 - It supersedes, for new work, the paused v1 scenario contract and v1 pre-registration. Both are kept unchanged.
 
 ---
@@ -163,7 +167,7 @@ Patterns change only demand. Fleet, policies and latent-draw *rules* are untouch
 | Wait penalty φ | Piecewise linear, slopes 1/2.5/5/10/20 per min, breaks at 5/10/15/20 | Gentler / steeper |
 | Ride weight β; distance γ | 0.5; 0.1 min/km | β 0.25 / 1; lexicographic |
 | Ride guardrail | max(25 min, 2·direct + 5 min); no candidate may create or increase a violation; an unavoidable one is logged and penalised by Ψ (D-47) | 20 hard / 35 |
-| Targets | 15 min pickup, 20 min ride, busy-time 20 min: **reporting thresholds**, taken from the page wording captured around April 2026 (not proof of operating policy). The live page read on 21 Oct 2026 states 20 / 25 / 25; kept distinct (D-49) | Also report at 10 and 20 min |
+| Targets | 15 min pickup, 20 min ride, busy-time 20 min: **reporting thresholds**, taken from the page wording captured around April 2026 (not proof of operating policy). The live page read on 21 Oct 2026 states 20 / 25 / 25; kept distinct (D-49). **The primary rider measure uses 20 min** (share of all requests not reached within 20 min; D-50 approval, 10 Nov), with 15 min as the sensitivity check | Also report at 10 min |
 | **Lyft rule** | **The factor under study** (§6) | — |
 | Dispatcher lag ℓ | 2 min | 0 / 5 |
 | Dispatcher capacity | Unlimited | 3 per 10 min |
@@ -303,7 +307,7 @@ For each condition, the best rule is the best point on the frontier, relative to
   **Keep the identified set** (all knob settings that pass), not one point.
 
 ## 13. Pre-registration
-`preregistration_v2.md` (draft, written from this spec) fixes the rules, thresholds, metrics, hypotheses and seeds before any comparison run.
+`preregistration_v2.md` (written from this spec) fixes the rules, thresholds, metrics, hypotheses and seeds before any comparison run. Its decision criteria were approved on 10 Nov 2026 (D-50 approval and amendments 1–2; summary in `scenario_methodology.md` §7c); it freezes at the first L6 comparison run.
 
 ## 14. Decisions (all settled 20 Oct)
 | ID | Decision | Outcome |
@@ -407,7 +411,17 @@ Ties inside a class are broken by request ID, then van ID.
 - **Lyft window:** in M2 and later the rule acts at every epoch (`lyft_window="evening"`). The M0 harness (`"m0"`: in L4 the rules act only before 900 s, the hand-checkable window) stays selectable to reproduce M0.
 - **What a rule reads (D-55):** the plan ETA for a request assigned in the plan it reads; for a pending request, the **tentative ETA** (cheapest feasible insertion into the chosen routes, computed outside the MILP, ignoring the cap); none if no van can feasibly take it (treated as infinite). The tentative ETA is distinct from A's pending price; neither is a promised pickup time.
 - **Rule pass:** once per epoch, on the first solve; accepted transfers and declines are applied, then one re-solve; the rule is not re-evaluated on the re-solved plan in the same second.
+- **L5 settings (D-56):** set in the run configuration (`run.policy_for`), never read from the frozen inputs: lag 2 min, consent 1.0, presence p = 0.089 (provisional). The frozen inputs are unchanged.
+- **Tie searches (D-52 amendment 5):** a failure of a tie re-solve is labelled `tie_enumeration_incomplete` and does not stop the run; the main solve still stops the run on any solver error. An incomplete tie search does not prove the optimum unique.
+- **Guardrail excesses between epochs (D-57):** plans never create or increase a violation (plan audit). A ride may still exceed the guardrail after an unplanned event. The batch check accepts an excess only if it is attributable to van no-shows on the same van during the ride (≤ 150 s each + 13 s matrix tolerance); otherwise the run fails.
 - **R1u clock:** a request's "unassigned since" time is updated from the plan the rule read and again from the re-solved plan.
+
+## 22. Changes from v0.7 (22 Oct 2026)
+| v0.7 | v0.8 | Why |
+|---|---|---|
+| L5 policy settings unstated | Set in the run configuration | D-56 |
+| A tie re-solve error stopped the run | Labelled incomplete; the main solve still stops on error | D-52 amendment 5 |
+| Guardrail excesses between epochs unchecked | Attribution check in the batch | D-57 |
 
 ## 21. Changes from v0.6 (22 Oct 2026)
 | v0.6 | v0.7 | Why |

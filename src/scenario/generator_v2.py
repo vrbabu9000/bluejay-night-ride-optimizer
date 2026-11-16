@@ -328,6 +328,74 @@ def build_l5(replicate, mult=1.2):
     return req, latent, _availability(2, 0, L5_WINDOW_S)
 
 
+# ---------- L6: five vans, 18:00-21:00 + backlog (D-36, D-37, D-59) ----------
+# Load ratio rho_h = requests per available van in clock hour h (spec 3.2, D-35; DERIVED from April p06/p07/p09,
+# provisional). Requests per hour = rho_h x vans x load factor, rounded by the largest-remainder rule.
+L6_RHO = (12.85, 10.10, 10.71)
+L6_VANS = 5                                  # D-36: constant five vans; the six-van case reuses the same requests (D-37)
+L6_LOAD = {"base": 1.0, "high": 1.3}         # spec 3.4: high load = rho x 1.3
+L6_EXPECTED = {"base": (64, 50, 54), "high": (83, 66, 70)}   # hand calculation, plan v2 M4 check 1
+L6_WINDOW_S = 3 * 3600
+
+
+def largest_remainder(x):
+    """Round a vector of non-negative reals to integers summing to round(sum(x)): floor each, then give the
+    leftover units to the largest fractions (ties -> earlier index)."""
+    x = [float(v) for v in x]
+    total = int(round(sum(x)))
+    fl = [int(math.floor(v)) for v in x]
+    order = sorted(range(len(x)), key=lambda i: (-(x[i] - fl[i]), i))
+    for i in order[:total - sum(fl)]:
+        fl[i] += 1
+    return tuple(fl)
+
+
+def l6_hour_counts(pattern):
+    return largest_remainder([r * L6_VANS * L6_LOAD[pattern] for r in L6_RHO])
+
+
+def _latent_random(rng, req):
+    """Latent per-request draws, the same distributions as L5 (spec 3.3; ASSUMED placeholders)."""
+    n = len(req)
+    shape, median = 1.5, 18 * 60
+    scale = median / (math.log(2) ** (1 / shape))
+    sigma = math.log(900 / 480) / 1.2816                    # lognormal: median 480 s, P90 900 s
+    return pd.DataFrame({
+        "request_id": req.request_id,
+        "patience_s": np.maximum(1, np.round(scale * rng["patience"].weibull(shape, n))).astype(int),
+        "noshow_u": rng["noshow"].random(n).round(6),
+        "consent_u": rng["consent"].random(n).round(6),
+        "lyft_delay_s": np.round(480 * np.exp(sigma * rng["lyft_delay"].standard_normal(n))).astype(int),
+        "lyft_noshow_u": rng["lyft_noshow"].random(n).round(6),
+        "eta_noise": np.exp(0.15 * rng["eta_noise"].standard_normal(n)).round(6)})
+
+
+def build_l6(pattern, replicate, n_vans=L6_VANS, mult=1.2):
+    """One L6 night. Fixed count per clock hour (l6_hour_counts), uniform random times within each hour, drawn hour
+    by hour from one 'times' stream, so the first hour's requests do not depend on later hours. Requests are numbered
+    in time order, so the first-hour slice (M5) is exactly the first n_0 rows. The fleet size is not in the seed key:
+    n_vans changes only availability.csv (D-37)."""
+    if pattern not in L6_LOAD:
+        raise ValueError(f"L6 pattern {pattern!r} not built yet (burst and far-trip are deferred to M7)")
+    lv = "L6"
+    rng = {c: stream(lv, pattern, replicate, c) for c in COMPONENTS}
+    counts = l6_hour_counts(pattern)
+    t = np.concatenate([np.sort(rng["times"].uniform(h * 3600, (h + 1) * 3600, n)) for h, n in enumerate(counts)])
+    t = np.minimum(np.floor(t), np.repeat([(h + 1) * 3600 - 1 for h in range(len(counts))], counts)).astype(int)
+    n = int(sum(counts))
+    o, d = draw_od(rng["od"], n)
+    party = draw_party(rng["party"], n, PARTY_P)
+    req = request_frame(t, o, d, party, mult)
+    latent = _latent_random(rng, req)
+    params = {"level": lv, "pattern": pattern, "replicate": replicate, "n_requests": n, "n_vans": n_vans,
+              "hour_counts": list(counts), "rho": list(L6_RHO), "load_factor": L6_LOAD[pattern],
+              "capacity": CAPACITY, "travel_multiplier": mult, "dwell_s": DWELL_S, "window_s": L6_WINDOW_S,
+              "closing": "vans stay on duty after the window until all accepted work is resolved (D-36)",
+              "patience": {"dist": "weibull", "shape": 1.5, "median_s": 1080},
+              "lyft_delay": {"dist": "lognormal", "median_s": 480, "p90_s": 900}, "p_noshow": P_NOSHOW}
+    return req, latent, _availability(n_vans, 0, L6_WINDOW_S), params
+
+
 # ---------- Dispersed geography variant (D-34): same requests, coarse endpoints spread over road satellites ----------
 def disperse_requests(req, level, pattern, replicate, sites, sec, min_trip_s=60, max_redraws=50):
     """Replace endpoints that are coarse city clusters by one of their satellites, drawn uniformly (equal weights)

@@ -1,0 +1,4 @@
+arrivals: 30 nights, 840 requests; figures written to /Users/vigneshrbabu/Documents/Git/bluejay-night-ride-optimizer/docs/report/midterm/figures
+wrote c_volume, c_assumed, c_noshow, c_example, c_phi, c_map
+Wrote /Users/vigneshrbabu/Documents/Git/bluejay-night-ride-optimizer/docs/report/midterm/BlueJayNightRide_Midterm.pdf
+Overfull \hbox (3.83086pt too wide) in paragraph at lines 549--549

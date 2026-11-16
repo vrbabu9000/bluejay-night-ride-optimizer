@@ -1,14 +1,14 @@
 # Sources used for the methodology companion PDF
 
-Files read for `BlueJay_Scenario_Methodology.pdf` (companion for methodology v1.6, 23 Oct 2026). The methodology hash was retaken on 23 Oct 2026 for v1.6; the other hashes date from 22 Oct 2026 after the L5 pilot and batch (spec v0.8, model_design v0.5, decision log through D-57) and were re-checked on 23 Oct. Earlier builds used methodology v1.0–v1.2, spec v0.4–v0.6, model_design v0.2–v0.4 and earlier decision-log versions; their hashes are in the git history of this file.
+Files read for `BlueJay_Scenario_Methodology.pdf` (companion for methodology v1.7, 10 Nov 2026). All document hashes were retaken on 10 Nov 2026 after the D-50 approval and the D-58 rehearsal (methodology v1.7, spec v0.9, model_design v0.6, decision log through D-58 and D-50 amendment 2). The v1.6 build used methodology v1.6, spec v0.8, model_design v0.5 and the decision log through D-57. Earlier builds used methodology v1.0–v1.2, spec v0.4–v0.6, model_design v0.2–v0.4 and earlier decision-log versions; their hashes are in the git history of this file.
 
 | File | Version / date | SHA-256 |
 |---|---|---|
-| `docs/technical/scenario_methodology.md` | v1.6, 23 Oct 2026 | `bd93a4548c987d1239cf0d686f4d5c01b84ca790029831ed6e4a31ccfed2f73d` |
-| `docs/technical/scenario_spec.md` | v0.8, 22 Oct 2026 | `0cdb285245508c1aa01624b0ebe756b76db13bd2bc4a487bc7248cfad2f85e1f` |
-| `docs/technical/model_design.md` | v0.5 draft, 22 Oct 2026 | `407d2d5bcfb7f1c55218b5f8caa31a5fd3a8e25019c0729aa9031ec6b8d087ea` |
-| `docs/technical/decision_log.md` | through D-57 (D-52 amendment 5, D-56, D-57), 22 Oct 2026 | `653f09658cf345012fd34dd1d60627e3746277b4399c64da5fbf8228de6afa45` |
-| `docs/technical/preregistration_v2.md` | draft, revised 22 Oct 2026 | `6b05cf0ffed51b7373e46c60dd765520cef618846f9404945f08e9cb9ed28140` |
+| `docs/technical/scenario_methodology.md` | v1.7, 10 Nov 2026 | `f91b3208e0bfa71d63ae2ab3d2fbc32da429d65144fc44bfbf5d07e9de763a00` |
+| `docs/technical/scenario_spec.md` | v0.9, 10 Nov 2026 | `8be990a62d984b72eb742b608606935d3dd02f3ea4ec287ae723c63eaba5a826` |
+| `docs/technical/model_design.md` | v0.6 draft, 10 Nov 2026 | `8c3f85695e8ca70930ec53553c92108006754bb03c451437db0d37faa99a7f6d` |
+| `docs/technical/decision_log.md` | through D-58 (D-50 approval and amendments 1–2, D-58), 10 Nov 2026 | `a9746f8cc24ff10574c6267177953738e87336256268a9fd42720be130b95850` |
+| `docs/technical/preregistration_v2.md` | criteria approved 10 Nov 2026 | `e94a65a5c8fc30d69ec0c090636facd6a18a6438c4cb5231c4c4e0a432145caa` |
 
 **Simulation artifacts read (never written)**
 
@@ -30,3 +30,5 @@ Files read for `BlueJay_Scenario_Methodology.pdf` (companion for methodology v1.
 **Not used as authority:** `scenario_contract.md` (paused v1), `archive/*`, `docs/evidence/` and the restricted April PDF. April numbers in the PDF are the aggregates already quoted in the files above.
 
 If any source changes, re-hash it (`shasum -a 256 <file>`), compare with this table, and update the PDF before relying on it.
+
+**Added for v1.7 (read, never written):** `outputs/sim/batch_L5_v1/intervals/pair_intervals.csv` (paired-interval table) `807b1023a2a07d28f134e8b42deea871d2ea3c97f36dfe75c7424c9ba6c894ef`.

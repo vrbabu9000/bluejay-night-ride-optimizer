@@ -78,7 +78,7 @@
 
 \newpagestyle{main}{%
   \setheadrule{0pt}%
-  \sethead{}{}{\sffamily\footnotesize\color{muted}Scenario methodology and simulator contract \textbar{} for methodology v1.6}%
+  \sethead{}{}{\sffamily\footnotesize\color{muted}Scenario methodology and simulator contract \textbar{} for methodology v1.7}%
   \setfoot{}{\sffamily\small\thepage}{}%
 }
 \pagestyle{main}
@@ -133,12 +133,12 @@
 \vspace{0.12in}
 {\sffamily\Large\color{heading} Scenario methodology and simulator contract,\\ explained\par}
 \vspace{0.35in}
-{\large An explanatory companion to the scenario methodology (v1.6), the scenario specification (v0.8) and the model design (v0.5)\par}
+{\large An explanatory companion to the scenario methodology (v1.7), the scenario specification (v0.9) and the model design (v0.6)\par}
 \vspace{0.3in}
 {\sffamily\small
 \begin{tabular}{@{}ll@{}}
-Status & Companion for methodology v1.6. Section~7: verified M0--M2 and the M3 batch.\\
-Date & 23 October 2026\\
+Status & Companion for methodology v1.7. Section~7: verified M0--M3.\\
+Date & 10 November 2026\\
 Sources read & Versions and fingerprints in \cref{app:sources}\\
 \end{tabular}\par}
 \vfill
@@ -274,11 +274,11 @@ Claims about real nights & Claims about synthetic evenings consistent with April
 The proposal deck itself is kept unchanged as a record.
 
 \subsection{How results will be judged (pointer)}
-The rules for judging results live in the draft pre-registration (\fn{preregistration_v2.md}), which is frozen when the first main (L6) comparison run starts. In outline:
+The rules for judging results live in the pre-registration (\fn{preregistration_v2.md}). Its decision criteria were approved on 10 November 2026 (\D{50} approval and amendments 1--2, \Accepted); it is frozen when the first main (L6) comparison run starts. In outline (full table in \cref{sec:criteria}):
 \begin{itemize}
-\item Rules are compared on \textbf{paired} nights (the same 30 evenings for every rule), and the answer is a \textbf{frontier} of rider outcome against resource use, not a single winner. ``Send everyone to Lyft'' is one end of that frontier, never the answer.
-\item The proposed primary rider outcome is the share of \emph{all} requests not reached by a vehicle (van or Lyft) within 15 minutes, counting riders who cancelled as not reached (\D{50}(2) \Proposed). Wait percentiles among picked-up riders leave out those who gave up, so they are read beside it.
-\item Comparisons use non-inferiority margins rather than ``the confidence interval contains zero''. The correction of that wording is \Accepted{}; the margins themselves (1 minute for wait percentiles, 2 percentage points for shares) are \Proposed{} (\D{50}).
+\item Rules are compared on \textbf{paired} nights (the same evenings for every rule), and the answer is a \textbf{frontier} of rider outcome against resource use, not a single winner. ``Send everyone to Lyft'' is one end of that frontier, never the answer.
+\item The primary rider outcome is the share of \emph{all} requests not reached by a vehicle (van or Lyft) within \textbf{20 minutes}, counting riders who cancelled as not reached. The 15-minute share is a sensitivity check. Wait percentiles among picked-up riders leave out those who gave up, so they are read beside it.
+\item Comparisons use non-inferiority margins rather than ``the confidence interval contains zero'': 2 percentage points for shares, 1 minute for wait percentiles, 2 Lyft bookings per 100 requests. A rule dominates another only if it is no worse on all three and better on at least one.
 \end{itemize}
 
 % ================================================================== 2
@@ -867,10 +867,10 @@ Because these traits are drawn once per request and shared by every rule, a ride
 
 % ================================================================== 7
 \section{Implementation status, provisional assumptions and next milestones}\label{sec:status}
-This section reports what the simulator milestones M0--M2 and the M3 batch (22 October 2026) built and verified, taken from \fn{scenario_methodology.md} v1.6 §7--§9. It keeps two things apart: what has been \textbf{verified} and what is only \textbf{planned}.
+This section reports what the simulator milestones M0--M3 (22 October and 10 November 2026) built and verified, taken from \fn{scenario_methodology.md} v1.7 §7--§9. It keeps two things apart: what has been \textbf{verified} and what is only \textbf{planned}.
 
 \begin{callout}[What this section does and does not show]
-Only designed cases have been simulated: the validation levels L1--L4 and the L5 rehearsal nights. The outcomes below are \Simulated{} outcomes of \Designed{} cases, not evidence about the real service. M2 ran every Lyft rule through one designed integration evening, and M3 replayed 30 two-van rehearsal nights under six rules, to check that the pieces work together and to describe variability. \textbf{M3 is a descriptive comparison of the six rules on two-van rehearsal nights; no intervals have been computed and no rule is ranked} (\D{50} open).
+Only designed cases have been simulated: the validation levels L1--L4 and the L5 rehearsal nights. The outcomes below are \Simulated{} outcomes of \Designed{} cases, not evidence about the real service. M2 ran every Lyft rule through one designed integration evening, and M3 replayed 30 two-van rehearsal nights under six rules, to check that the pieces work together and to describe variability. \textbf{M3 compares the six rules on two-van rehearsal nights; paired intervals under the approved criteria (\D{50}, \cref{sec:criteria}) are a rehearsal and rank no rule for the study.}
 \end{callout}
 
 \subsection{What was built}
@@ -886,7 +886,7 @@ The code lives in \fn{src/sim/}, with settings recorded in \D{52} and its amendm
 \subsection{What was verified}
 \begin{table}[H]
 \centering\small
-\caption[What M0--M1 verified]{What M0--M1 verified (\fn{scenario_methodology.md} v1.6 §7).}\label{tab:verified}
+\caption[What M0--M1 verified]{What M0--M1 verified (\fn{scenario_methodology.md} v1.7 §7).}\label{tab:verified}
 \begin{tabularx}{\textwidth}{@{}P{3.2cm}L@{}}
 \toprule
 \textbf{Check} & \textbf{Result}\\
@@ -1078,7 +1078,7 @@ Van-km & 51.2 & 47.6 & 48.6 & 51.9 & 45.7 & 43.0\\
 \subsection{Reading the results as trade-offs}\label{sec:tradeoff}
 Two objectives are stated explicitly: service $S$, the share of all requests reached within 15 minutes (larger is better), and Lyft use $B$, the bookings per night (smaller is better). Rule P \emph{dominates} rule Q if $S_P \ge S_Q$ and $B_P \le B_Q$, with at least one inequality strict. The calculation uses saved outputs only.
 \begin{itemize}
-\item \textbf{On the 30-night means,} R0, R1(15), R1(10), R2(15) and R3(2) are nondominated among the six tested rules (\cref{fig:tradeoff}). R1u(10) is dominated by R0, narrowly: $S$ = 0.476 against 0.477 (about one request in 840), with more Lyft use. No noise margin is applied (\D{50}), so in practice it is a near tie that uses slightly more Lyft. R0 is nondominated through zero Lyft use alone. The same five remain nondominated with van-km as a third objective.
+\item \textbf{On the 30-night means,} R0, R1(15), R1(10), R2(15) and R3(2) are nondominated among the six tested rules (\cref{fig:tradeoff}). R1u(10) is dominated by R0, narrowly: $S$ = 0.476 against 0.477 (about one request in 840), with more Lyft use. This descriptive comparison applies no noise margin (the \D{50} margins are applied in \cref{sec:criteria}), so in practice it is a near tie that uses slightly more Lyft. R0 is nondominated through zero Lyft use alone. The same five remain nondominated with van-km as a third objective.
 \item \textbf{Night by night,} R2(15) and R3(2) reach more requests than R0 on all 30 nights; R1(10) reaches more on 19 nights and fewer on 6.
 \end{itemize}
 
@@ -1092,9 +1092,58 @@ Two objectives are stated explicitly: service $S$, the share of all requests rea
 \begin{enumerate}
 \item the fixed weights inside C's routing objective (\cref{sec:math});
 \item the empirical trade-off between transfer rules (this analysis);
-\item the decision criteria for choosing a rule (\D{50}, not approved).
+\item the decision criteria for choosing a rule (\D{50}, approved 10 November; applied in \cref{sec:criteria}).
 \end{enumerate}
-``Nondominated among six tested rules'' is neither a frontier of all policies nor a recommendation. Because the service measure favours early transfer (mechanism 5 in \cref{sec:l5}), another measure or decision criterion could change the assessment. Still to come are paired intervals, once \D{50} is decided; threshold sweeps to trace curves; calibrated behaviour; and five vans.
+``Nondominated among six tested rules'' is neither a frontier of all policies nor a recommendation. Because the service measure favours early transfer (mechanism 5 in \cref{sec:l5}), another measure or decision criterion could change the assessment. Paired intervals under the approved criteria follow in \cref{sec:criteria}. Still to come are threshold sweeps to trace curves, calibrated behaviour, and five vans.
+
+\subsection{Decision criteria and the paired-interval rehearsal}\label{sec:criteria}
+The team approved the decision criteria on 10 November 2026 (\D{50} approval and amendments 1--2, \Accepted). The primary measure moved from 15 to 20 minutes, and the dominance rule was rewritten as one sentence, before any 20-minute outcome or dominance result under the new wording had been computed.
+
+\begin{table}[H]
+\centering\small
+\caption[Approved decision criteria]{Approved decision criteria (\fn{preregistration_v2.md} §3--§4; \fn{scenario_methodology.md} v1.7 §7c).}\label{tab:criteria}
+\begin{tabularx}{\textwidth}{@{}P{3.2cm}L@{}}
+\toprule
+\textbf{Item} & \textbf{Approved setting}\\
+\midrule
+Primary measure & Share of \emph{all} requests not reached by a vehicle (curb arrival) within 20 min; cancellations count as not reached. 15 min is a sensitivity check\\
+Secondary & Passenger P90 wait among riders picked up\\
+Resource & Lyft bookings per 100 requests; van-km reported beside\\
+Margins & 2 percentage points; 1 min; 2 bookings per 100 requests\\
+Comparison & Paired differences over the same nights; percentile bootstrap, 10{,}000 resamples of nights\\
+Non-inferior / better & Upper bound of $(A - B)$ below $+\delta$ / below 0; an interval containing 0 means ``cannot tell''\\
+Dominance & A is non-inferior on all three measures and better on at least one\\
+Power & 10-night L6 pilot outside the main 30 (R0 vs R3(2)); 30 nights if the half-width $\le 0.7\delta$, otherwise 60; then ``underpowered'' if still short\\
+Multiplicity & Only H1--H3 confirmatory, at 98.3\% (Bonferroni over three); all else exploratory at 95\%\\
+Single score & None; the frontier and the dominance rule are reported\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{The rehearsal} (\D{58}) applies these criteria to the 180 saved L5 runs, with no new simulation (\fn{src/sim/intervals.py}). The 15-minute reach recounted from each run's outcomes matches the saved metrics on all 180 runs, and independently computed $t$-intervals agree with the bootstrap to 0.1 points.
+
+\begin{table}[H]
+\centering\small
+\caption[Paired intervals against R0 on L5]{Each rule against R0 on L5: mean difference over 30 paired nights with the 95\% bootstrap interval; negative means the rule does better than R0 \Designed\ \Simulated. Re-derived from \fn{intervals/pair_intervals.csv}.}\label{tab:intervals}
+\begin{tabularx}{\textwidth}{@{}lLLL@{}}
+\toprule
+\textbf{Rule $-$ R0} & \textbf{Not reached in 20 min (pp)} & \textbf{P90 wait (min)} & \textbf{Lyft bookings per night}\\
+\midrule
+R1(10) & $-5.6$ [$-8.5$, $-2.6$] & $-2.8$ [$-4.8$, $-1.0$] & $+5.9$ [$+5.4$, $+6.5$]\\
+R1(15) & $-1.3$ [$-3.1$, $+0.4$] & $-0.9$ [$-2.3$, $+0.5$] & $+3.1$ [$+2.6$, $+3.6$]\\
+R1u(10) & $-0.5$ [$-1.4$, $+0.2$] & $-0.6$ [$-1.5$, $+0.0$] & $+0.2$ [$+0.1$, $+0.4$]\\
+R2(15) & $-22.3$ [$-25.6$, $-18.9$] & $-6.9$ [$-9.0$, $-4.8$] & $+9.3$ [$+8.5$, $+10.2$]\\
+R3(2) & $-23.1$ [$-26.5$, $-19.6$] & $-7.4$ [$-9.8$, $-5.2$] & $+10.5$ [$+9.8$, $+11.1$]\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{itemize}
+\item \textbf{No rule dominates another} under the approved rule, at 20 or at 15 minutes. Every transfer rule serves riders at least as well as R0 and books more Lyft rides: a trade-off, not a ranking.
+\item \textbf{Noise:} at 30 nights the half-width meets the $0.7\delta$ target for 1 of 15 pairs on each outcome. On L5 one request is 3.6 points of a night, so this does not set the L6 night count; the L6 pilot does.
+\item \textbf{Bookings margin:} at 1 per 100 instead of 2, no dominance result changes; only R1u(10)'s status as ``no worse than R0 on all three'' is lost.
+\end{itemize}
+It is a check that the machinery works and a description of L5 noise. It ranks no rule for the study and says nothing about the real service.
 
 \subsection{A leader--follower reading (possible extension, not implemented)}\label{sec:bilevel}
 One possible extension is to optimize transfer policy while anticipating how the routing dispatcher responds. A bilevel formulation is a modelling choice: a threshold could also be tuned by simulation-based search with the dispatcher treated as a black box. One reading has two decision makers. The \emph{leader} is the policy designer, who chooses rule parameters $\theta$. The \emph{follower} is the routing optimizer, which responds to the requests left after transfers. As a bilevel program:
@@ -1111,7 +1160,7 @@ One possible extension is to optimize transfer policy while anticipating how the
 \item the follower: a sequence of per-epoch restricted MILPs whose state depends on earlier epochs and random outcomes, or one whole-evening problem, with its information and timing;
 \item how non-unique follower optima are treated (optimistic or pessimistic; ours uses a fixed canonical tie rule, \D{52}, which is neither);
 \item the expectation (a scenario distribution, or a sample average over $N$ nights);
-\item the loss $L$ and the weight $\lambda$ (\D{50} open);
+\item the loss $L$ and the weight $\lambda$ (\D{50} deliberately sets no single score and reports the frontier; a bilevel version would have to choose one);
 \item any upper-level constraints, such as a Lyft budget or a service floor.
 \end{itemize}
 Any single-level reduction would need specific assumptions and justification, and \textbf{none is claimed}. Riders (fixed patience rules) and Lyft (a delay distribution) are not modelled as optimizing players. The terminology follows von Stackelberg (1934), Colson, Marcotte and Savard (2007), and Dempe (2002).
@@ -1119,7 +1168,7 @@ Any single-level reduction would need specific assumptions and justification, an
 \subsection{Status by item}
 \begin{table}[H]
 \centering\small
-\caption{Status by item after M0--M3's batch (\fn{scenario_methodology.md} v1.6 §7).}\label{tab:statusitems}
+\caption{Status by item after M0--M3 (\fn{scenario_methodology.md} v1.7 §7).}\label{tab:statusitems}
 \begin{tabularx}{\textwidth}{@{}P{3.6cm}L@{}}
 \toprule
 \textbf{Status} & \textbf{Items}\\
@@ -1127,7 +1176,8 @@ Any single-level reduction would need specific assumptions and justification, an
 Implemented and verified & Event engine for L1--L4 events (requests, movement, boarding, drop-offs, curb waits and no-shows, designed cancellations, commitment, periodic re-planning, backlog completion); dispatcher C with pending price A (approved provisionally); the curb-wait convention \D{54}; the Lyft rules all evening on L4 with the full transfer lifecycle (M2); logs, narratives and reports\\
 Implemented, provisional & All \D{52} settings ($K = 3$, $\Psi = 1000$, solver budget, tie rule); presence $p = 0.089$ (L1--L4 do not depend on it); the conventions of \cref{sec:conventions}\\
 Implemented (M3 pilot and batch) & L5 pilot settings in the run configuration (\D{56}); resumable 30-night batch with per-run checks (\D{57}); descriptive trade-off analysis of saved outputs\\
-Documented only & Decision criteria and paired intervals (\D{50}, not approved); pre-registration\\
+Implemented (M3 intervals) & Approved decision criteria (\D{50}) applied to the saved L5 batch: paired bootstrap intervals and the dominance rule (\D{58})\\
+Documented only & Pre-registration (criteria approved; frozen at the first L6 comparison run)\\
 Not started & Heuristic T; hindsight H; the L6 and L7 builders; calibration; the M5 benchmark; the experiment grid\\
 \bottomrule
 \end{tabularx}
@@ -1144,18 +1194,18 @@ Not started & Heuristic T; hindsight H; the L6 and L7 builders; calibration; the
 \end{itemize}
 
 \subsection{Next milestone and how the work grows}
-\textbf{M3: batch done, one step remaining.} The L5 pilot (\D{56}) and the 30-night batch (\D{57}) are done (\cref{sec:l5}). The remaining step is the paired-interval analysis of the \emph{saved} outputs, which needs no new simulation. Its entry decision is \D{50}: which primary metric, which margins and which power target. That analysis will show the interval machinery working and the night-to-night variance the power check needs. With two vans and placeholder behaviour, it supports no conclusion about the real service.
+\textbf{M3 is complete:} the L5 pilot (\D{56}), the 30-night batch (\D{57}) and the paired-interval rehearsal under the approved criteria (\D{58}, \cref{sec:criteria}). With two vans and placeholder behaviour, it supports no conclusion about the real service.
 
 \begin{table}[H]
 \centering\small
-\caption{Milestones (\fn{scenario_methodology.md} v1.6 §8). M0--M2 and the M3 batch are done; the rest is a plan.}\label{tab:milestones}
+\caption{Milestones (\fn{scenario_methodology.md} v1.7 §8). M0--M3 are done; the rest is a plan.}\label{tab:milestones}
 \begin{tabularx}{\textwidth}{@{}P{1.6cm}LLP{1.9cm}@{}}
 \toprule
 \textbf{Milestone} & \textbf{Adds} & \textbf{Shows} & \textbf{State}\\
 \midrule
 M0--M1 & Referee; C on L4 under R0 & Exact answer keys; joint optimization on overlapping requests & Done, verified\\
 M2 & The Lyft rules all evening with C on L4 & Transfer bookkeeping through a full evening & Done, verified\\
-M3 & L5, 30 nights $\times$ 6 rules & Pairing, metrics, variability; paired intervals after \D{50} & Batch done; intervals wait on \D{50}\\
+M3 & L5, 30 nights $\times$ 6 rules & Pairing, metrics, variability; paired intervals under \D{50} & Done (\D{58})\\
 M4 & The L6 builder, 64 / 50 / 54 (needs go-ahead) & Inputs for the demonstration & Planned\\
 M5 & First hour: 5 vans, 64 requests; benchmark & Whether C fits the budget, confirming or overturning \D{51} & Planned\\
 M6 & The full 168-request, five-van evening & One traced evening, end to end & Planned\\
@@ -1166,12 +1216,11 @@ M7 & The experiment grid & The research answer & Planned\\
 
 \subsection{Open decisions for the team}
 \begin{enumerate}
-\item \D{50}: the decision criteria (primary metric, margins, power target), before paired intervals are computed.
 \item The midterm timing is settled: a 30-minute slot, with the presentation planned at about 27 minutes.
-\item Review of the provisional \D{52} settings ($K = 3$, $\Psi$, solver budget, tie rule) and of the proposed conventions \D{46}, \D{47}(2), \D{48} and \D{50}.
+\item Review of the provisional \D{52} settings ($K = 3$, $\Psi$, solver budget, tie rule) and of the proposed conventions \D{46}, \D{47}(2) and \D{48}.
 \item Later, not now: accepting the dashboard status mapping that pins $p \approx 8.9\%$, and the calibration targets.
 \end{enumerate}
-Settled on 22 October: the pending price (A, provisionally, \D{53} approval), the curb-wait convention (\D{54}) and the L5 pilot settings (\D{56}).
+Settled on 22 October: the pending price (A, provisionally, \D{53} approval), the curb-wait convention (\D{54}) and the L5 pilot settings (\D{56}). Settled on 10 November: the decision criteria (\D{50} approval and amendments 1--2).
 
 \begin{table}[H]
 \centering\small
@@ -1187,9 +1236,8 @@ Candidate rule (\D{52} and amendment) & $K = 3$ new pickups per route; all stops
 Pending-price formulation (\D{53}) & A, the default; original and B kept as options & \Provisional\\
 Curb-wait convention (\D{54}) & pickup stays committed; possible boarding at expiry, planning only & \Provisional\\
 L5 pilot settings (\D{56}) & lag 2 min, consent 1.0, $p = 0.089$, in the run configuration & \Provisional\\
-Decision criteria (\D{50}) & primary metric, margins, power target & \Open\\
 No-show probability $p$ (\D{48}) & $\approx$ 8.9\% per arrival under the mapping & \Proposed\\
-Margins and primary metric (\D{50}) & 1 min / 2 points; share not reached in 15 min & \Proposed\\
+Margins and primary metric (\D{50}) & 2 points / 1 min / 2 per 100; share not reached in 20 min & \Accepted\\
 Request count (\D{35}, \D{36}) & 64 / 50 / 54 = 168 & \Provisional\\
 Patience distribution and range (\D{39}) & Weibull 1.5, median 18; 50--75\% & \Provisional\\
 L6 base geography (\D{34}) & reference or dispersed & \Provisional\\
@@ -1257,7 +1305,7 @@ D-46 & 21 Oct & Simulator build conventions (spec §17) & Proposed, not separate
 D-47 & 21 Oct & Model-math corrections: (1) multipliers once, (3) pending claim, (5) wording; (2) guardrail convention, (4) solver settings & (1), (3), (5) corrections; (2), (4) proposed\\
 D-48 & 21 Oct & One presence probability for all modes; $p \approx$ 8.9\% under the mapping; errata for 0.047 fields & $p$ proposed, not approved; errata corrections\\
 D-49 & 21 Oct & Evidence-wording corrections (targets, range, 29 days, pairing) & Corrections\\
-D-50 & 21 Oct & Pre-registration statistics & ``CI contains 0'' fix a correction; margins, metric, power proposed\\
+D-50 & 21 Oct; 10 Nov & Pre-registration statistics; approval with a 20-minute primary; amendments 1--2 (dominance rule, bookings margin) & Approved 10 Nov\\
 D-51 & 21 Oct & Held-fixed dispatcher: C provisionally; T a contingency, not a runtime fallback & Provisionally decided\\
 D-52 & 22 Oct & M0--M1 implementation settings: $K = 3$ candidate rule, cost units, solver settings, engine conventions & Implemented; provisional\\
 D-52 (am.) & 22 Oct & Candidate rule: all of the van's stops reordered freely & Implemented; provisional (team review pending)\\
@@ -1273,6 +1321,7 @@ D-55 & 22 Oct & M2: Lyft rules with C over the whole L4 evening; rule pass, what
 D-52 (am.~5) & 22 Oct & Tie-search robustness: a failed tie re-solve is labelled incomplete instead of stopping the run & Implemented\\
 D-56 & 22 Oct & L5 engineering pilot (two runs); L5 settings in the run configuration & Done; settings provisional\\
 D-57 & 22 Oct & L5 30-night batch (180 runs): pipeline verification and variability; descriptive only & Done\\
+D-58 & 10 Nov & L5 paired-interval rehearsal under the approved criteria & Done\\
 \end{longtable}
 }
 
@@ -1364,7 +1413,7 @@ Off-duty trigger & \textbf{Open:} spec §17.4 and \D{46}(3) list it as a trigger
 
 
 \section{Source documents and versions}\label{app:sources}
-This companion was prepared from the files below, last read on 23 October 2026. The SHA-256 fingerprints identify the exact versions; the full values are in \fn{methodology_pdf/SOURCES.md}.
+This companion was prepared from the files below, last read on 10 November 2026. The SHA-256 fingerprints identify the exact versions; the full values are in \fn{methodology_pdf/SOURCES.md}.
 
 {\small
 \begin{longtable}{@{}P{4.4cm}P{4.2cm}P{4.9cm}@{}}
@@ -1379,16 +1428,17 @@ This companion was prepared from the files below, last read on 23 October 2026. 
 \endhead
 \bottomrule
 \endfoot
-\fn{scenario_methodology.md} & v1.6, 23 Oct 2026 & \texttt{bd93a4548c987d12}\\
-\fn{scenario_spec.md} & v0.8, 22 Oct 2026 & \texttt{0cdb285245508c1a}\\
-\fn{model_design.md} & v0.5 draft, 22 Oct 2026 & \texttt{407d2d5bcfb7f1c5}\\
-\fn{decision_log.md} & through \D{57}, 22 Oct 2026 & \texttt{653f09658cf34501}\\
-\fn{preregistration_v2.md} & draft, revised 22 Oct 2026 & \texttt{6b05cf0ffed51b73}\\
+\fn{scenario_methodology.md} & v1.7, 10 Nov 2026 & \texttt{f91b3208e0bfa71d}\\
+\fn{scenario_spec.md} & v0.9, 10 Nov 2026 & \texttt{8be990a62d984b72}\\
+\fn{model_design.md} & v0.6 draft, 10 Nov 2026 & \texttt{8c3f85695e8ca709}\\
+\fn{decision_log.md} & through \D{58}, 10 Nov 2026 & \texttt{a9746f8cc24ff107}\\
+\fn{preregistration_v2.md} & criteria approved 10 Nov 2026 & \texttt{e94a65a5c8fc30d6}\\
 \fn{outputs/sim/}\newline\fn{L4_R0_M1_reference/}\newline\fn{epochs.jsonl} & M1 run, original price (\cref{tab:plan1815}), read only & \texttt{7b962cc5a96ee9e0}\\
 \fn{outputs/sim/}\newline\fn{d53_experiment/}\newline\fn{d53_comparison.md} & D-53 experiment (\cref{tab:d53}), read only & \texttt{38f11a09deafbc91}\\
 \fn{outputs/sim/}\newline\fn{m2_L4_report.md} & M2 report (\cref{tab:m2,tab:m2step}), read only & \texttt{dbc1e1dc841d5cf2}\\
 \fn{outputs/sim/batch_L5_v1/}\newline\fn{per_night_metrics.csv} & L5 batch (\cref{tab:l5fate,tab:l5desc}), read only & \texttt{1e26c95e1c92defd}\\
 \fn{outputs/sim/batch_L5_v1/}\newline\fn{tradeoff_rule_summary.csv} & \cref{fig:tradeoff}, read only & \texttt{e94a8c0f7588c798}\\
+\fn{outputs/sim/batch_L5_v1/}\newline\fn{intervals/}\newline\fn{pair_intervals.csv} & \cref{tab:intervals}, read only & \texttt{807b1023a2a07d28}\\
 \end{longtable}
 }
 
@@ -1400,9 +1450,9 @@ Literature and vendor sources are cited as the source documents cite them; full 
 
 \subsection*{Project documents}
 \begin{itemize}[leftmargin=1.2em]
-\item Team FourSight. \emph{Scenario-design methodology and build contract}, v1.6, 23 Oct 2026 (\fn{scenario_methodology.md}).
-\item Team FourSight. \emph{Scenario specification}, v0.8, 22 Oct 2026 (\fn{scenario_spec.md}), especially §17, the simulator build contract.
-\item Team FourSight. \emph{Mathematical design and architecture}, v0.5 draft, 22 Oct 2026 (\fn{model_design.md}).
+\item Team FourSight. \emph{Scenario-design methodology and build contract}, v1.7, 10 Nov 2026 (\fn{scenario_methodology.md}).
+\item Team FourSight. \emph{Scenario specification}, v0.9, 10 Nov 2026 (\fn{scenario_spec.md}), especially §17, the simulator build contract.
+\item Team FourSight. \emph{Mathematical design and architecture}, v0.6 draft, 10 Nov 2026 (\fn{model_design.md}).
 \item Team FourSight. \emph{Decision log} (plan v2), D-01 to D-57 with the scenario design trail (\fn{decision_log.md}).
 \item Team FourSight. \emph{Pre-registration v2}, draft revised 22 Oct 2026 (\fn{preregistration_v2.md}).
 \end{itemize}

@@ -1,8 +1,8 @@
-# Mathematical design and architecture (v0.5 draft, 22 Oct 2026)
+# Mathematical design and architecture (v0.6 draft, 10 Nov 2026)
 
 **Status:** a design document. Dispatcher C and the event engine are **implemented for L1–L4** (Phase 4 M0–M1, 22 Oct; `src/sim/`, decision log D-52); everything else here (T, G, H, the Lyft module after 18:15, evaluation) is a proposal, not implemented.
 
-**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. **v0.4 (22 Oct 2026):** pending-price formulations and the D-53 experiment; curb-wait planning (D-54); v0.3 archived. **v0.5 (22 Oct 2026):** pending price A approved provisionally and made the default; the Lyft module runs all evening (M2, D-55); v0.4 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
+**v0.2 (21 Oct 2026):** corrections from the consolidation review (decision log D-45–D-47, D-50, D-51); v0.1 is archived in `archive/`. **v0.3 (22 Oct 2026):** aligned with what M0–M1 built (D-51 update, D-52, D-53); v0.2 archived. **v0.4 (22 Oct 2026):** pending-price formulations and the D-53 experiment; curb-wait planning (D-54); v0.3 archived. **v0.5 (22 Oct 2026):** pending price A approved provisionally and made the default; the Lyft module runs all evening (M2, D-55); v0.4 archived. **v0.6 (10 Nov 2026):** the evaluation paragraph follows the approved decision criteria (D-50 approval and amendments 1–2); no change to the mathematics; v0.5 archived. The changes are listed in §9. The **build contract** is `scenario_spec.md` §17; this file gives the mathematics behind it. Where the two disagree, the decision log wins, then the spec.
 
 **Sources:**
 - `research_review.md` (direction and assumptions);
@@ -274,7 +274,7 @@ A transfer is **not** a completion.
 - **ETA churn**; maximum pending age; backlog after 02:00;
 - **subgroups:** party size (parties of 5 need a Lyft XL; XL trips reported separately) and zone (Homewood core vs Peabody area).
 
-**Better** means a point on the **frontier of rider outcome against resource use (Lyft bookings, van-km)**. The primary rider outcome counts **every** request (D-50: the share not reached by a vehicle within 15 min); wait percentiles among picked-up riders are secondary because they leave out those who cancelled. "Send everyone to Lyft" is just one end of that frontier, never the answer. **No money is modelled** (D-45): Hopkins' cost per Lyft trip is unknown, and a rider's app showing no charge does not reveal it.
+**Better** means a point on the **frontier of rider outcome against resource use (Lyft bookings, van-km)**. The primary rider outcome counts **every** request (D-50, approved 10 Nov: the share not reached by a vehicle within **20 min**, with 15 min as a sensitivity check); wait percentiles among picked-up riders are secondary because they leave out those who cancelled. A rule **dominates** another if it is non-inferior on the primary share, P90 wait and Lyft bookings per 100 requests (margins 2 pp, 1 min, 2 per 100) and better on at least one; otherwise the two lie on the frontier. No single score combines service and resource use. "Send everyone to Lyft" is just one end of that frontier, never the answer. **No money is modelled** (D-45): Hopkins' cost per Lyft trip is unknown, and a rider's app showing no charge does not reveal it.
 
 ---
 
@@ -333,6 +333,12 @@ flowchart LR
 ---
 
 ## 9. Changes
+### v0.5 → v0.6 (10 Nov 2026)
+| v0.5 | v0.6 | Decision |
+|---|---|---|
+| Primary rider outcome within 15 min (proposed) | Within 20 min, approved; 15 min as sensitivity | D-50 approval |
+| "Better" as a frontier point, without a stated dominance test | Dominance with margins on three measures; no single score | D-50 amendments 1–2 |
+
 ### v0.4 → v0.5 (22 Oct 2026)
 | v0.4 | v0.5 | Decision |
 |---|---|---|
