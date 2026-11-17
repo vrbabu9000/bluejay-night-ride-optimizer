@@ -111,3 +111,41 @@ def test_compare_pipeline_g_against_itself(tmp_path, monkeypatch, capsys):
     per = pd.read_csv(tmp_path / "m5b" / "comparison_test_per_night.csv")
     assert len(per) == 1 and per.C_not_reached_20_pp.equals(per.G_not_reached_20_pp)
     assert "| 1 self | 1 | +0.00 |" in (tmp_path / "m5b" / "comparison_test.md").read_text()
+
+
+def test_cf_cell_and_m5c_guard(monkeypatch, tmp_path):
+    """C-F (M5c, D-63) differs from C only in the drop-order flag; M5b configs are unchanged; M5c waits for its freeze."""
+    cf, c = m5._c("high", 5, "C", fixed_drop=True), m5._c("high", 5, "C")
+    assert cf.name == "high5_CF_R0_t120" and c.name == "high5_C_R0_t120"
+    assert m5.policy(cf).dispatcher.fix_existing_drop_order and not m5.policy(c).dispatcher.fix_existing_drop_order
+    assert "fixed_drop" not in m5.config(c)["cell"] and m5.config(cf)["cell"]["fixed_drop"] is True
+    assert [x.name for x, _ in m5.STAGES["m5c"]["runs"][::30]] == ["high5_CF_R0_t120", "base5_CF_R0_t120"]
+    f = tmp_path / "m5c.md"
+    f.write_text("**Status: DRAFT (not frozen).**")
+    monkeypatch.setattr(m5, "PREREG_C", f)
+    with pytest.raises(SystemExit):
+        m5.cmd_run("m5c", 1)
+
+
+def test_m5c_noninferiority_reading():
+    assert m5.noninferiority(-1.0, 1.5) == "C-F non-inferior"
+    assert m5.noninferiority(-3.0, -0.5) == "C-F non-inferior (and better than C)"
+    assert m5.noninferiority(2.5, 5.0) == "C-F worse by more than the margin"
+    assert m5.noninferiority(0.5, 3.0) == "inconclusive at this scale"
+
+
+def test_m5c_compare_pipeline_g_against_itself(tmp_path, monkeypatch, capsys):
+    """End-to-end check of the M5c analysis before any C-F run: one arm compared with itself gives exactly 0."""
+    monkeypatch.setattr(m5, "M5", tmp_path)
+    for name in ("PREREG", "PREREG_C"):
+        f = tmp_path / f"{name}.md"
+        f.write_text("**Status: FROZEN test**")
+        monkeypatch.setattr(m5, name, f)
+    cell = m5.Cell("base5_G_R0_t120", "base", 5, "G")
+    monkeypatch.setitem(m5.STAGES, "t", {"runs": [], "reps": 1, "folder": "m5b"})
+    assert m5.run_one(("t", cell, "r00", 1, m5.code_fingerprint()))["status"] == "ok"
+    monkeypatch.setattr(m5, "M5C_PAIRS", [("self", cell, cell, cell)])
+    m5.cmd_compare_m5c(root_c=tmp_path / "m5b", root_b=tmp_path / "m5b")
+    capsys.readouterr()                                          # values are not shown
+    text = (tmp_path / "m5b" / "comparison_m5c.md").read_text()
+    assert "| self | 1 | +0.00 |" in text and "| self | 1 |" in text.split("## Compute")[1]

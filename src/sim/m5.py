@@ -47,6 +47,7 @@ SIM = Path(__file__).resolve().parent
 FINGERPRINTED = ("inputs.py", "engine.py", "dispatch.py", "lyft.py", "greedy.py", "l5_pilot.py")
 FROZEN_L6 = inputs.SCEN / "FROZEN_v2_L6.json"
 PREREG = inputs.ROOT / "docs" / "technical" / "research_notes" / "m5_preregistration_2026-11.md"
+PREREG_C = inputs.ROOT / "docs" / "technical" / "research_notes" / "m5c_preregistration_2026-11.md"
 FIRST_HOUR_S = 3600
 SLICE_N = {"base": 64, "high": 83}
 
@@ -59,10 +60,12 @@ class Cell:
     algorithm: str      # C | G
     rule: str = "R0"
     tick_s: int = 120
+    fixed_drop: bool = False    # C-F (M5c): riders already aboard keep the committed-only drop order
 
 
-def _c(pattern, fleet, alg, rule="R0", tick=120):
-    return Cell(f"{pattern}{fleet}_{alg}_{rule_tag(rule)}_t{tick}", pattern, fleet, alg, rule, tick)
+def _c(pattern, fleet, alg, rule="R0", tick=120, fixed_drop=False):
+    tag = "CF" if fixed_drop else alg
+    return Cell(f"{pattern}{fleet}_{tag}_{rule_tag(rule)}_t{tick}", pattern, fleet, alg, rule, tick, fixed_drop)
 
 
 NIGHTS30 = [f"r{i:02d}" for i in range(30)]
@@ -97,6 +100,12 @@ STAGES = {
     # M5b (D-60, D-61): group A = cells 1, 2, 5, 4; group B = cell 3 (at most 2 workers: up to 5 GB per night)
     "m5b_A": {"runs": _ordered(COMPARISONS[:5]), "reps": 1, "folder": "m5b"},
     "m5b_B": {"runs": _ordered(COMPARISONS[5:]), "reps": 1, "folder": "m5b", "max_workers": 2},
+    # M5c (D-63, proposed): C-F = C with riders aboard keeping their committed-only drop order.
+    # Compute-only probe first (blind: no outcome read), on the M5 probe nights plus r03, the slowest C night.
+    "probe_cf": {"runs": [(_c("high", 5, "C", fixed_drop=True), n) for n in ("r00", "r01", "r02", "r03")], "reps": 1},
+    # M5c proper: high load first (the reason for C-F), then base; refused until m5c_preregistration is FROZEN
+    "m5c": {"runs": [(_c(p, 5, "C", fixed_drop=True), n) for p in ("high", "base") for n in NIGHTS30],
+            "reps": 1, "folder": "m5c"},
 }
 M5B_CUTOFFS = {"preview": "2026-11-19T12:00:00-05:00", "final": "2026-11-28T12:00:00-05:00"}
 
@@ -105,12 +114,18 @@ def folder(stage):
     return STAGES.get(stage, {}).get("folder", stage)
 
 
-def prereg_frozen():
-    return PREREG.exists() and "**Status: FROZEN" in PREREG.read_text()
+def _prereg(fold="m5b"):
+    """The preregistration note that governs a run folder (m5b: C vs G; m5c: C-F vs C), or None."""
+    return {"m5b": PREREG, "m5c": PREREG_C}.get(fold)
 
 
-def prereg_sha():
-    return hashlib.sha256(PREREG.read_bytes()).hexdigest()
+def prereg_frozen(fold="m5b"):
+    f = _prereg(fold)
+    return f.exists() and "**Status: FROZEN" in f.read_text()
+
+
+def prereg_sha(fold="m5b"):
+    return hashlib.sha256(_prereg(fold).read_bytes()).hexdigest()
 
 
 def code_fingerprint():
@@ -122,7 +137,8 @@ def code_fingerprint():
 
 def policy(cell):
     return E.Policy(rule=cell.rule, lag_s=120, consent_p=1.0, p_absent=0.089, curb_wait_planning="possible_boarding",
-                    dispatcher=D.Config(tick_s=cell.tick_s), algorithm=cell.algorithm)
+                    dispatcher=D.Config(tick_s=cell.tick_s, fix_existing_drop_order=cell.fixed_drop),
+                    algorithm=cell.algorithm)
 
 
 def config(cell):
@@ -131,6 +147,8 @@ def config(cell):
     d["dispatcher"] = dataclasses.asdict(pol.dispatcher)
     d["rule_active_before_s"] = str(d["rule_active_before_s"])
     d["cell"] = dataclasses.asdict(cell)
+    if not cell.fixed_drop:                 # keeps M5a/M5b configurations byte-equal to their saved manifests
+        del d["cell"]["fixed_drop"]
     d["slice"] = f"t_request_s < {FIRST_HOUR_S}"
     return d
 
@@ -196,8 +214,8 @@ def run_one(args):
            "python": sys.version.split()[0], "highspy": highspy.__version__ if hasattr(highspy, "__version__") else None,
            "events_sha256": hashlib.sha256((tmp / "events.csv").read_bytes()).hexdigest(),
            "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
-    if folder(stage) == "m5b":
-        man["prereg_sha256"] = prereg_sha()
+    if _prereg(folder(stage)):
+        man["prereg_sha256"] = prereg_sha(folder(stage))
     run = {"out": pd.read_csv(tmp / "outcomes.csv"), "events": pd.read_csv(tmp / "events.csv"), "epochs": eng.epochs,
            "manifest": man}
     ck = checks(run, scen, travel, eng.pol.p_absent, key, frozen=json.loads(FROZEN_L6.read_text()))
@@ -218,15 +236,16 @@ def done(stage, cell, night, rep, fp):
     if man["code_fingerprint"] != fp or man["config"] != json.loads(json.dumps(config(cell), default=str)):
         raise SystemExit(f"{stage} {cell.name} {night} rep{rep}: existing run has a different code fingerprint or "
                          "configuration; refusing to mix versions (move the folder aside to start again)")
-    if folder(stage) == "m5b" and man.get("prereg_sha256") != prereg_sha():
+    if _prereg(folder(stage)) and man.get("prereg_sha256") != prereg_sha(folder(stage)):
         raise SystemExit(f"{cell.name} {night}: run was made under a different preregistration file; refusing to mix")
     return True                                         # complete, whatever its check status (reported, not re-run)
 
 
 def cmd_run(stage, workers):
-    if folder(stage) == "m5b" and not prereg_frozen():
-        raise SystemExit(f"{stage}: the M5b criteria must be frozen in {PREREG.name} (a '**Status: FROZEN <date>**' "
-                         "line) before the first run (D-60)")
+    fold = folder(stage)
+    if _prereg(fold) and not prereg_frozen(fold):
+        raise SystemExit(f"{stage}: the {fold.upper()} criteria must be frozen in {_prereg(fold).name} (a "
+                         "'**Status: FROZEN <date>**' line) before the first run (D-60, D-63)")
     st, fp = STAGES[stage], code_fingerprint()
     workers = min(workers, st.get("max_workers", workers))
     (M5 / folder(stage)).mkdir(parents=True, exist_ok=True)
@@ -532,6 +551,70 @@ def cmd_compare(which):
     print("\n".join(L))
 
 
+# ---------- M5c: C-F vs C (D-63; criteria in m5c_preregistration_2026-11.md, written before any C-F outcome) ----------
+M5C_PAIRS = [   # (label, C-F cell in m5c/, C cell in m5b/, G cell in m5b/); high load is primary
+    ("high load, 5 vans, R0 (primary)", _c("high", 5, "C", fixed_drop=True), _c("high", 5, "C"), _c("high", 5, "G")),
+    ("base, 5 vans, R0", _c("base", 5, "C", fixed_drop=True), _c("base", 5, "C"), _c("base", 5, "G")),
+]
+COMPUTE_GATE_MEDIAN_S = 15 * 60          # the D-60 per-night compute threshold, reused
+
+
+def _passed(d):
+    f = d / "manifest.json"
+    if not f.exists():
+        return False
+    man = json.loads(f.read_text())
+    return man.get("status") == "ok" and all(man.get("checks", {}).values())
+
+
+def noninferiority(lo, hi, margin=MARGIN_PP):
+    """M5c reading for C-F − C (pp not reached within 20 min; positive = C-F worse)."""
+    if hi < margin:
+        return "C-F non-inferior (and better than C)" if hi < 0 else "C-F non-inferior"
+    if lo > margin:
+        return "C-F worse by more than the margin"
+    return "inconclusive at this scale"
+
+
+def cmd_compare_m5c(root_c=None, root_b=None):
+    root_c, root_b = root_c or M5 / "m5c", root_b or M5 / "m5b"
+    L = ["# M5c: C-F (fixed drop order for riders aboard) vs C, first-hour L6 slice", "",
+         f"Generated {time.strftime('%Y-%m-%d %H:%M %Z')}. Preregistration `{PREREG_C.name}` (sha256 "
+         f"{prereg_sha('m5c')[:12]}). Paired per-night differences; 95% percentile bootstrap, {BOOT_N:,} resamples, seed "
+         f"{BOOT_SEED}. Nights used: every night r00–r29 on which both C-F and C passed all run checks.", "",
+         "| Comparison | Nights | C-F − C, pp not reached within 20 min | 95% CI | Reading | C-F − G (descriptive) |",
+         "|---|---|---|---|---|---|"]
+    comp, per = [], []
+    for label, cf, c, g in M5C_PAIRS:
+        nights = [n for n in NIGHTS30 if _passed(root_c / cf.name / n / "rep1") and _passed(root_b / c.name / n / "rep1")]
+        mf = [night_measures(root_c / cf.name / n / "rep1") for n in nights]
+        mc = [night_measures(root_b / c.name / n / "rep1") for n in nights]
+        mg = [night_measures(root_b / g.name / n / "rep1") for n in nights]
+        for n, a, b, x in zip(nights, mf, mc, mg):
+            per.append({"comparison": label, "night": n, **{f"CF_{k}": v for k, v in a.items()},
+                        **{f"C_{k}": v for k, v in b.items()}, **{f"G_{k}": v for k, v in x.items()}})
+        d = [a["not_reached_20_pp"] - b["not_reached_20_pp"] for a, b in zip(mf, mc)]
+        mean, lo, hi, k = paired_bootstrap(d)
+        dg = paired_bootstrap([a["not_reached_20_pp"] - x["not_reached_20_pp"] for a, x in zip(mf, mg)])
+        ok = k >= 5
+        L.append(f"| {label} | {k} | {mean:+.2f} | " + (f"[{lo:+.2f}, {hi:+.2f}]" if ok else "—") + " | "
+                 + (noninferiority(lo, hi) if ok else "fewer than 5 nights: point estimate only") + " | "
+                 + (f"{dg[0]:+.2f} [{dg[1]:+.2f}, {dg[2]:+.2f}]" if ok else f"{dg[0]:+.2f}") + " |")
+        w = sorted(json.loads((root_c / cf.name / n / "rep1" / "manifest.json").read_text())["wall_s"]
+                   for n in NIGHTS30 if (root_c / cf.name / n / "rep1" / "manifest.json").exists())
+        if w:
+            med = w[len(w) // 2] if len(w) % 2 else (w[len(w) // 2 - 1] + w[len(w) // 2]) / 2
+            comp.append(f"| {label} | {len(w)} | {med / 60:.1f} | {w[-1] / 60:.1f} | "
+                        + ("pass" if med <= COMPUTE_GATE_MEDIAN_S else "FAIL") + " |")
+    L += ["", "Reading (primary = high load): C-F non-inferior if the upper bound < +2 pp; worse by more than the margin "
+          "if the lower bound > +2 pp; otherwise inconclusive.", "", "## Compute (C-F runs)", "",
+          "| Comparison | Runs | Median min per night | Max min | Gate: median ≤ 15 min |", "|---|---|---|---|---|"] + comp
+    root_c.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(per).to_csv(root_c / "comparison_m5c_per_night.csv", index=False)
+    (root_c / "comparison_m5c.md").write_text("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("stage", choices=list(STAGES) + ["m5b"])
@@ -544,6 +627,8 @@ def main():
         cmd_run(a.stage, a.workers)
     elif a.cmd == "compute":
         cmd_compute()
+    elif a.cmd == "compare" and a.stage == "m5c":
+        cmd_compare_m5c()
     elif a.cmd == "compare":
         cmd_compare(a.analysis)
     else:
