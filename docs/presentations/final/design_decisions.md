@@ -31,8 +31,13 @@ Started 17 Nov 2026 at the user's request: "these are very valuable design decis
 - **Chose:** reorder all of a van's stops, including drop-offs of riders already aboard.
 - **Gave up:** speed. The fixed-order rule was faster, but it lost up to 286 objective points in one re-plan and was binding in 45 of 132 checked cases (L4).
 - **Consequence found later:** time grows explosively with riders aboard. The median re-plan took 0.2 s with 3 aboard and 385 s with 7, and one high-load first hour took 23.3 h.
-- **Follow-on (planned, M5c):** a variant C-F keeps the aboard riders' drop order fixed, so high-load nights are affordable. We test whether that costs rider outcomes **before** using it. C is changed to accommodate high load only if the test passes.
-- **Slide idea:** run time against riders aboard (steep curve), then C vs C-F side by side.
+- **Follow-on (M5c, 17 Nov):** a variant C-F keeps the aboard riders' drop order fixed. We tested it against C under criteria frozen before the runs, and it failed both ways:
+  - **speed:** median high-load night 15.2 min, just over the 15-min gate (C took about 1 h);
+  - **riders:** about 2 pp more requests unreached within 20 min at high load (+2.08 pp [+0.50, +3.78]).
+  So C was kept as tested, and high-load full evenings are reported as a compute limitation. The result also measures what exact reordering buys: about 1–2 pp of riders. C-F still beats greedy by about 9.5 pp, so most of C's gain comes from re-planning all open work together.
+- **Diagnostic (18 Nov, exploratory):** the value of exact reordering sits in moderately loaded vans (2–4 parties, about 76%), while its compute cost sits in the full ones (6+ parties: 11% of re-plans, 65% of time). Fixing the order costs new riders waiting, not ride time. So a "switch when full" rule is a safety valve, not a cure; a time budget per re-plan is the natural next design.
+- **Why it matters for the talk:** we had a hypothesis we liked, tested it with a pass mark set in advance, and it lost. We report it, and the rule stopped us from moving the threshold after a 15.2-vs-15 miss.
+- **Slide idea:** run time against riders aboard (steep curve), then C vs C-F: faster, but not fast enough, and it costs riders.
 
 ## 5. A simple greedy baseline G, to answer "when does the MILP beat greedy?" (D-60)
 - **Chose:** insertion that never reassigns, sharing everything else with C (engine, cost, guardrail).
