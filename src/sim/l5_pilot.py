@@ -78,14 +78,18 @@ def checks(run, scen, travel, p_absent, level=LEVEL, frozen=None):
 
 
 NOSHOW_EXTRA_S = 180 - D.DWELL_S        # a no-show wait holds the van 150 s longer than the planned boarding dwell
+RESEQ_DWELL_S = D.DWELL_S               # D-62 fix: after an unplanned no-show wait, an equal-cost re-sequencing of
+                                        # drops (tie-break) can put one more drop dwell ahead of the rider
 MATRIX_TOL_S = 13                       # largest triangle-inequality gap of the travel matrix (D-53 review)
 
 
 def guardrail_excesses(run, scen, travel):
     """Van rides longer than the guardrail, each attributed or not. Plans never create or increase a violation (the
     plan audit checks that every epoch); an excess can only arise between epochs from an unplanned event. Here it is
-    attributed when the same van recorded van no-shows while the rider was aboard and the excess is at most
-    150 s per such no-show (+ the 13-s matrix tolerance)."""
+    attributed when the same van recorded van no-shows while the rider was aboard (after the pickup, up to and
+    including the drop's timestamp: a 0-s leg puts the drop at the no-show's time) and the excess is at most
+    150 s + one 30-s drop dwell per such no-show (+ the 13-s matrix tolerance). The "at or before the drop" rule and
+    the dwell allowance are the D-62 fix (M5b r26: an equal-cost drop re-order during a no-show wait)."""
     o, ev = run["out"], run["events"]
     g = {r.rid: D.guardrail_s(travel.van(r.o, r.d), D.Config()) for r in scen.requests}
     ns = ev[(ev.event == "state") & (ev.state_to == "noshow_van")]
@@ -94,9 +98,9 @@ def guardrail_excesses(run, scen, travel):
         excess = x.ride_s - g[x.request_id]
         if excess <= 0:
             continue
-        k = int(((ns.van == x.van) & (ns.t_s > x.pickup_s) & (ns.t_s < x.drop_s)).sum())
+        k = int(((ns.van == x.van) & (ns.t_s > x.pickup_s) & (ns.t_s <= x.drop_s)).sum())
         out.append({"request": x.request_id, "van": x.van, "excess_s": int(excess), "noshows_during_ride": k,
-                    "attributed": k > 0 and excess <= k * NOSHOW_EXTRA_S + MATRIX_TOL_S})
+                    "attributed": k > 0 and excess <= k * (NOSHOW_EXTRA_S + RESEQ_DWELL_S) + MATRIX_TOL_S})
     return out
 
 

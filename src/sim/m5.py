@@ -48,6 +48,7 @@ FINGERPRINTED = ("inputs.py", "engine.py", "dispatch.py", "lyft.py", "greedy.py"
 FROZEN_L6 = inputs.SCEN / "FROZEN_v2_L6.json"
 PREREG = inputs.ROOT / "docs" / "technical" / "research_notes" / "m5_preregistration_2026-11.md"
 PREREG_C = inputs.ROOT / "docs" / "technical" / "research_notes" / "m5c_preregistration_2026-11.md"
+PREREG_D = inputs.ROOT / "docs" / "technical" / "research_notes" / "m5d_preregistration_2026-11.md"
 FIRST_HOUR_S = 3600
 SLICE_N = {"base": 64, "high": 83}
 
@@ -61,14 +62,18 @@ class Cell:
     rule: str = "R0"
     tick_s: int = 120
     fixed_drop: bool = False    # C-F (M5c): riders already aboard keep the committed-only drop order
+    drop_switch: int = 0        # C-S6 (M5d): vans with >= this many parties aboard/committed keep the drop order
 
 
-def _c(pattern, fleet, alg, rule="R0", tick=120, fixed_drop=False):
-    tag = "CF" if fixed_drop else alg
-    return Cell(f"{pattern}{fleet}_{tag}_{rule_tag(rule)}_t{tick}", pattern, fleet, alg, rule, tick, fixed_drop)
+def _c(pattern, fleet, alg, rule="R0", tick=120, fixed_drop=False, drop_switch=0):
+    tag = "CF" if fixed_drop else f"CS{drop_switch}" if drop_switch else alg
+    return Cell(f"{pattern}{fleet}_{tag}_{rule_tag(rule)}_t{tick}", pattern, fleet, alg, rule, tick, fixed_drop,
+                drop_switch)
 
 
 NIGHTS30 = [f"r{i:02d}" for i in range(30)]
+NIGHTS_FRESH = [f"r{i:02d}" for i in range(30, 60)]     # M5d: nights never used before (built 18 Nov, same generator)
+SWITCH_PARTIES = 6                                      # M5d threshold, chosen from the exploratory diagnostic (18 Nov)
 # M5b comparisons (preregistration §2): (label, C-side run cell, G-side run cell). Cell 4 reuses cell 1's G.
 COMPARISONS = [
     ("1 base, 5 vans, R0 (primary)", _c("base", 5, "C"), _c("base", 5, "G")),
@@ -106,6 +111,16 @@ STAGES = {
     # M5c proper: high load first (the reason for C-F), then base; refused until m5c_preregistration is FROZEN
     "m5c": {"runs": [(_c(p, 5, "C", fixed_drop=True), n) for p in ("high", "base") for n in NIGHTS30],
             "reps": 1, "folder": "m5c"},
+    # M5d (D-64, proposed): C-S6 vs C on fresh nights r30-r59. Development probe on old nights first (compute only)
+    "probe_cs6": {"runs": [(_c("high", 5, "C", drop_switch=SWITCH_PARTIES), n) for n in ("r00", "r03")], "reps": 1},
+    # Two queues run side by side: C at high load (the slow arm, at most 2 workers for memory), and everything else.
+    # A run whose checks fail is recorded and excluded by the preregistered rule; only a crash pauses a queue.
+    "m5d_C": {"runs": [(_c("high", 5, "C"), n) for n in NIGHTS_FRESH], "reps": 1, "folder": "m5d",
+              "max_workers": 2, "pause_on_checks": False},
+    "m5d_rest": {"runs": [(c, n) for p in ("high", "base") for n in NIGHTS_FRESH
+                          for c in ((_c(p, 5, "C", drop_switch=SWITCH_PARTIES), _c(p, 5, "G")) if p == "high" else
+                                    (_c(p, 5, "C", drop_switch=SWITCH_PARTIES), _c(p, 5, "C"), _c(p, 5, "G")))],
+                 "reps": 1, "folder": "m5d", "pause_on_checks": False},
 }
 M5B_CUTOFFS = {"preview": "2026-11-19T12:00:00-05:00", "final": "2026-11-28T12:00:00-05:00"}
 
@@ -116,7 +131,7 @@ def folder(stage):
 
 def _prereg(fold="m5b"):
     """The preregistration note that governs a run folder (m5b: C vs G; m5c: C-F vs C), or None."""
-    return {"m5b": PREREG, "m5c": PREREG_C}.get(fold)
+    return {"m5b": PREREG, "m5c": PREREG_C, "m5d": PREREG_D}.get(fold)
 
 
 def prereg_frozen(fold="m5b"):
@@ -137,7 +152,8 @@ def code_fingerprint():
 
 def policy(cell):
     return E.Policy(rule=cell.rule, lag_s=120, consent_p=1.0, p_absent=0.089, curb_wait_planning="possible_boarding",
-                    dispatcher=D.Config(tick_s=cell.tick_s, fix_existing_drop_order=cell.fixed_drop),
+                    dispatcher=D.Config(tick_s=cell.tick_s, fix_existing_drop_order=cell.fixed_drop,
+                                        fix_drop_order_min_parties=cell.drop_switch),
                     algorithm=cell.algorithm)
 
 
@@ -149,6 +165,9 @@ def config(cell):
     d["cell"] = dataclasses.asdict(cell)
     if not cell.fixed_drop:                 # keeps M5a/M5b configurations byte-equal to their saved manifests
         del d["cell"]["fixed_drop"]
+    if not cell.drop_switch:                # same for M5a/M5b/M5c (field added for M5d)
+        del d["cell"]["drop_switch"]
+        del d["dispatcher"]["fix_drop_order_min_parties"]
     d["slice"] = f"t_request_s < {FIRST_HOUR_S}"
     return d
 
@@ -266,7 +285,7 @@ def cmd_run(stage, workers):
             res["t"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
             log.write(json.dumps(res) + "\n"); log.flush()
             print(res, flush=True)
-            if res["status"] != "ok":
+            if res["status"] == "failed" or (res["status"] != "ok" and st.get("pause_on_checks", True)):
                 failed = True                                   # pause: no new launches; in-flight runs finish
             if not failed:
                 a = next(it, None)
@@ -615,10 +634,97 @@ def cmd_compare_m5c(root_c=None, root_b=None):
     print("\n".join(L))
 
 
+# ---------- M5d: C-S6 vs C on fresh nights (D-64; criteria in m5d_preregistration_2026-11.md) ----------
+M5D_CUTOFF = "2026-11-24T12:00:00-05:00"
+M5D_PAIRS = [   # (label, C-S6 cell, C cell, G cell), all in m5d/; high load is primary
+    ("high load, 5 vans, R0 (primary)", _c("high", 5, "C", drop_switch=SWITCH_PARTIES), _c("high", 5, "C"),
+     _c("high", 5, "G")),
+    ("base, 5 vans, R0", _c("base", 5, "C", drop_switch=SWITCH_PARTIES), _c("base", 5, "C"), _c("base", 5, "G")),
+]
+
+
+def _finished_by(d, cut):
+    f = d / "manifest.json"
+    return f.exists() and pd.Timestamp(json.loads(f.read_text())["finished_at"]) <= cut
+
+
+def m5d_nights(cells, cutoff=M5D_CUTOFF, root=None):
+    """Preregistration §3: the longest unbroken run r30..rk with every arm finished by the cutoff (any check status);
+    then the nights where every arm also passed all run checks. Returns (prefix, used)."""
+    root, cut = root or M5 / "m5d", pd.Timestamp(cutoff)
+    prefix = []
+    for n in NIGHTS_FRESH:
+        if not all(_finished_by(root / c.name / n / "rep1", cut) for c in cells):
+            break
+        prefix.append(n)
+    return prefix, [n for n in prefix if all(_passed(root / c.name / n / "rep1") for c in cells)]
+
+
+def _walls(root, cell, nights):
+    return [json.loads((root / cell.name / n / "rep1" / "manifest.json").read_text())["wall_s"] for n in nights]
+
+
+def cmd_compare_m5d(cutoff=M5D_CUTOFF, root=None):
+    root = root or M5 / "m5d"
+    L = ["# M5d: C-S6 (fixed drop order in vans with 6+ parties) vs C, fresh first-hour L6 nights r30–r59", "",
+         f"Generated {time.strftime('%Y-%m-%d %H:%M %Z')}. Cutoff {cutoff}. Preregistration `{PREREG_D.name}` (sha256 "
+         f"{prereg_sha('m5d')[:12]}). Paired per-night differences; 95% percentile bootstrap, {BOOT_N:,} resamples, seed "
+         f"{BOOT_SEED}. Nights: the unbroken run r30…rk with all three arms finished by the cutoff, less nights where "
+         "any arm failed a run check.", "",
+         "| Comparison | Nights finished / used | C-S6 − C, pp not reached within 20 min | 95% CI | Reading |",
+         "|---|---|---|---|---|"]
+    comp, rep, per = [], [], []
+    for label, s6, c, g in M5D_PAIRS:
+        prefix, nights = m5d_nights((s6, c, g), cutoff, root)
+        ms, mc, mg = ([night_measures(root / x.name / n / "rep1") for n in nights] for x in (s6, c, g))
+        for n, a, b, x in zip(nights, ms, mc, mg):
+            per.append({"comparison": label, "night": n, **{f"CS6_{k}": v for k, v in a.items()},
+                        **{f"C_{k}": v for k, v in b.items()}, **{f"G_{k}": v for k, v in x.items()}})
+        mean, lo, hi, k = paired_bootstrap([a["not_reached_20_pp"] - b["not_reached_20_pp"] for a, b in zip(ms, mc)])
+        ok = k >= 5
+        reading = noninferiority(lo, hi).replace("C-F", "C-S6") if ok else "fewer than 5 nights: point estimate only"
+        L.append(f"| {label} | {len(prefix)} / {k} | {mean:+.2f} | " + (f"[{lo:+.2f}, {hi:+.2f}]" if ok else "—")
+                 + f" | {reading} |")
+        for name, xs in (("C − G", (mc, mg)), ("C-S6 − G", (ms, mg))):
+            r = paired_bootstrap([a["not_reached_20_pp"] - b["not_reached_20_pp"] for a, b in zip(*xs)])
+            rep.append(f"| {label} | {name} | {r[3]} | {r[0]:+.2f} | " + (f"[{r[1]:+.2f}, {r[2]:+.2f}]" if r[3] >= 5 else "—") + " |")
+        for key, name in SECONDARY:
+            r = paired_bootstrap([a[key] - b[key] for a, b in zip(ms, mc)])
+            rep.append(f"| {label} | C-S6 − C: {name} | {r[3]} | {r[0]:+.2f} | " + (f"[{r[1]:+.2f}, {r[2]:+.2f}]" if r[3] >= 5 else "—") + " |")
+        for name, cell in (("C-S6", s6), ("C", c)):
+            w = sorted(_walls(root, cell, prefix))
+            if w:
+                med = float(np.median(w))
+                comp.append(f"| {label} | {name} | {len(w)} | {med / 60:.1f} | {w[-1] / 60:.1f} | "
+                            + (("pass" if med <= COMPUTE_GATE_MEDIAN_S else "FAIL") if name == "C-S6" else "—") + " |")
+    L += ["", "Reading (primary = high load): C-S6 non-inferior if the upper bound < +2 pp; worse by more than the "
+          "margin if the lower bound > +2 pp; otherwise inconclusive.", "", "## Compute (nights finished by the cutoff)",
+          "", "| Comparison | Arm | Runs | Median min per night | Max min | Gate: C-S6 median ≤ 15 min |",
+          "|---|---|---|---|---|---|"] + comp
+    L += ["", "## Secondary and descriptive (no decision rests on these)", "",
+          "| Comparison | Measure | Nights | Mean difference | 95% CI |", "|---|---|---|---|---|"] + rep
+    root.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(per).to_csv(root / "comparison_m5d_per_night.csv", index=False)
+    (root / "comparison_m5d.md").write_text("\n".join(L) + "\n")
+    print("\n".join(L))
+
+
+def cmd_status_m5d(root=None):
+    """Progress only: how many runs finished per arm, their check status and wall time. Reads no rider outcome."""
+    root = root or M5 / "m5d"
+    for label, *cells in M5D_PAIRS:
+        for c in cells:
+            ms = [json.loads(f.read_text()) for f in sorted((root / c.name).glob("r*/rep1/manifest.json"))]
+            bad = [m["night"] for m in ms if m["status"] != "ok"]
+            w = [m["wall_s"] for m in ms]
+            print(f"{c.name:22s} {len(ms):2d}/30 finished" + (f", median {np.median(w) / 60:.1f} min, max "
+                  f"{max(w) / 60:.1f} min" if w else "") + (f", checks failed: {bad}" if bad else ""))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=list(STAGES) + ["m5b"])
-    ap.add_argument("cmd", choices=["run", "compute", "kcheck", "compare"])
+    ap.add_argument("stage", choices=list(STAGES) + ["m5b", "m5d"])
+    ap.add_argument("cmd", choices=["run", "compute", "kcheck", "compare", "status"])
     ap.add_argument("--analysis", choices=list(M5B_CUTOFFS), default="preview")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--sample", type=int, default=8)
@@ -629,6 +735,10 @@ def main():
         cmd_compute()
     elif a.cmd == "compare" and a.stage == "m5c":
         cmd_compare_m5c()
+    elif a.cmd == "compare" and a.stage == "m5d":
+        cmd_compare_m5d()
+    elif a.cmd == "status":
+        cmd_status_m5d()
     elif a.cmd == "compare":
         cmd_compare(a.analysis)
     else:

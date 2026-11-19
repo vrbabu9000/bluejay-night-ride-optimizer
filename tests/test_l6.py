@@ -34,10 +34,10 @@ def test_hour_counts_by_hand():
         assert g.l6_hour_counts(pat) == exp
 
 
-@pytest.mark.parametrize("cell,pat", [("base_5", "base"), ("base_6", "base"), ("high_5", "high")])
-def test_counts_and_order(cell, pat):
+@pytest.mark.parametrize("cell,pat,n", [("base_5", "base", 60), ("base_6", "base", 30), ("high_5", "high", 60)])
+def test_counts_and_order(cell, pat, n):
     fs = nights(cell)
-    assert len(fs) == 30
+    assert len(fs) == n                                   # base_5 and high_5 carry the M5d fresh nights r30-r59
     for f in fs:
         r = pd.read_csv(f / "requests.csv")
         per_hour = tuple(np.bincount(r.t_request_s // 3600, minlength=3)[:3])
@@ -51,7 +51,7 @@ def test_frozen_and_loadable():
     frozen = json.loads((V2 / "FROZEN_v2_L6.json").read_text())
     assert set(frozen).isdisjoint(json.loads((V2 / "FROZEN_v2.json").read_text()))
     keys = [k for k in frozen if k.startswith("L6/")]
-    assert len(keys) == 90
+    assert len(keys) == 150                               # 90 (D-59) + 60 fresh nights for M5d (D-64)
     sc = inputs.load("L6/base_5/r00", check_hash=False)   # L6 hashes live in FROZEN_v2_L6.json (inputs.py unchanged)
     assert sc.content_hash == frozen["L6/base_5/r00"]
     assert len(sc.requests) == 168 and len(sc.vans) == 5
@@ -60,7 +60,7 @@ def test_frozen_and_loadable():
 def test_rebuild_is_identical():
     """Rebuilding a night in memory reproduces the frozen content hash."""
     frozen = json.loads((V2 / "FROZEN_v2_L6.json").read_text())
-    for pat, fleet, r in (("base", 5, 0), ("base", 6, 7), ("high", 5, 29)):
+    for pat, fleet, r in (("base", 5, 0), ("base", 6, 7), ("high", 5, 29), ("high", 5, 30), ("base", 5, 59)):
         req, lat, av, params = g.build_l6(pat, r, n_vans=fleet)
         blob = b"".join(g.csv_bytes(x) for x in (req, lat, av))
         canon = json.dumps(params, sort_keys=True, separators=(",", ":")).encode()

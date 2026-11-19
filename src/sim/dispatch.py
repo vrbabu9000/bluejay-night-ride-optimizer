@@ -60,6 +60,9 @@ class Config:
     pending_price: str = "A"               # D-53 approval (provisional): "A"; "original" reproduces M1, "B" the experiment
     fix_existing_drop_order: bool = False   # True: existing riders keep the committed-only drop order (faster,
                                             # smaller candidate set; an explicit setting, never switched automatically)
+    fix_drop_order_min_parties: int = 0     # C-S6 (M5d, D-64 proposed): if > 0, a van with at least this many rider
+                                            # parties aboard or committed keeps its committed-only drop order; other
+                                            # vans reorder freely. 0 = off (C as tested). Decided from public state only
     beta: float = 0.5              # points per passenger-minute riding
     gamma: float = 0.1             # points per km
     psi: int = 1000                # points per passenger-minute over the guardrail (unavoidable violations only)
@@ -291,6 +294,13 @@ def _insert(labels, lab):
 
 
 # ---------- the epoch solve ----------
+def fixes_drop_order(van, cfg):
+    """Whether this van's existing riders keep the committed-only drop order in this epoch (C-F: always; C-S6: when
+    the van carries or is committed to at least cfg.fix_drop_order_min_parties rider parties; C: never)."""
+    k = cfg.fix_drop_order_min_parties
+    return cfg.fix_existing_drop_order or (k > 0 and len(van.riders) >= k)
+
+
 def candidates(obs, travel, cfg):
     """All candidate routes per van, plus the 'allowed' ride limits used for each van's existing riders."""
     out, allowed_by_van = {}, {}
@@ -304,7 +314,7 @@ def candidates(obs, travel, cfg):
         ev = evaluate(van, exempt[1], {}, travel, cfg, None)
         allowed = {r.rid: max(guardrail_s(r.direct_van_s, cfg), ev["rides"][r.rid]) for r in van.riders}
         allowed_by_van[van.vid] = allowed
-        base_order = [rid for kind, rid in exempt[1]] if cfg.fix_existing_drop_order else None
+        base_order = [rid for kind, rid in exempt[1]] if fixes_drop_order(van, cfg) else None
         routes = best_routes(van, obs.open, travel, cfg, cfg.K, allowed, base_order)
         routes[frozenset()] = exempt                      # committed-only route: exempt from the guardrail rule
         out[van.vid] = sorted(((S, c, seq) for S, (c, seq) in routes.items()),

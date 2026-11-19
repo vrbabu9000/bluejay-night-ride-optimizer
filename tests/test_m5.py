@@ -149,3 +149,75 @@ def test_m5c_compare_pipeline_g_against_itself(tmp_path, monkeypatch, capsys):
     capsys.readouterr()                                          # values are not shown
     text = (tmp_path / "m5b" / "comparison_m5c.md").read_text()
     assert "| self | 1 | +0.00 |" in text and "| self | 1 |" in text.split("## Compute")[1]
+
+
+def test_cs6_switch_and_m5d_guard(monkeypatch, tmp_path):
+    """C-S6 (M5d, D-64): a van keeps its drop order only at >= 6 parties aboard/committed; C and C-F unchanged;
+    M5a-M5c configurations stay byte-equal; M5d waits for its freeze; the fresh nights are r30-r59."""
+    from sim import dispatch as D
+
+    def van(k):
+        riders = tuple(D.Rider(f"R{i:03d}", "X", 1, 0, 0, 60) for i in range(k))
+        return D.VanState("V1", 12, "X", 0, riders, ())
+    s6 = D.Config(fix_drop_order_min_parties=6)
+    assert [D.fixes_drop_order(van(k), s6) for k in (0, 5, 6, 9)] == [False, False, True, True]
+    assert not any(D.fixes_drop_order(van(k), D.Config()) for k in (0, 6, 9))
+    assert all(D.fixes_drop_order(van(k), D.Config(fix_existing_drop_order=True)) for k in (0, 6))
+    cs6, c = m5._c("high", 5, "C", drop_switch=6), m5._c("high", 5, "C")
+    assert cs6.name == "high5_CS6_R0_t120" and m5.policy(cs6).dispatcher.fix_drop_order_min_parties == 6
+    assert "drop_switch" not in m5.config(c)["cell"] and "fix_drop_order_min_parties" not in m5.config(c)["dispatcher"]
+    assert m5.config(cs6)["cell"]["drop_switch"] == 6 and not m5.policy(cs6).dispatcher.fix_existing_drop_order
+    assert m5.NIGHTS_FRESH[0] == "r30" and len(m5.NIGHTS_FRESH) == 30 and not set(m5.NIGHTS_FRESH) & set(m5.NIGHTS30)
+    assert {n for _, n in m5.STAGES["m5d_C"]["runs"] + m5.STAGES["m5d_rest"]["runs"]} == set(m5.NIGHTS_FRESH)
+    f = tmp_path / "m5d.md"
+    f.write_text("**Status: DRAFT (not frozen).**")
+    monkeypatch.setattr(m5, "PREREG_D", f)
+    for stage in ("m5d_C", "m5d_rest"):
+        with pytest.raises(SystemExit):
+            m5.cmd_run(stage, 1)
+
+
+def test_fresh_night_first_hour_slice():
+    for pattern, n in (("base", 64), ("high", 83)):
+        scen, key = m5.first_hour(m5.Cell("t", pattern, 5, "G"), "r30")
+        assert key == f"L6/{pattern}_5/r30" and len(scen.requests) == n
+
+
+def test_guardrail_check_d62_fix():
+    """The M5b r26 case (D-62): a no-show at the drop's own timestamp counts, and one equal-cost re-sequencing dwell
+    per no-show is allowed. An excess without a no-show, or beyond the allowance, is still unexplained."""
+    import pandas as pd
+    from types import SimpleNamespace
+    from sim.l5_pilot import guardrail_excesses
+    scen = SimpleNamespace(requests=[SimpleNamespace(rid=r, o="A", d="B") for r in ("R1", "R2", "R3", "R4")])
+    travel = SimpleNamespace(van=lambda a, b: 600)              # guardrail = max(1500, 2*600 + 300) = 1500 s
+    out = pd.DataFrame({"request_id": ["R1", "R2", "R3", "R4"], "outcome": ["van_completed"] * 4,
+                        "van": ["V5"] * 3 + ["V1"], "pickup_s": [2000, 2000, 2000, 2000],
+                        "drop_s": [4254, 4500, 4600, 4500],
+                        "ride_s": [1500 + 24, 1500 + 177, 1500 + 194, 1500 + 10]})
+    ev = pd.DataFrame({"event": ["state"], "state_to": ["noshow_van"], "van": ["V5"], "t_s": [4254]})
+    got = {e["request"]: e["attributed"] for e in guardrail_excesses({"out": out, "events": ev}, scen, travel)}
+    assert got == {"R1": True, "R2": True, "R3": False, "R4": False}
+
+
+def test_m5d_compare_pipeline_and_night_rule(tmp_path, monkeypatch, capsys):
+    """M5d analysis before any M5d run: one arm compared with itself gives exactly 0; the prefix rule stops at the
+    first night not finished by the cutoff; a night with a failed check is finished but not used."""
+    monkeypatch.setattr(m5, "M5", tmp_path)
+    f = tmp_path / "PREREG_D.md"
+    f.write_text("**Status: FROZEN test**")
+    monkeypatch.setattr(m5, "PREREG_D", f)
+    cell = m5.Cell("base5_G_R0_t120", "base", 5, "G")
+    monkeypatch.setitem(m5.STAGES, "t", {"runs": [], "reps": 1, "folder": "m5d"})
+    for n in ("r30", "r31", "r33"):
+        assert m5.run_one(("t", cell, n, 1, m5.code_fingerprint()))["status"] == "ok"
+    man = tmp_path / "m5d" / cell.name / "r31" / "rep1" / "manifest.json"
+    j = json.loads(man.read_text()); j["status"] = "checks_failed"; man.write_text(json.dumps(j))
+    prefix, used = m5.m5d_nights((cell, cell, cell), "2100-01-01T00:00:00-05:00", tmp_path / "m5d")
+    assert prefix == ["r30", "r31"] and used == ["r30"]
+    assert m5.m5d_nights((cell,), "2000-01-01T00:00:00-05:00", tmp_path / "m5d") == ([], [])
+    monkeypatch.setattr(m5, "M5D_PAIRS", [("self", cell, cell, cell)])
+    m5.cmd_compare_m5d("2100-01-01T00:00:00-05:00", tmp_path / "m5d")
+    capsys.readouterr()
+    text = (tmp_path / "m5d" / "comparison_m5d.md").read_text()
+    assert "| self | 2 / 1 | +0.00 |" in text
