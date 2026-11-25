@@ -21,8 +21,8 @@
 | M3 | L5, 30 nights × 6 rules: pairing, metrics, bootstrap CIs, pilot variance | **Done**: batch 22 Oct (D-56, D-57); D-50 approved and paired-interval rehearsal 10 Nov (D-58) |
 | M4 | L6 builder, 64 / 50 / 54 (new scenario generation) | **Done 10 Nov** (D-59; `research_notes/m4_l6_build_2026-11-10.md`) |
 | M5 | First hour, 5 vans, 64 requests: (a) compute benchmark of C; (b) C vs greedy G | **Planned** (below); D-60 approved 10 Nov |
-| M6 | Full 168-request, five-van demonstration | **Prepared and frozen 19 Nov** (plan: `research_notes/m6_plan_2026-11.md`; runner `src/sim/m6.py`); runs after the M5d queues end |
-| M7 | Experiment grid | Not started; no Lyft-rule comparison before then. Expected after the 26 Nov preview |
+| M6 | Full 168-request, five-van demonstration | **Prepared and frozen 19 Nov** (plan: `research_notes/m6_plan_2026-11.md`; runner `src/sim/m6.py`); **done 21 Nov** (`research_notes/m6_results_2026-11-24.md`; C median 8.5 min per full evening) |
+| M7 | Experiment grid | **Done 24 Nov** (D-65 proposed; plan `research_notes/m7_plan_2026-11.md`, results `research_notes/m7_results_2026-11-24.md`): base pattern, six rules × 5/6 vans, 30 full evenings; H3 supported |
 
 Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L7 taper and shift ends, R4(14, 6) (P-13).
 
