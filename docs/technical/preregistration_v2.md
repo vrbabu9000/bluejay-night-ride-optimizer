@@ -1,6 +1,7 @@
 # Pre-registration v2 (DRAFT, revised 22 Oct 2026)
 
 **Status:** decision criteria approved 10 Nov 2026 (D-50 approval); otherwise a draft written from `scenario_spec.md` v0.2 and revised to match spec v0.4 (21 Oct; D-45, D-49–D-51; the 20 Oct draft is archived in `archive/`). It is **frozen when the first L6 comparison run starts.**
+- **FROZEN 2026-11-24**, immediately before the first L6 rule-comparison run (the M7 power pilot), on the user's instruction of 24 Nov ("keep proceeding with the appropriate compute decisions ... do all the compute"). How M7 implements it, and where it cannot (patterns, H1, H2, H4, calibration), is in `research_notes/m7_plan_2026-11.md` §2 (D-65, proposed).
 - Changes before then are allowed, and are logged at the bottom.
 - Changes after then are dated amendments, with the original text kept.
 - v1 (`preregistration.md`) is paused and unchanged.
@@ -73,3 +74,4 @@ The main comparison is re-run at the extremes of the identified set.
 - 2026-11-10: D-50 approved by the team. Primary measure moved from 15 to 20 min (15 min kept as sensitivity); margins unchanged; L6 pilot for power with a 60-night cap; Bonferroni 98.3% for H1–H3; no single score.
 - 2026-11-10: dominance rule replaced by one Pareto-with-margins rule (D-50 amendment 1); bookings counted per 100 requests; δ_B = 1 or 2, to be fixed before the freeze.
 - 2026-11-10: bookings margin fixed at δ_B = 2 per 100 requests.
+- 2026-11-24: pre-freeze note. No criterion changed. M7 runs the base pattern only at 5 and 6 vans; burst and far-trip were never built and high-load full evenings are unaffordable with C, so H1, H2 and H4 are not tested and calibration (§5) is not done. H3 is operationalised in the M7 plan §5 and keeps its 98.3% interval. Power pilot nights: L6 base_5 r30–r39. Frozen the same day.

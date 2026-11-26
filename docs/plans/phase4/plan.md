@@ -23,6 +23,7 @@
 | M5 | First hour, 5 vans, 64 requests: (a) compute benchmark of C; (b) C vs greedy G | **Planned** (below); D-60 approved 10 Nov |
 | M6 | Full 168-request, five-van demonstration | **Prepared and frozen 19 Nov** (plan: `research_notes/m6_plan_2026-11.md`; runner `src/sim/m6.py`); **done 21 Nov** (`research_notes/m6_results_2026-11-24.md`; C median 8.5 min per full evening) |
 | M7 | Experiment grid | **Done 24 Nov** (D-65 proposed; plan `research_notes/m7_plan_2026-11.md`, results `research_notes/m7_results_2026-11-24.md`): base pattern, six rules × 5/6 vans, 30 full evenings; H3 supported |
+| M8 | Sensitivity (patience, Lyft delay, acceptance) | **Frozen and started 25 Nov** (D-66 proposed; plan `research_notes/m8_plan_2026-11.md`): 5 vans, 6 one-at-a-time settings, 30 nights, 780 runs; cutoff 28 Nov 12:00 ET |
 
 Not in Phase 4 scope until decided: heuristic T, hindsight H, calibration, the L7 taper and shift ends, R4(14, 6) (P-13).
 

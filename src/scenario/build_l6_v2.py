@@ -11,7 +11,7 @@ never touched: the dispersed variant records its exact bytes. An existing L6 ent
 Burst and far-trip are deferred to M7. The first-hour slice used by M5 is the first n_0 requests of each night
 (t_request_s < 3600); it is cut at run time, not stored separately.
 
-Run: .venv/bin/python src/scenario/build_l6_v2.py
+Run: .venv/bin/python src/scenario/build_l6_v2.py   (add --m7-60 for the M7 60-night branch)
 """
 import json
 import sys
@@ -27,6 +27,10 @@ CELLS = (("base", 5), ("base", 6), ("high", 5))
 # scheme (replicate is part of the seed key), so r30-r59 are new independent draws; r00-r29 are rebuilt unchanged.
 FRESH_REPLICATES = range(30, 60)
 FRESH_CELLS = (("base", 5), ("high", 5))
+# M7 (plan m7_plan_2026-11.md §3b, D-65 proposed, 24 Nov 2026): only if the power pilot calls for 60 nights. Main nights
+# are r00-r29 + r40-r69 (r30-r39 are the pilot). base_5 gains r60-r69; base_6 gains r40-r69 with the SAME requests as
+# base_5 (D-37: fleet is not in the seed key). Off by default; `--m7-60` turns it on.
+M7_JOBS = [(("base", 5), r) for r in range(60, 70)] + [(("base", 6), r) for r in range(40, 70)]
 
 
 def main():
@@ -38,6 +42,8 @@ def main():
     frozen = json.loads(path.read_text()) if path.exists() else {}
     n_new = 0
     jobs = [(c, r) for c in CELLS for r in REPLICATES] + [(c, r) for c in FRESH_CELLS for r in FRESH_REPLICATES]
+    if "--m7-60" in sys.argv:
+        jobs += M7_JOBS
     for (pat, fleet), r in jobs:
         req, lat, av, params = g.build_l6(pat, r, n_vans=fleet)
         key = f"L6/{pat}_{fleet}/r{r:02d}"
