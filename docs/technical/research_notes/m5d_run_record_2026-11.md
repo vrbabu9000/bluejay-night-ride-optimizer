@@ -1,6 +1,6 @@
 # M5d run record (started 18 Nov 2026)
 
-**Status:** a running log of compute, crashes and check failures for M5d. It contains **no rider outcomes**. The test itself is defined in `m5d_preregistration_2026-11.md` (frozen 18 Nov, sha `cda1b43885d2`), and nothing here changes it.
+**Status:** complete (all 180 runs finished 19 Nov 20:11 ET). A log of compute, crashes and check failures for M5d. It contains **no rider outcomes**. The test itself is defined in `m5d_preregistration_2026-11.md` (frozen 18 Nov, sha `cda1b43885d2`), and nothing here changes it.
 
 ## Queues
 - **Launched:** about 17:35 ET on 18 Nov, code fingerprint `1f318cef8ad4`, under `caffeinate -i`.
@@ -24,6 +24,17 @@ The prereg's §8 left the second probe night open. It is recorded here, as §8 s
 | When (ET) | C high | C-S6 high | G high | Base arms | Notes |
 |---|---|---|---|---|---|
 | 18 Nov 20:37 | 4/30 done | 3/30 done | 3/30 done | 0/30 | No crashes, no failed checks so far |
+| 19 Nov 11:25 | 26/30 | 24/30 | 24/30 | 0/30 | No crashes, no failed checks |
+| 20 Nov 12:22 | 30/30 (done 19 Nov 14:39) | 30/30 (done 16:25) | 30/30 | 90/90 (done 20:11) | Both queues complete |
+
+## Final compute (r30–r59, first hour)
+| Arm | High load: median / max min | High peak memory | Base: median / max min | Base peak memory |
+|---|---|---|---|---|
+| C | 58.0 / 385.4 | 5.9 GB | 4.5 / 11.1 | 1.4 GB |
+| C-S6 | 38.2 / 127.3 | 3.8 GB | 2.8 / 8.7 | 1.0 GB |
+| G | < 1 s | — | < 1 s | — |
+
+Outcomes are in `m5d_results_2026-11-21.md`.
 
 ## Crashes and failed checks
-- None so far.
+- None. All 180 runs passed every check; no crash, no pause.
