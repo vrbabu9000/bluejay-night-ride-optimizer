@@ -243,6 +243,13 @@ def effects(d, nights, measure="not_reached_20_pp"):
     return t
 
 
+def _md(df):
+    """Markdown table without the optional tabulate dependency (formatting only)."""
+    df = df.reset_index()
+    rows = [list(map(str, df.columns)), ["---"] * len(df.columns)] + [[str(v) for v in r] for r in df.itertuples(index=False)]
+    return "\n".join("| " + " | ".join(r) + " |" for r in rows)
+
+
 def cmd_compare(root=None, explained=(), cutoff=CUTOFF):
     d = per_night(root)
     prefix, nights, strict = used_nights(d, cutoff, explained)
@@ -257,7 +264,7 @@ def cmd_compare(root=None, explained=(), cutoff=CUTOFF):
          f"Cutoff {cutoff}. Nights complete / used / strict: {len(prefix)} / {len(nights)} / {len(strict)}. "
          "Paired percentile bootstrap over nights, 10,000 resamples, seed 20261110. Sensitivity analysis: no test.", ""]
     if len(nights) < MIN_NIGHTS:
-        L += [f"**Fewer than {MIN_NIGHTS} nights: means only (plan §3).**", "", means.round(2).to_markdown()]
+        L += [f"**Fewer than {MIN_NIGHTS} nights: means only (plan §3).**", "", _md(means.round(2))]
         (out / "comparison_m8.md").write_text("\n".join(L) + "\n")
         print("\n".join(L))
         return
@@ -289,7 +296,7 @@ def cmd_compare(root=None, explained=(), cutoff=CUTOFF):
     if ts is not None:
         L += ["", f"Strict ({len(strict)} nights, every failed-check night out): (a) holds in "
               f"{sum(ts.groupby('setting').holds_a.all())} of 7 settings; (b) in {int(ts.groupby('setting').holds_b.first().sum())} of 7."]
-    L += ["", "## Means over the used nights", "", means.round(2).to_markdown()]
+    L += ["", "## Means over the used nights", "", _md(means.round(2))]
     (out / "comparison_m8.md").write_text("\n".join(L) + "\n")
     print("\n".join(L))
 
